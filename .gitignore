@@ -40,3 +40,4 @@ build/
 
 ### SQLite Database ###
 data/*.db
+*.sqlite
