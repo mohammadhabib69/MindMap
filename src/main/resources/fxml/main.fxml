@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mindmap.controller.MainController"
+      alignment="CENTER"
+      spacing="16"
+      styleClass="main-container">
+
+    <padding>
+        <Insets top="40" right="40" bottom="40" left="40"/>
+    </padding>
+
+    <Label text="MindMap" styleClass="title"/>
+    <Label text="Personal Knowledge Base" styleClass="subtitle"/>
+
+    <VBox alignment="CENTER" spacing="8" styleClass="status-card">
+        <Label fx:id="statusLabel" text="Database: Initializing..." styleClass="status-text"/>
+    </VBox>
+
+</VBox>
