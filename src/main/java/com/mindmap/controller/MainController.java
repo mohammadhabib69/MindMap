@@ -1,6 +1,7 @@
 package com.mindmap.controller;
 
 import com.mindmap.database.DatabaseManager;
+import com.mindmap.util.AnimationUtil;
 import com.mindmap.util.ViewManager;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -52,8 +53,21 @@ public class MainController {
 
     @FXML
     public void initialize() {
+        setupSidebarAnimations();
         // Load default dashboard screen on startup
         showDashboard();
+    }
+
+    private void setupSidebarAnimations() {
+        AnimationUtil.addSidebarNavHoverEffect(btnDashboard);
+        AnimationUtil.addSidebarNavHoverEffect(btnNotes);
+        AnimationUtil.addSidebarNavHoverEffect(btnMindMap);
+        AnimationUtil.addSidebarNavHoverEffect(btnSearch);
+        AnimationUtil.addSidebarNavHoverEffect(btnRevision);
+        AnimationUtil.addSidebarNavHoverEffect(btnTimeline);
+        AnimationUtil.addSidebarNavHoverEffect(btnSettings);
+        AnimationUtil.addSidebarNavHoverEffect(btnAbout);
+        AnimationUtil.addSidebarNavHoverEffect(btnExit);
     }
 
     @FXML
@@ -135,11 +149,17 @@ public class MainController {
     private void setActiveButton(Button button) {
         if (currentActiveButton != null) {
             currentActiveButton.getStyleClass().remove("active");
+            currentActiveButton.setTranslateX(0);
+            currentActiveButton.setScaleX(1.0);
+            currentActiveButton.setScaleY(1.0);
         }
         if (button != null) {
             if (!button.getStyleClass().contains("active")) {
                 button.getStyleClass().add("active");
             }
+            button.setTranslateX(0);
+            button.setScaleX(1.0);
+            button.setScaleY(1.0);
             currentActiveButton = button;
         }
     }

@@ -34,36 +34,48 @@
         </columnConstraints>
 
         <!-- Card 1: Total Notes -->
-        <VBox spacing="8" styleClass="stat-card" GridPane.columnIndex="0">
-            <Label text="Total Notes" styleClass="stat-label"/>
+        <VBox fx:id="cardTotalNotes" spacing="10" styleClass="stat-card" GridPane.columnIndex="0">
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label text="📝" styleClass="card-icon-badge"/>
+                <Label text="Total Notes" styleClass="stat-label"/>
+            </HBox>
             <Label fx:id="lblTotalNotes" text="0" styleClass="stat-value"/>
             <Label text="All notes in database" styleClass="stat-detail"/>
         </VBox>
 
         <!-- Card 2: Total Subjects -->
-        <VBox spacing="8" styleClass="stat-card" GridPane.columnIndex="1">
-            <Label text="Total Subjects" styleClass="stat-label"/>
+        <VBox fx:id="cardTotalSubjects" spacing="10" styleClass="stat-card" GridPane.columnIndex="1">
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label text="📚" styleClass="card-icon-badge"/>
+                <Label text="Total Subjects" styleClass="stat-label"/>
+            </HBox>
             <Label fx:id="lblTotalSubjects" text="0" styleClass="stat-value"/>
             <Label text="Distinct topics organized" styleClass="stat-detail"/>
         </VBox>
 
         <!-- Card 3: Total Tags -->
-        <VBox spacing="8" styleClass="stat-card" GridPane.columnIndex="2">
-            <Label text="Total Tags" styleClass="stat-label"/>
+        <VBox fx:id="cardTotalTags" spacing="10" styleClass="stat-card" GridPane.columnIndex="2">
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label text="🏷" styleClass="card-icon-badge"/>
+                <Label text="Total Tags" styleClass="stat-label"/>
+            </HBox>
             <Label fx:id="lblTotalTags" text="0" styleClass="stat-value"/>
             <Label text="Knowledge index tags" styleClass="stat-detail"/>
         </VBox>
 
         <!-- Card 4: Reviews Due -->
-        <VBox spacing="8" styleClass="stat-card, stat-card-highlight" GridPane.columnIndex="3">
-            <Label text="Reviews Due" styleClass="stat-label"/>
+        <VBox fx:id="cardReviewsDue" spacing="10" styleClass="stat-card, stat-card-highlight" GridPane.columnIndex="3">
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label text="⏰" styleClass="card-icon-badge, card-icon-badge-highlight"/>
+                <Label text="Reviews Due" styleClass="stat-label"/>
+            </HBox>
             <Label fx:id="lblReviewsDue" text="0" styleClass="stat-value, stat-value-highlight"/>
             <Label text="Scheduled for today" styleClass="stat-detail"/>
         </VBox>
     </GridPane>
 
     <!-- Overview Section -->
-    <VBox spacing="12" styleClass="card" VBox.vgrow="ALWAYS">
+    <VBox fx:id="cardOverview" spacing="12" styleClass="card" VBox.vgrow="ALWAYS">
         <Label text="Overview" styleClass="card-title"/>
         <Label text="MindMap helps you structure notes, discover conceptual relationships through graph visualization, and retain knowledge using spaced repetition." styleClass="card-description" wrapText="true"/>
         <VBox spacing="8" styleClass="placeholder-box">

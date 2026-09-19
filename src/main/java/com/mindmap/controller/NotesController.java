@@ -4,6 +4,7 @@ import com.mindmap.model.Note;
 import com.mindmap.model.Tag;
 import com.mindmap.service.NoteService;
 import com.mindmap.service.TagService;
+import com.mindmap.util.AnimationUtil;
 import com.mindmap.util.DateUtil;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -103,9 +104,18 @@ public class NotesController {
         configureTableSelection();
         configureRowDoubleClicks();
         configureFilterListeners();
+        setupButtonAnimations();
 
         loadTagFilters();
         loadNotes();
+    }
+
+    private void setupButtonAnimations() {
+        AnimationUtil.addButtonHoverEffect(btnNewNote);
+        AnimationUtil.addButtonHoverEffect(btnViewNote);
+        AnimationUtil.addButtonHoverEffect(btnEditNote);
+        AnimationUtil.addButtonHoverEffect(btnDeleteNote);
+        AnimationUtil.addButtonHoverEffect(btnClearFilter);
     }
 
     private void configureColumns() {

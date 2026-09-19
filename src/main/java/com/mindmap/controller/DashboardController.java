@@ -2,18 +2,35 @@ package com.mindmap.controller;
 
 import com.mindmap.service.NoteService;
 import com.mindmap.service.TagService;
+import com.mindmap.util.AnimationUtil;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Controller for the Dashboard screen connecting real SQLite statistics.
+ * Controller for the Dashboard screen connecting real SQLite statistics and 3D card effects.
  */
 public class DashboardController {
 
     private static final Logger LOGGER = Logger.getLogger(DashboardController.class.getName());
+
+    @FXML
+    private VBox cardTotalNotes;
+
+    @FXML
+    private VBox cardTotalSubjects;
+
+    @FXML
+    private VBox cardTotalTags;
+
+    @FXML
+    private VBox cardReviewsDue;
+
+    @FXML
+    private VBox cardOverview;
 
     @FXML
     private Label lblTotalNotes;
@@ -42,7 +59,16 @@ public class DashboardController {
 
     @FXML
     public void initialize() {
+        setupCardHoverEffects();
         refreshStatistics();
+    }
+
+    private void setupCardHoverEffects() {
+        AnimationUtil.addCardHoverEffect(cardTotalNotes);
+        AnimationUtil.addCardHoverEffect(cardTotalSubjects);
+        AnimationUtil.addCardHoverEffect(cardTotalTags);
+        AnimationUtil.addCardHoverEffect(cardReviewsDue);
+        AnimationUtil.addCardHoverEffect(cardOverview);
     }
 
     /**
