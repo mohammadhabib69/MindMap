@@ -77,8 +77,9 @@ public class DashboardController {
     public void refreshStatistics() {
         try {
             int notes = noteService.getNoteCount();
+            int subjects = noteService.getDistinctSubjectCount();
             int tags = tagService.getTagCount();
-            setStatistics(notes, 0, tags, 0);
+            setStatistics(notes, subjects, tags, 0);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to load dashboard statistics: " + e.getMessage(), e);
         }

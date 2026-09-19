@@ -29,39 +29,39 @@
 
     <!-- Header Section -->
     <HBox alignment="CENTER_LEFT" spacing="12">
-        <VBox spacing="4" HBox.hgrow="ALWAYS">
+        <VBox spacing="3" HBox.hgrow="ALWAYS" minWidth="120">
             <Label text="Knowledge Space" styleClass="view-header"/>
-            <Label text="Visual connections, prerequisites, and conceptual relationships between notes" styleClass="view-subtitle"/>
+            <Label text="Visual connections, prerequisites, and conceptual relationships" styleClass="view-subtitle"/>
         </VBox>
-        <HBox spacing="8" alignment="CENTER_RIGHT">
+        <HBox spacing="8" alignment="CENTER_RIGHT" HBox.hgrow="NEVER">
             <!-- 2D / 3D View Toggle -->
-            <HBox alignment="CENTER" style="-fx-background-color: #e2e8f0; -fx-padding: 2; -fx-background-radius: 8px;">
+            <HBox alignment="CENTER" minWidth="-Infinity" style="-fx-background-color: #e2e8f0; -fx-padding: 2; -fx-background-radius: 8px;">
                 <fx:define>
                     <ToggleGroup fx:id="viewToggleGroup"/>
                 </fx:define>
-                <ToggleButton fx:id="btn3DView" text="3D Space" toggleGroup="$viewToggleGroup" selected="true" onAction="#handleSwitchTo3D" styleClass="view-toggle-btn"/>
-                <ToggleButton fx:id="btn2DView" text="2D Graph" toggleGroup="$viewToggleGroup" onAction="#handleSwitchTo2D" styleClass="view-toggle-btn"/>
+                <ToggleButton fx:id="btn3DView" text="3D Space" toggleGroup="$viewToggleGroup" selected="true" onAction="#handleSwitchTo3D" styleClass="view-toggle-btn" minWidth="-Infinity"/>
+                <ToggleButton fx:id="btn2DView" text="2D Graph" toggleGroup="$viewToggleGroup" onAction="#handleSwitchTo2D" styleClass="view-toggle-btn" minWidth="-Infinity"/>
             </HBox>
 
-            <Button fx:id="btnFocusSelected" text="🎯 Focus" onAction="#handleFocusSelected" styleClass="btn-secondary"/>
-            <Button fx:id="btnAddConnection" text="+ Connect Notes" onAction="#handleAddConnection" styleClass="btn-primary"/>
-            <Button fx:id="btnAutoLayout" text="Auto Layout" onAction="#handleAutoLayout" styleClass="btn-secondary"/>
-            <Button fx:id="btnRefresh" text="🔄 Refresh" onAction="#handleRefresh" styleClass="btn-secondary"/>
-            <HBox spacing="4" alignment="CENTER" style="-fx-background-color: #ffffff; -fx-padding: 2 6; -fx-background-radius: 8px; -fx-border-color: #cbd5e1; -fx-border-radius: 8px; -fx-border-width: 1px;">
-                <Button fx:id="btnZoomOut" text="-" onAction="#handleZoomOut" styleClass="btn-secondary" style="-fx-padding: 4 8; -fx-font-size: 11px;"/>
-                <Label fx:id="lblZoomLevel" text="100%" style="-fx-font-size: 11px; -fx-text-fill: #475569; -fx-padding: 0 4; -fx-font-weight: bold;"/>
-                <Button fx:id="btnZoomIn" text="+" onAction="#handleZoomIn" styleClass="btn-secondary" style="-fx-padding: 4 8; -fx-font-size: 11px;"/>
-                <Button fx:id="btnResetView" text="Reset" onAction="#handleResetView" styleClass="btn-secondary" style="-fx-padding: 4 8; -fx-font-size: 11px;"/>
-            </HBox>
+            <Button fx:id="btnAddConnection" text="+ Connect Notes" onAction="#handleAddConnection" styleClass="btn-primary" minWidth="-Infinity" style="-fx-padding: 6 12; -fx-font-size: 12px;"/>
         </HBox>
     </HBox>
 
-    <!-- Toolbar / Search Section -->
-    <HBox alignment="CENTER_LEFT" spacing="12" style="-fx-padding: 2 0 4 0;">
-        <TextField fx:id="txtSearch" promptText="🔍 Search notes in knowledge space..." prefWidth="260" minWidth="120" styleClass="input-field"/>
-        <Button fx:id="btnClearSearch" text="✕ Clear" onAction="#handleClearSearch" styleClass="btn-secondary" style="-fx-padding: 6 10; -fx-font-size: 11px;"/>
+    <!-- Toolbar / Search & Navigation Section -->
+    <HBox alignment="CENTER_LEFT" spacing="8" style="-fx-padding: 2 0 4 0;">
+        <TextField fx:id="txtSearch" promptText="🔍 Search notes in space..." minWidth="80" prefWidth="180" maxWidth="280" HBox.hgrow="ALWAYS" styleClass="input-field" style="-fx-padding: 6 10; -fx-font-size: 12px;"/>
+        <Button fx:id="btnClearSearch" text="✕" onAction="#handleClearSearch" styleClass="btn-secondary" minWidth="-Infinity" style="-fx-padding: 6 9; -fx-font-size: 11px;"/>
+        <Button fx:id="btnFocusSelected" text="🎯 Focus" onAction="#handleFocusSelected" styleClass="btn-secondary" minWidth="-Infinity" style="-fx-padding: 6 10; -fx-font-size: 11px;"/>
+        <Button fx:id="btnAutoLayout" text="Auto Layout" onAction="#handleAutoLayout" styleClass="btn-secondary" minWidth="-Infinity" visible="false" managed="false" style="-fx-padding: 6 10; -fx-font-size: 11px;"/>
+        <Button fx:id="btnRefresh" text="🔄 Refresh" onAction="#handleRefresh" styleClass="btn-secondary" minWidth="-Infinity" style="-fx-padding: 6 10; -fx-font-size: 11px;"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Label fx:id="lblGraphStats" text="Graph: 0 notes • 0 connections" style="-fx-font-size: 12px; -fx-text-fill: #64748b; -fx-font-weight: 500;"/>
+        <HBox spacing="3" alignment="CENTER" minWidth="-Infinity" style="-fx-background-color: #ffffff; -fx-padding: 2 4; -fx-background-radius: 8px; -fx-border-color: #cbd5e1; -fx-border-radius: 8px; -fx-border-width: 1px;">
+            <Button fx:id="btnZoomOut" text="-" onAction="#handleZoomOut" styleClass="btn-secondary" style="-fx-padding: 4 7; -fx-font-size: 11px;"/>
+            <Label fx:id="lblZoomLevel" text="3D" style="-fx-font-size: 11px; -fx-text-fill: #475569; -fx-padding: 0 4; -fx-font-weight: bold;"/>
+            <Button fx:id="btnZoomIn" text="+" onAction="#handleZoomIn" styleClass="btn-secondary" style="-fx-padding: 4 7; -fx-font-size: 11px;"/>
+            <Button fx:id="btnResetView" text="Reset" onAction="#handleResetView" styleClass="btn-secondary" style="-fx-padding: 4 7; -fx-font-size: 11px;"/>
+        </HBox>
+        <Label fx:id="lblGraphStats" text="0 notes • 0 connections" minWidth="-Infinity" style="-fx-font-size: 11px; -fx-text-fill: #64748b; -fx-font-weight: 500;"/>
     </HBox>
 
     <!-- Main Content Area: Graph Canvas + Side Inspector Panel -->

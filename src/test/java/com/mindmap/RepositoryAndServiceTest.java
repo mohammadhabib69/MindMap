@@ -259,4 +259,25 @@ public class RepositoryAndServiceTest {
             noteService.createNote(new Note("Valid Title", "Content", "Subject", "INVALID_DIFFICULTY"));
         }, "Invalid difficulty string must throw ValidationException");
     }
+
+    @Test
+    @Order(14)
+    public void testCountDistinctSubjects() {
+        int initial = noteService.getDistinctSubjectCount();
+
+        Note n1 = noteService.createNote(new Note("Subject Test 1", "Body", "QuantumPhysics", Difficulty.EASY.name()));
+        assertEquals(initial + 1, noteService.getDistinctSubjectCount(), "Count should increase after adding a new distinct subject");
+
+        Note n2 = noteService.createNote(new Note("Subject Test 2", "Body", "QuantumPhysics", Difficulty.MEDIUM.name()));
+        assertEquals(initial + 1, noteService.getDistinctSubjectCount(), "Duplicate subject must not increase distinct subject count");
+
+        Note n3 = noteService.createNote(new Note("Subject Test 3", "Body", "   ", Difficulty.HARD.name()));
+        assertEquals(initial + 1, noteService.getDistinctSubjectCount(), "Empty/whitespace subject must not increase distinct subject count");
+
+        noteService.deleteNote(n1.getId());
+        noteService.deleteNote(n2.getId());
+        noteService.deleteNote(n3.getId());
+
+        assertEquals(initial, noteService.getDistinctSubjectCount(), "Count should return to initial after deleting the unique subject notes");
+    }
 }

@@ -72,7 +72,7 @@
             <Label fx:id="lblAppVersion" text="1.0-SNAPSHOT" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 
             <Label text="Phase:" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-            <Label text="Phase 2 - UI Foundation &amp; Navigation" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+            <Label fx:id="lblAppPhase" text="Phase 6 - Interactive 3D Knowledge Space" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
         </GridPane>
     </VBox>
 

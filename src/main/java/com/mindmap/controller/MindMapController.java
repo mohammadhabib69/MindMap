@@ -312,7 +312,7 @@ public class MindMapController {
 
     private void updateStats(int noteCount, int connectionCount) {
         if (lblGraphStats != null) {
-            lblGraphStats.setText("Graph: " + noteCount + " notes • " + connectionCount + " connections");
+            lblGraphStats.setText(noteCount + " notes • " + connectionCount + " links");
         }
         if (lblOverviewTotalNotes != null) {
             lblOverviewTotalNotes.setText(String.valueOf(noteCount));

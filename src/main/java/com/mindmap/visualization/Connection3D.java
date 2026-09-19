@@ -67,9 +67,9 @@ public class Connection3D {
 
         // Dimmed muted slate
         dimmedMaterial = new PhongMaterial();
-        dimmedMaterial.setDiffuseColor(Color.rgb(51, 65, 85, 0.35));
+        dimmedMaterial.setDiffuseColor(Color.rgb(51, 65, 85, 0.15));
         dimmedMaterial.setSpecularColor(Color.rgb(30, 41, 59));
-        dimmedMaterial.setSpecularPower(2.0);
+        dimmedMaterial.setSpecularPower(1.0);
 
         cylinder.setMaterial(normalMaterial);
         directionalMarker.setMaterial(normalMaterial);
@@ -146,8 +146,8 @@ public class Connection3D {
         } else {
             cylinder.setRadius(DEFAULT_RADIUS);
             directionalMarker.setRadius(4.5);
-            cylinder.setMaterial(normalMaterial);
-            directionalMarker.setMaterial(normalMaterial);
+            cylinder.setMaterial(dimmed ? dimmedMaterial : normalMaterial);
+            directionalMarker.setMaterial(dimmed ? dimmedMaterial : normalMaterial);
         }
     }
 

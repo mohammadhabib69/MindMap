@@ -27,17 +27,23 @@ public class Node3D {
 
     private PhongMaterial normalMaterial;
     private PhongMaterial selectedMaterial;
+    private PhongMaterial connectedMaterial;
     private PhongMaterial dimmedMaterial;
 
     private boolean selected = false;
+    private boolean connectedHighlight = false;
     private boolean dimmed = false;
     private Consumer<Node3D> onSelectHandler;
 
     public Node3D(Note note, Point3D position) {
+        this(note, position, DEFAULT_RADIUS);
+    }
+
+    public Node3D(Note note, Point3D position, double radius) {
         this.note = note;
         this.position = position;
 
-        this.sphere = new Sphere(DEFAULT_RADIUS);
+        this.sphere = new Sphere(radius > 0 ? radius : DEFAULT_RADIUS);
         this.sphere.setTranslateX(position.getX());
         this.sphere.setTranslateY(position.getY());
         this.sphere.setTranslateZ(position.getZ());
@@ -61,11 +67,17 @@ public class Node3D {
         selectedMaterial.setSpecularColor(Color.rgb(255, 255, 255));
         selectedMaterial.setSpecularPower(64.0);
 
-        // Dimmed material (subdued dark slate for search filtering)
+        // Connected neighbor material (vibrant emerald with shiny specular highlight)
+        connectedMaterial = new PhongMaterial();
+        connectedMaterial.setDiffuseColor(Color.rgb(16, 185, 129));
+        connectedMaterial.setSpecularColor(Color.rgb(255, 255, 255));
+        connectedMaterial.setSpecularPower(48.0);
+
+        // Dimmed material (subdued translucent slate)
         dimmedMaterial = new PhongMaterial();
-        dimmedMaterial.setDiffuseColor(Color.rgb(71, 85, 105, 0.45));
+        dimmedMaterial.setDiffuseColor(Color.rgb(71, 85, 105, 0.22));
         dimmedMaterial.setSpecularColor(Color.rgb(30, 41, 59));
-        dimmedMaterial.setSpecularPower(4.0);
+        dimmedMaterial.setSpecularPower(2.0);
 
         sphere.setMaterial(normalMaterial);
     }
@@ -124,14 +136,14 @@ public class Node3D {
 
         // Hover scale animation
         sphere.setOnMouseEntered(e -> {
-            if (!selected) {
-                playScaleAnimation(1.18);
+            if (!selected && !connectedHighlight) {
+                playScaleAnimation(dimmed ? 1.0 : 1.18);
             }
         });
 
         sphere.setOnMouseExited(e -> {
-            if (!selected) {
-                playScaleAnimation(1.0);
+            if (!selected && !connectedHighlight) {
+                playScaleAnimation(dimmed ? 0.88 : 1.0);
             }
         });
 
@@ -152,22 +164,39 @@ public class Node3D {
         st.play();
     }
 
-    public void setSelected(boolean selected) {
-        this.selected = selected;
+    private void applyCurrentVisualState() {
         if (selected) {
             sphere.setMaterial(selectedMaterial);
-            playScaleAnimation(1.25);
+            playScaleAnimation(1.28);
+        } else if (connectedHighlight) {
+            sphere.setMaterial(connectedMaterial);
+            playScaleAnimation(1.15);
+        } else if (dimmed) {
+            sphere.setMaterial(dimmedMaterial);
+            playScaleAnimation(0.88);
         } else {
-            sphere.setMaterial(dimmed ? dimmedMaterial : normalMaterial);
+            sphere.setMaterial(normalMaterial);
             playScaleAnimation(1.0);
         }
     }
 
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+        applyCurrentVisualState();
+    }
+
+    public void setConnectedHighlight(boolean connectedHighlight) {
+        this.connectedHighlight = connectedHighlight;
+        applyCurrentVisualState();
+    }
+
     public void setDimmed(boolean dimmed) {
         this.dimmed = dimmed;
-        if (!selected) {
-            sphere.setMaterial(dimmed ? dimmedMaterial : normalMaterial);
-        }
+        applyCurrentVisualState();
+    }
+
+    public boolean isConnectedHighlight() {
+        return connectedHighlight;
     }
 
     public void setOnSelectHandler(Consumer<Node3D> onSelectHandler) {

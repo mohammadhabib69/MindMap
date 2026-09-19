@@ -15,8 +15,10 @@ import javafx.scene.paint.Color;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -41,6 +43,7 @@ public class KnowledgeSpace3D {
 
     private Node3D selectedNode;
     private Connection3D selectedConnection;
+    private String activeSearchQuery = null;
 
     private Consumer<Note> onNodeSelectedCallback;
     private Consumer<Connection> onConnectionSelectedCallback;
@@ -131,7 +134,14 @@ public class KnowledgeSpace3D {
         sortedNotes.sort(Comparator.comparingInt(Note::getId));
 
         int n = sortedNotes.size();
-        double baseRadius = (n == 1) ? 0.0 : 250.0 + Math.min(n * 10.0, 150.0);
+        // Dynamic Fibonacci sphere radius scaling: scales as O(sqrt(n)) to maintain generous spatial separation
+        double baseRadius = (n <= 1) ? 0.0 : Math.max(280.0, 50.0 * Math.sqrt(n));
+
+        // Adapt default camera distance so the entire 3D space fits in view cleanly
+        cameraController.setAdaptiveDefaultDistance(-Math.max(1000.0, baseRadius * 2.15));
+
+        // Sleek sphere radius for large graphs to prevent visual crowding
+        double nodeRadius = (n > 80) ? 14.0 : (n > 40 ? 16.0 : Node3D.DEFAULT_RADIUS);
 
         // Fibonacci sphere 3D distribution
         for (int i = 0; i < n; i++) {
@@ -151,7 +161,7 @@ public class KnowledgeSpace3D {
                 position = new Point3D(x * baseRadius, y * baseRadius, z * baseRadius);
             }
 
-            Node3D node3D = new Node3D(note, position);
+            Node3D node3D = new Node3D(note, position, nodeRadius);
             node3D.setOnSelectHandler(this::handleNodeClicked);
             node3DMap.put(note.getId(), node3D);
             nodesGroup.getChildren().add(node3D.getSphere());
@@ -204,12 +214,46 @@ public class KnowledgeSpace3D {
     private void selectNode(Node3D node3D) {
         clearSelection();
         this.selectedNode = node3D;
+
+        // 1. Collect directly connected neighbor nodes and connecting edges
+        Set<Node3D> connectedNeighbors = new HashSet<>();
+        List<Connection3D> incidentEdges = new ArrayList<>();
+
+        for (Connection3D edge : connection3DList) {
+            boolean isFrom = (edge.getFromNode() == node3D);
+            boolean isTo = (edge.getToNode() == node3D);
+            if (isFrom || isTo) {
+                incidentEdges.add(edge);
+                if (isFrom && edge.getToNode() != node3D) {
+                    connectedNeighbors.add(edge.getToNode());
+                }
+                if (isTo && edge.getFromNode() != node3D) {
+                    connectedNeighbors.add(edge.getFromNode());
+                }
+            }
+        }
+
+        // 2. Highlight selected node
         node3D.setSelected(true);
 
-        // Highlight connected 3D edges
+        // 3. Highlight directly connected neighbor nodes; dim unrelated nodes
+        for (Node3D otherNode : node3DMap.values()) {
+            if (otherNode == node3D) {
+                continue;
+            }
+            if (connectedNeighbors.contains(otherNode)) {
+                otherNode.setConnectedHighlight(true);
+            } else {
+                otherNode.setDimmed(true);
+            }
+        }
+
+        // 4. Highlight incident edges; dim unrelated edges
         for (Connection3D edge : connection3DList) {
-            if (edge.getFromNode() == node3D || edge.getToNode() == node3D) {
+            if (incidentEdges.contains(edge)) {
                 edge.setSelected(true);
+            } else {
+                edge.setDimmed(true);
             }
         }
     }
@@ -217,9 +261,22 @@ public class KnowledgeSpace3D {
     private void selectConnection(Connection3D conn3D) {
         clearSelection();
         this.selectedConnection = conn3D;
+
         conn3D.setSelected(true);
         conn3D.getFromNode().setSelected(true);
-        conn3D.getToNode().setSelected(true);
+        conn3D.getToNode().setConnectedHighlight(true);
+
+        // Dim unrelated nodes and edges
+        for (Node3D node : node3DMap.values()) {
+            if (node != conn3D.getFromNode() && node != conn3D.getToNode()) {
+                node.setDimmed(true);
+            }
+        }
+        for (Connection3D edge : connection3DList) {
+            if (edge != conn3D) {
+                edge.setDimmed(true);
+            }
+        }
     }
 
     /**
@@ -243,16 +300,32 @@ public class KnowledgeSpace3D {
             selectedNode.setSelected(false);
             selectedNode = null;
         }
+        for (Node3D node : node3DMap.values()) {
+            node.setSelected(false);
+            node.setConnectedHighlight(false);
+            node.setDimmed(false);
+        }
         for (Connection3D edge : connection3DList) {
             edge.setSelected(false);
+            edge.setDimmed(false);
         }
         selectedConnection = null;
+
+        // If there is an active search query, re-apply it
+        if (activeSearchQuery != null && !activeSearchQuery.trim().isEmpty()) {
+            applySearchFilter(activeSearchQuery);
+        }
     }
 
     /**
      * Filters 3D nodes and edges based on a search query.
      */
     public void search(String query) {
+        this.activeSearchQuery = query;
+        applySearchFilter(query);
+    }
+
+    private void applySearchFilter(String query) {
         if (query == null || query.trim().isEmpty()) {
             for (Node3D node : node3DMap.values()) {
                 node.setDimmed(false);

@@ -26,6 +26,7 @@ public class CameraController {
     private final Rotate rotateY = new Rotate(0, Rotate.Y_AXIS);
     private final Translate panTranslate = new Translate(0, 0, 0);
     private final Translate zoomTranslate = new Translate(0, 0, DEFAULT_CAMERA_DISTANCE);
+    private double currentDefaultDistance = DEFAULT_CAMERA_DISTANCE;
 
     private double mouseAnchorX;
     private double mouseAnchorY;
@@ -100,10 +101,22 @@ public class CameraController {
                         new KeyValue(rotateY.angleProperty(), 0.0),
                         new KeyValue(panTranslate.xProperty(), 0.0),
                         new KeyValue(panTranslate.yProperty(), 0.0),
-                        new KeyValue(zoomTranslate.zProperty(), DEFAULT_CAMERA_DISTANCE)
+                        new KeyValue(zoomTranslate.zProperty(), currentDefaultDistance)
                 )
         );
         timeline.play();
+    }
+
+    /**
+     * Adapts the default camera distance based on graph size and sets current zoom to it.
+     */
+    public void setAdaptiveDefaultDistance(double distance) {
+        this.currentDefaultDistance = Math.max(MIN_CAMERA_DISTANCE, Math.min(MAX_CAMERA_DISTANCE, distance));
+        zoomTranslate.setZ(this.currentDefaultDistance);
+    }
+
+    public double getCurrentDefaultDistance() {
+        return currentDefaultDistance;
     }
 
     /**

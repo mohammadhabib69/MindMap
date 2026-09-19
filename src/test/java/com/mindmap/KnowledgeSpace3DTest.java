@@ -223,19 +223,23 @@ public class KnowledgeSpace3DTest {
         assertTrue(latch.await(3, TimeUnit.SECONDS));
         KnowledgeSpace3D space = ref.get();
 
-        // 1. Test Selection
+        // 1. Test Selection & Connected Subgraph Focus
         Platform.runLater(() -> space.selectNote(n1));
         Thread.sleep(100);
 
         assertNotNull(space.getSelectedNode());
         assertEquals(10, space.getSelectedNode().getNote().getId());
-        assertTrue(space.getSelectedNode().isSelected());
+        assertTrue(space.getSelectedNode().isSelected(), "Target node must be selected");
+        assertTrue(space.getNode3DMap().get(20).isConnectedHighlight(), "Directly connected neighbor (n2) must have connectedHighlight");
+        assertTrue(space.getNode3DMap().get(30).isDimmed(), "Unrelated node (n3) must be dimmed");
         assertTrue(space.getConnection3DList().get(0).isSelected(), "Connected edge must be selected when node is selected");
 
         // 2. Test Clear Selection
         Platform.runLater(space::clearSelection);
         Thread.sleep(100);
         assertNull(space.getSelectedNode());
+        assertFalse(space.getNode3DMap().get(20).isConnectedHighlight());
+        assertFalse(space.getNode3DMap().get(30).isDimmed());
         assertFalse(space.getConnection3DList().get(0).isSelected());
 
         // 3. Test Search Filtering
@@ -253,6 +257,49 @@ public class KnowledgeSpace3DTest {
         assertFalse(space.getNode3DMap().get(20).isDimmed());
         assertFalse(space.getNode3DMap().get(30).isDimmed());
         assertFalse(space.getConnection3DList().get(0).isDimmed());
+    }
+
+    @Test
+    void testLargeScaleFibonacciSeparation147Nodes() throws Exception {
+        if (!toolkitInitialized) return;
+
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<KnowledgeSpace3D> ref = new AtomicReference<>();
+
+        Platform.runLater(() -> {
+            try {
+                KnowledgeSpace3D space = new KnowledgeSpace3D(800, 600);
+                List<Note> notes = new ArrayList<>();
+                for (int i = 1; i <= 147; i++) {
+                    notes.add(createMockNote(i, "Concept " + i, "Subject" + (i % 5), "MEDIUM"));
+                }
+                space.updateData(notes, new ArrayList<>());
+                ref.set(space);
+            } finally {
+                latch.countDown();
+            }
+        });
+
+        assertTrue(latch.await(4, TimeUnit.SECONDS));
+        KnowledgeSpace3D space = ref.get();
+        assertEquals(147, space.getNode3DMap().size(), "All 147 notes should be distributed in 3D");
+
+        // Verify that for all 147 nodes, the nearest neighbor distance is >= 40 units (no overlaps)
+        List<Node3D> nodes = new ArrayList<>(space.getNode3DMap().values());
+        for (int i = 0; i < nodes.size(); i++) {
+            Point3D pi = nodes.get(i).getPosition();
+            double minNeighborDist = Double.MAX_VALUE;
+            for (int j = 0; j < nodes.size(); j++) {
+                if (i != j) {
+                    double dist = pi.distance(nodes.get(j).getPosition());
+                    if (dist < minNeighborDist) {
+                        minNeighborDist = dist;
+                    }
+                }
+            }
+            assertTrue(minNeighborDist >= 40.0,
+                    "Node " + i + " nearest neighbor distance (" + minNeighborDist + ") must be >= 40.0 to prevent overlaps");
+        }
     }
 
     @Test

@@ -111,12 +111,13 @@ public class MainController {
         alert.setTitle("About MindMap");
         alert.setHeaderText("MindMap: Personal Knowledge Base & Study Organizer");
         alert.setContentText("""
-                Version: 1.0-SNAPSHOT (Phase 2)
+                Version: 1.0-SNAPSHOT
+                Phase: Phase 6 - Interactive 3D Knowledge Space
                 Framework: JavaFX 21 & SQLite JDBC
                 Database: """ + DatabaseManager.JDBC_URL + """
 
                 
-                MindMap helps you take notes, organize subjects, discover connections with knowledge graphs, and retain information through spaced repetition.
+                MindMap helps you take notes, organize subjects, discover connections with interactive 2D & 3D knowledge spaces, and retain information through spaced repetition.
                 """);
         alert.showAndWait();
     }

@@ -212,6 +212,28 @@ public class NoteRepository {
     }
 
     /**
+     * Returns the count of distinct non-empty subjects across all notes.
+     *
+     * @return Distinct subjects count.
+     */
+    public int countDistinctSubjects() {
+        String sql = "SELECT COUNT(DISTINCT TRIM(subject)) FROM notes WHERE subject IS NOT NULL AND TRIM(subject) <> '';";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error counting distinct subjects: " + e.getMessage(), e);
+            throw new DatabaseException("Failed to count distinct subjects", e);
+        }
+    }
+
+    /**
      * Atomically persists a Note along with its associated tags in a single database transaction.
      *
      * @param note The note to persist.

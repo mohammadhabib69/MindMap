@@ -206,6 +206,15 @@ public class NoteService {
         return noteRepository.count();
     }
 
+    /**
+     * Returns the count of distinct non-empty subjects across all notes.
+     *
+     * @return Distinct subjects count.
+     */
+    public int getDistinctSubjectCount() {
+        return noteRepository.countDistinctSubjects();
+    }
+
     private List<String> sanitizeTagNames(List<String> rawTagNames) {
         if (rawTagNames == null || rawTagNames.isEmpty()) {
             return List.of();
