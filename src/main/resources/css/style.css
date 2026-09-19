@@ -1188,3 +1188,59 @@
     -fx-border-radius: 6px;
     -fx-cursor: hand;
 }
+
+/* =========================================================================
+   Dashboard Styles
+   ========================================================================= */
+
+.dashboard-chart {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.dashboard-chart .chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.dashboard-chart .chart-vertical-grid-lines,
+.dashboard-chart .chart-horizontal-grid-lines {
+    -fx-stroke: #f1f5f9;
+}
+
+.dashboard-chart .axis {
+    -fx-tick-label-font-size: 10px;
+    -fx-tick-label-fill: #64748b;
+}
+
+.dashboard-progress .bar {
+    -fx-background-color: #2563eb;
+    -fx-background-radius: 4px;
+}
+
+.dashboard-progress .track {
+    -fx-background-color: #e2e8f0;
+    -fx-background-radius: 4px;
+}
+
+.revision-mini-stat {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1px;
+    -fx-padding: 6 10;
+}
+
+.dashboard-list-row {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-border-color: #f1f5f9;
+    -fx-border-width: 1px;
+    -fx-padding: 8 10;
+}
+
+.dashboard-list-row:hover {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #cbd5e1;
+}

@@ -262,6 +262,93 @@ public class NoteRepository {
     }
 
     /**
+     * Retrieves the most recently updated notes up to the specified limit.
+     */
+    public List<Note> findRecentNotes(int limit) {
+        String sql = """
+                SELECT id, title, content, subject, difficulty, created_at, updated_at
+                FROM notes
+                ORDER BY updated_at DESC, id DESC
+                LIMIT ?;
+                """;
+        List<Note> notes = new ArrayList<>();
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, limit);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    notes.add(mapResultSetToNote(rs));
+                }
+            }
+            return notes;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error querying recent notes: " + e.getMessage(), e);
+            throw new DatabaseException("Failed to query recent notes", e);
+        }
+    }
+
+    /**
+     * Aggregates note counts grouped by subject (ordered by count descending).
+     */
+    public Map<String, Integer> countNotesBySubject() {
+        String sql = """
+                SELECT COALESCE(NULLIF(TRIM(subject), ''), 'Uncategorized') AS subj, COUNT(*) AS count
+                FROM notes
+                GROUP BY subj
+                ORDER BY count DESC
+                LIMIT 8;
+                """;
+        Map<String, Integer> distribution = new LinkedHashMap<>();
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                distribution.put(rs.getString("subj"), rs.getInt("count"));
+            }
+            return distribution;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error aggregating notes by subject: " + e.getMessage(), e);
+            throw new DatabaseException("Failed to aggregate notes by subject", e);
+        }
+    }
+
+    /**
+     * Aggregates note counts grouped by difficulty tier.
+     */
+    public Map<String, Integer> countNotesByDifficulty() {
+        String sql = """
+                SELECT UPPER(COALESCE(NULLIF(TRIM(difficulty), ''), 'MEDIUM')) AS diff, COUNT(*) AS count
+                FROM notes
+                GROUP BY diff;
+                """;
+        Map<String, Integer> distribution = new LinkedHashMap<>();
+        // Pre-populate with standard difficulty tiers in order
+        distribution.put("EASY", 0);
+        distribution.put("MEDIUM", 0);
+        distribution.put("HARD", 0);
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String diff = rs.getString("diff");
+                int count = rs.getInt("count");
+                distribution.put(diff, count);
+            }
+            return distribution;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error aggregating notes by difficulty: " + e.getMessage(), e);
+            throw new DatabaseException("Failed to aggregate notes by difficulty", e);
+        }
+    }
+
+    /**
      * Atomically persists a Note along with its associated tags in a single database transaction.
      *
      * @param note The note to persist.

@@ -251,4 +251,19 @@ public class TagRepository {
             throw new DatabaseException("Failed to query tags for note", e);
         }
     }
+
+    /**
+     * Returns the total count of distinct tags in the database.
+     */
+    public int count() {
+        String sql = "SELECT COUNT(*) FROM tags;";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            return rs.next() ? rs.getInt(1) : 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error counting tags: " + e.getMessage(), e);
+            throw new DatabaseException("Failed to count tags", e);
+        }
+    }
 }

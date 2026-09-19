@@ -248,4 +248,30 @@ public class ConnectionRepository {
             throw new DatabaseException("Failed to count connections", e);
         }
     }
+
+    /**
+     * Returns the count of distinct notes that have at least one connection.
+     */
+    public int countConnectedNotes() {
+        String sql = """
+                SELECT COUNT(DISTINCT note_id) FROM (
+                    SELECT from_note_id AS note_id FROM connections
+                    UNION
+                    SELECT to_note_id AS note_id FROM connections
+                );
+                """;
+
+        try (java.sql.Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error counting connected notes: " + e.getMessage(), e);
+            throw new DatabaseException("Failed to count connected notes", e);
+        }
+    }
 }

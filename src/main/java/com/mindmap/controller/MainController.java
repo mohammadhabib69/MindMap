@@ -79,37 +79,37 @@ public class MainController {
     }
 
     @FXML
-    private void showDashboard() {
+    public void showDashboard() {
         navigateTo("/fxml/dashboard.fxml", btnDashboard);
     }
 
     @FXML
-    private void showNotes() {
+    public void showNotes() {
         navigateTo("/fxml/notes.fxml", btnNotes);
     }
 
     @FXML
-    private void showMindMap() {
+    public void showMindMap() {
         navigateTo("/fxml/mindmap.fxml", btnMindMap);
     }
 
     @FXML
-    private void showSearch() {
+    public void showSearch() {
         navigateTo("/fxml/search.fxml", btnSearch);
     }
 
     @FXML
-    private void showRevision() {
+    public void showRevision() {
         navigateTo("/fxml/revision.fxml", btnRevision);
     }
 
     @FXML
-    private void showTimeline() {
+    public void showTimeline() {
         navigateTo("/fxml/timeline.fxml", btnTimeline);
     }
 
     @FXML
-    private void showSettings() {
+    public void showSettings() {
         navigateTo("/fxml/settings.fxml", btnSettings);
     }
 

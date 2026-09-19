@@ -355,6 +355,73 @@ public class LearningEventRepository {
         }
     }
 
+    /**
+     * Counts review completions for a specific calendar date.
+     */
+    public int countCompletedReviewsForDate(LocalDate date) {
+        String sql = """
+                SELECT COUNT(*) FROM learning_events
+                WHERE UPPER(event_type) = 'NOTE_REVIEWED'
+                  AND event_date >= ? AND event_date <= ?;
+                """;
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, DateUtil.formatDateTime(date.atStartOfDay()));
+            stmt.setString(2, DateUtil.formatDateTime(date.atTime(LocalTime.MAX)));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error counting completed reviews for date: " + e.getMessage(), e);
+            throw new DatabaseException("Failed to count completed reviews for date", e);
+        }
+    }
+
+    /**
+     * Retrieves the most recent timeline events up to a given limit using a single JOIN query.
+     */
+    public List<TimelineEvent> findRecentTimelineEvents(int limit) {
+        String sql = """
+                SELECT
+                    le.id,
+                    le.note_id,
+                    le.event_type,
+                    le.event_date,
+                    le.description,
+                    n.id AS n_id,
+                    n.title AS n_title,
+                    n.content AS n_content,
+                    n.subject AS n_subject,
+                    n.difficulty AS n_difficulty,
+                    n.created_at AS n_created_at,
+                    n.updated_at AS n_updated_at
+                FROM learning_events le
+                LEFT JOIN notes n ON le.note_id = n.id
+                ORDER BY le.event_date DESC
+                LIMIT ?;
+                """;
+        List<TimelineEvent> events = new ArrayList<>();
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, limit);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    events.add(mapJoinedResultSet(rs));
+                }
+            }
+            return events;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error finding recent timeline events: " + e.getMessage(), e);
+            throw new DatabaseException("Failed to query recent timeline events", e);
+        }
+    }
+
     private TimelineEvent mapJoinedResultSet(ResultSet rs) throws SQLException {
         int noteIdVal = rs.getInt("note_id");
         Integer noteId = rs.wasNull() ? null : noteIdVal;
