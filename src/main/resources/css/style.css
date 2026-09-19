@@ -698,3 +698,34 @@
     -fx-text-fill: #dc2626;
 }
 
+/* 2D / 3D View Toggle Segmented Buttons */
+.view-toggle-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #475569;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-padding: 5px 10px;
+    -fx-background-radius: 6px;
+    -fx-cursor: hand;
+}
+
+.view-toggle-btn:hover {
+    -fx-text-fill: #0f172a;
+    -fx-background-color: rgba(255, 255, 255, 0.5);
+}
+
+.view-toggle-btn:selected {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #2563eb;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.12), 4, 0, 0, 1);
+}
+
+/* 3D Knowledge Space Container */
+.space3d-container {
+    -fx-background-color: linear-gradient(to bottom, #090d16 0%, #0f172a 50%, #0b1120 100%);
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-border-color: #1e293b;
+    -fx-border-width: 1px;
+}
+

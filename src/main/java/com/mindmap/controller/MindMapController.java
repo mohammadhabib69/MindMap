@@ -5,6 +5,7 @@ import com.mindmap.model.Note;
 import com.mindmap.service.ConnectionService;
 import com.mindmap.service.NoteService;
 import com.mindmap.util.AnimationUtil;
+import com.mindmap.visualization.KnowledgeSpace3D;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -21,6 +22,8 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.MouseButton;
@@ -66,6 +69,18 @@ public class MindMapController {
     @FXML private TextField txtSearch;
     @FXML private Button btnClearSearch;
     @FXML private Label lblGraphStats;
+
+    // View Switching & 3D
+    @FXML private ToggleGroup viewToggleGroup;
+    @FXML private ToggleButton btn3DView;
+    @FXML private ToggleButton btn2DView;
+    @FXML private Button btnFocusSelected;
+    @FXML private Button btnInspectorFocus;
+    @FXML private StackPane space3DContainer;
+
+    // 3D Knowledge Space
+    private KnowledgeSpace3D knowledgeSpace3D;
+    private boolean is3DMode = true;
 
     // Canvas
     @FXML private StackPane canvasContainer;
@@ -119,12 +134,37 @@ public class MindMapController {
 
     @FXML
     public void initialize() {
+        setup3DKnowledgeSpace();
+        setupViewToggles();
         setupGraphHierarchy();
         setupCanvasPanningAndZooming();
         setupSearchFiltering();
         setupButtonAnimations();
 
         loadGraphData();
+    }
+
+    private void setup3DKnowledgeSpace() {
+        if (space3DContainer != null) {
+            knowledgeSpace3D = new KnowledgeSpace3D(750, 550);
+            knowledgeSpace3D.bindSizeTo(space3DContainer.widthProperty(), space3DContainer.heightProperty());
+            space3DContainer.getChildren().add(knowledgeSpace3D.getSubScene());
+
+            knowledgeSpace3D.setOnNodeSelectedCallback(this::selectNode);
+            knowledgeSpace3D.setOnConnectionSelectedCallback(this::selectConnection);
+            knowledgeSpace3D.setOnDeselectCallback(this::handleDeselect);
+        }
+    }
+
+    private void setupViewToggles() {
+        if (viewToggleGroup != null) {
+            viewToggleGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal == null && oldVal != null) {
+                    oldVal.setSelected(true);
+                }
+            });
+        }
+        handleSwitchTo3D();
     }
 
     private void setupGraphHierarchy() {
@@ -146,6 +186,8 @@ public class MindMapController {
         AnimationUtil.addButtonHoverEffect(btnZoomIn);
         AnimationUtil.addButtonHoverEffect(btnResetView);
         AnimationUtil.addButtonHoverEffect(btnClearSearch);
+        if (btnFocusSelected != null) AnimationUtil.addButtonHoverEffect(btnFocusSelected);
+        if (btnInspectorFocus != null) AnimationUtil.addButtonHoverEffect(btnInspectorFocus);
         if (btnCreateFirstNote != null) {
             AnimationUtil.addButtonHoverEffect(btnCreateFirstNote);
         }
@@ -227,6 +269,9 @@ public class MindMapController {
         updateEmptyStates(notes.size(), connections.size());
 
         if (notes.isEmpty()) {
+            if (knowledgeSpace3D != null) {
+                knowledgeSpace3D.updateData(notes, connections);
+            }
             handleDeselect();
             return;
         }
@@ -247,6 +292,11 @@ public class MindMapController {
                 edgeViews.add(edgeView);
                 edgesGroup.getChildren().addAll(edgeView.line, edgeView.arrow, edgeView.badge);
             }
+        }
+
+        // Pass data to 3D Knowledge Space
+        if (knowledgeSpace3D != null) {
+            knowledgeSpace3D.updateData(notes, connections);
         }
 
         // Initial layout if needed
@@ -424,6 +474,11 @@ public class MindMapController {
             }
         }
 
+        // Highlight in 3D Knowledge Space
+        if (knowledgeSpace3D != null) {
+            knowledgeSpace3D.selectNote(note);
+        }
+
         populateInspectorForNote(note);
     }
 
@@ -435,6 +490,11 @@ public class MindMapController {
             if (edge.connection.getId() == connection.getId()) {
                 edge.setSelected(true);
             }
+        }
+
+        // Highlight in 3D Knowledge Space
+        if (knowledgeSpace3D != null) {
+            knowledgeSpace3D.selectConnection(connection);
         }
 
         Note fromNote = notesMap.get(connection.getFromNoteId());
@@ -453,6 +513,9 @@ public class MindMapController {
         }
         for (EdgeView edge : edgeViews) {
             edge.setSelected(false);
+        }
+        if (knowledgeSpace3D != null) {
+            knowledgeSpace3D.clearSelection();
         }
         selectedNote = null;
         selectedConnection = null;
@@ -767,7 +830,80 @@ public class MindMapController {
         txtSearch.clear();
     }
 
+    @FXML
+    private void handleSwitchTo3D() {
+        is3DMode = true;
+        if (btn3DView != null) btn3DView.setSelected(true);
+        if (btn2DView != null) btn2DView.setSelected(false);
+        if (space3DContainer != null) {
+            space3DContainer.setVisible(true);
+            space3DContainer.setManaged(true);
+        }
+        if (graphCanvasPane != null) {
+            graphCanvasPane.setVisible(false);
+            graphCanvasPane.setManaged(false);
+        }
+        if (btnFocusSelected != null) {
+            btnFocusSelected.setVisible(true);
+            btnFocusSelected.setManaged(true);
+        }
+        if (btnAutoLayout != null) {
+            btnAutoLayout.setVisible(false);
+            btnAutoLayout.setManaged(false);
+        }
+        if (lblZoomLevel != null) {
+            lblZoomLevel.setText("3D");
+        }
+    }
+
+    @FXML
+    private void handleSwitchTo2D() {
+        is3DMode = false;
+        if (btn2DView != null) btn2DView.setSelected(true);
+        if (btn3DView != null) btn3DView.setSelected(false);
+        if (space3DContainer != null) {
+            space3DContainer.setVisible(false);
+            space3DContainer.setManaged(false);
+        }
+        if (graphCanvasPane != null) {
+            graphCanvasPane.setVisible(true);
+            graphCanvasPane.setManaged(true);
+        }
+        if (btnFocusSelected != null) {
+            btnFocusSelected.setVisible(false);
+            btnFocusSelected.setManaged(false);
+        }
+        if (btnAutoLayout != null) {
+            btnAutoLayout.setVisible(true);
+            btnAutoLayout.setManaged(true);
+        }
+        if (lblZoomLevel != null) {
+            lblZoomLevel.setText((int) Math.round(zoomFactor * 100) + "%");
+        }
+        runAutoLayout();
+    }
+
+    @FXML
+    private void handleFocusSelected() {
+        if (is3DMode && knowledgeSpace3D != null) {
+            knowledgeSpace3D.focusSelected();
+        } else if (!is3DMode && selectedNote != null) {
+            NodeCardView card = nodeViews.get(selectedNote.getId());
+            if (card != null) {
+                double canvasW = graphCanvasPane.getWidth() > 0 ? graphCanvasPane.getWidth() : 750;
+                double canvasH = graphCanvasPane.getHeight() > 0 ? graphCanvasPane.getHeight() : 550;
+                panX = (canvasW / 2.0) - (card.getLayoutX() + 80) * zoomFactor;
+                panY = (canvasH / 2.0) - (card.getLayoutY() + 35) * zoomFactor;
+                applyTransform();
+            }
+        }
+    }
+
     private void applySearchFilter(String query) {
+        if (knowledgeSpace3D != null) {
+            knowledgeSpace3D.search(query);
+        }
+
         if (query == null || query.trim().isEmpty()) {
             for (NodeCardView card : nodeViews.values()) {
                 card.setDimmed(false);
@@ -803,23 +939,37 @@ public class MindMapController {
 
     @FXML
     private void handleZoomIn() {
-        zoomFactor = Math.min(2.5, zoomFactor * 1.15);
-        applyTransform();
+        if (is3DMode && knowledgeSpace3D != null) {
+            knowledgeSpace3D.getCameraController().zoomBy(180.0);
+        } else {
+            zoomFactor = Math.min(2.5, zoomFactor * 1.15);
+            applyTransform();
+        }
     }
 
     @FXML
     private void handleZoomOut() {
-        zoomFactor = Math.max(0.4, zoomFactor / 1.15);
-        applyTransform();
+        if (is3DMode && knowledgeSpace3D != null) {
+            knowledgeSpace3D.getCameraController().zoomBy(-180.0);
+        } else {
+            zoomFactor = Math.max(0.4, zoomFactor / 1.15);
+            applyTransform();
+        }
     }
 
     @FXML
     private void handleResetView() {
+        if (knowledgeSpace3D != null) {
+            knowledgeSpace3D.resetView();
+        }
         zoomFactor = 1.0;
         panX = 0;
         panY = 0;
         applyTransform();
         runAutoLayout();
+        if (is3DMode && lblZoomLevel != null) {
+            lblZoomLevel.setText("3D");
+        }
     }
 
     private void showErrorAlert(String title, String content) {
