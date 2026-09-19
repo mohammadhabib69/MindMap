@@ -2,7 +2,9 @@ package com.mindmap.repository;
 
 import com.mindmap.database.DatabaseException;
 import com.mindmap.database.DatabaseManager;
+import com.mindmap.model.Note;
 import com.mindmap.model.Revision;
+import com.mindmap.model.ScheduledReview;
 import com.mindmap.util.DateUtil;
 
 import java.sql.Connection;
@@ -330,6 +332,87 @@ public class RevisionRepository {
             LOGGER.log(Level.SEVERE, "Error updating revision ID: " + revision.getId(), e);
             throw new DatabaseException("Failed to update revision with ID " + revision.getId(), e);
         }
+    }
+
+    /**
+     * Finds all due revisions (on or before date, PENDING) with their Note data
+     * in a single JOIN query, eliminating N+1 lookups.
+     */
+    public List<ScheduledReview> findDueWithNotes(LocalDate date) {
+        String sql = """
+                SELECT r.id, r.note_id, r.review_date, r.status, r.interval_days, r.created_at,
+                       n.id AS n_id, n.title, n.content, n.subject, n.difficulty,
+                       n.created_at AS n_created_at, n.updated_at AS n_updated_at
+                FROM revisions r
+                INNER JOIN notes n ON r.note_id = n.id
+                WHERE r.review_date <= ? AND (r.status IS NULL OR r.status = 'PENDING')
+                ORDER BY r.review_date ASC;
+                """;
+        List<ScheduledReview> result = new ArrayList<>();
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, DateUtil.formatDate(date));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    result.add(mapJoinedResultSet(rs));
+                }
+            }
+            return result;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error finding due revisions with notes: " + e.getMessage(), e);
+            throw new DatabaseException("Failed to query due revisions with notes", e);
+        }
+    }
+
+    /**
+     * Finds all upcoming revisions (after date, PENDING) with their Note data
+     * in a single JOIN query, eliminating N+1 lookups.
+     */
+    public List<ScheduledReview> findUpcomingWithNotes(LocalDate date) {
+        String sql = """
+                SELECT r.id, r.note_id, r.review_date, r.status, r.interval_days, r.created_at,
+                       n.id AS n_id, n.title, n.content, n.subject, n.difficulty,
+                       n.created_at AS n_created_at, n.updated_at AS n_updated_at
+                FROM revisions r
+                INNER JOIN notes n ON r.note_id = n.id
+                WHERE r.review_date > ? AND (r.status IS NULL OR r.status = 'PENDING')
+                ORDER BY r.review_date ASC;
+                """;
+        List<ScheduledReview> result = new ArrayList<>();
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, DateUtil.formatDate(date));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    result.add(mapJoinedResultSet(rs));
+                }
+            }
+            return result;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error finding upcoming revisions with notes: " + e.getMessage(), e);
+            throw new DatabaseException("Failed to query upcoming revisions with notes", e);
+        }
+    }
+
+    private ScheduledReview mapJoinedResultSet(ResultSet rs) throws SQLException {
+        Revision rev = mapResultSetToRevision(rs);
+
+        Note note = new Note();
+        note.setId(rs.getInt("n_id"));
+        note.setTitle(rs.getString("title"));
+        note.setContent(rs.getString("content"));
+        note.setSubject(rs.getString("subject"));
+        note.setDifficulty(rs.getString("difficulty"));
+        note.setCreatedAt(DateUtil.parseDateTime(rs.getString("n_created_at")));
+        note.setUpdatedAt(DateUtil.parseDateTime(rs.getString("n_updated_at")));
+
+        return new ScheduledReview(rev, note);
     }
 
     /**

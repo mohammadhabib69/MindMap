@@ -5,13 +5,18 @@ import com.mindmap.model.Note;
 import com.mindmap.model.ScheduledReview;
 import com.mindmap.service.NoteService;
 import com.mindmap.service.RevisionService;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -27,8 +32,8 @@ import java.util.logging.Logger;
 
 /**
  * Controller for the Revision (Spaced Repetition) screen.
- * Displays due reviews today, upcoming future reviews, memory engine stats,
- * and controls for starting active recall sessions or scheduling notes.
+ * Uses virtualized ListView with cell reuse for smooth scrolling with 200+ reviews.
+ * Data is cached in ObservableList — no DB queries during scroll or resize.
  */
 public class RevisionController {
 
@@ -46,13 +51,15 @@ public class RevisionController {
     @FXML private Button btnScheduleAll;
     @FXML private Button btnRefresh;
 
-    @FXML private VBox boxDueContainer;
+    @FXML private ListView<ScheduledReview> listDue;
     @FXML private VBox boxEmptyDue;
-    @FXML private VBox boxDueList;
 
-    @FXML private VBox boxUpcomingContainer;
+    @FXML private ListView<ScheduledReview> listUpcoming;
     @FXML private VBox boxEmptyUpcoming;
-    @FXML private VBox boxUpcomingList;
+
+    // Cached data — no DB queries during scroll/resize
+    private final ObservableList<ScheduledReview> dueData = FXCollections.observableArrayList();
+    private final ObservableList<ScheduledReview> upcomingData = FXCollections.observableArrayList();
 
     private RevisionService revisionService = new RevisionService();
     private NoteService noteService = new NoteService();
@@ -71,11 +78,53 @@ public class RevisionController {
 
     @FXML
     public void initialize() {
+        setupListViews();
         loadRevisionData();
     }
 
     /**
-     * Loads due and upcoming reviews from SQLite and renders the UI.
+     * Configures virtualized ListViews with cell factories that reuse cells.
+     * Fixed cell height enables O(1) scroll offset calculation in JavaFX VirtualFlow.
+     */
+    private void setupListViews() {
+        if (listDue != null) {
+            listDue.setItems(dueData);
+            listDue.setFocusTraversable(false);
+            listDue.setFixedCellSize(108.0);
+            listDue.setCellFactory(lv -> new DueReviewCell());
+        }
+
+        if (listUpcoming != null) {
+            listUpcoming.setItems(upcomingData);
+            listUpcoming.setFocusTraversable(false);
+            listUpcoming.setFixedCellSize(108.0);
+            listUpcoming.setCellFactory(lv -> new UpcomingReviewCell());
+        }
+    }
+
+    public ObservableList<ScheduledReview> getDueData() {
+        return dueData;
+    }
+
+    public ObservableList<ScheduledReview> getUpcomingData() {
+        return upcomingData;
+    }
+
+    public ListView<ScheduledReview> getListDue() {
+        return listDue;
+    }
+
+    public ListView<ScheduledReview> getListUpcoming() {
+        return listUpcoming;
+    }
+
+    /**
+     * Loads due and upcoming reviews from SQLite (single JOIN query each)
+     * and populates the cached ObservableLists. Only called on:
+     * - Initial load
+     * - Explicit Refresh
+     * - After completing a review
+     * - After scheduling note(s)
      */
     public void loadRevisionData() {
         List<ScheduledReview> dueReviews = revisionService.getDueReviews();
@@ -96,213 +145,292 @@ public class RevisionController {
             btnStartSession.setDisable(dueCount == 0);
         }
 
-        // 2. Render Due Today column
-        renderDueList(dueReviews);
+        // 2. Update cached data (triggers ListView refresh via ObservableList)
+        dueData.setAll(dueReviews);
+        upcomingData.setAll(upcomingReviews);
 
-        // 3. Render Upcoming column
-        renderUpcomingList(upcomingReviews);
+        // 3. Toggle empty states
+        updateEmptyState(boxEmptyDue, listDue, dueCount == 0);
+        updateEmptyState(boxEmptyUpcoming, listUpcoming, upcomingCount == 0);
     }
 
-    private void renderDueList(List<ScheduledReview> dueReviews) {
-        if (boxDueList == null) return;
-        boxDueList.getChildren().clear();
-
-        if (dueReviews.isEmpty()) {
-            if (boxEmptyDue != null) {
-                boxEmptyDue.setVisible(true);
-                boxEmptyDue.setManaged(true);
-            }
-        } else {
-            if (boxEmptyDue != null) {
-                boxEmptyDue.setVisible(false);
-                boxEmptyDue.setManaged(false);
-            }
-            for (ScheduledReview sr : dueReviews) {
-                boxDueList.getChildren().add(createDueCard(sr));
-            }
+    private void updateEmptyState(VBox emptyBox, ListView<?> listView, boolean isEmpty) {
+        if (emptyBox != null) {
+            emptyBox.setVisible(isEmpty);
+            emptyBox.setManaged(isEmpty);
+        }
+        if (listView != null) {
+            listView.setVisible(!isEmpty);
+            listView.setManaged(!isEmpty);
         }
     }
 
-    private VBox createDueCard(ScheduledReview sr) {
-        VBox card = new VBox(6);
-        card.getStyleClass().add("review-item-card");
+    // =========================================================================
+    // Virtualized Cell: Due Review
+    // =========================================================================
 
-        Note note = sr.getNote();
+    /**
+     * Custom ListCell for due reviews. Creates UI hierarchy once in constructor,
+     * then only updates data in updateItem(). Guarantees cell reuse.
+     */
+    private class DueReviewCell extends ListCell<ScheduledReview> {
+        private final VBox card;
+        private final Label lblTitle;
+        private final Label lblOverdue;
+        private final Label lblInterval;
+        private final Label lblSubject;
+        private final Label lblDifficulty;
+        private final Label lblDueStatus;
+        private final Button btnReview;
+        private final Button btnView;
+        private final Button btnMindMap;
 
-        // Title row
-        HBox titleRow = new HBox(8);
-        titleRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        DueReviewCell() {
+            card = new VBox(6);
+            card.getStyleClass().add("revision-cell-card");
 
-        Label lblTitle = new Label(note.getTitle() != null ? note.getTitle() : "Untitled Note");
-        lblTitle.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #0f172a;");
-        lblTitle.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(lblTitle, Priority.ALWAYS);
+            // Title row
+            HBox titleRow = new HBox(8);
+            titleRow.setAlignment(Pos.CENTER_LEFT);
 
-        titleRow.getChildren().add(lblTitle);
+            lblTitle = new Label();
+            lblTitle.getStyleClass().add("revision-cell-title");
+            lblTitle.setMaxWidth(Double.MAX_VALUE);
+            HBox.setHgrow(lblTitle, Priority.ALWAYS);
 
-        if (sr.isOverdue()) {
-            Label lblOverdue = new Label("OVERDUE");
+            lblOverdue = new Label("OVERDUE");
             lblOverdue.getStyleClass().add("badge-hard");
             lblOverdue.setStyle("-fx-font-size: 10px; -fx-padding: 2 6;");
-            titleRow.getChildren().add(lblOverdue);
+
+            lblInterval = new Label();
+            lblInterval.getStyleClass().add("badge-interval");
+            lblInterval.setStyle("-fx-font-size: 10px; -fx-padding: 2 6;");
+
+            titleRow.getChildren().addAll(lblTitle, lblOverdue, lblInterval);
+
+            // Meta row
+            HBox metaRow = new HBox(6);
+            metaRow.setAlignment(Pos.CENTER_LEFT);
+
+            lblSubject = new Label();
+            lblSubject.getStyleClass().add("badge-subject");
+            lblSubject.setStyle("-fx-font-size: 10px; -fx-padding: 1 6;");
+
+            lblDifficulty = new Label();
+            lblDifficulty.setStyle("-fx-font-size: 10px; -fx-padding: 1 6;");
+
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+
+            lblDueStatus = new Label();
+            lblDueStatus.getStyleClass().add("revision-cell-due-status");
+
+            metaRow.getChildren().addAll(lblSubject, lblDifficulty, spacer, lblDueStatus);
+
+            // Action row
+            HBox actionRow = new HBox(6);
+            actionRow.setAlignment(Pos.CENTER_RIGHT);
+
+            btnReview = new Button("▶ Review");
+            btnReview.getStyleClass().addAll("revision-cell-btn", "revision-cell-btn-review");
+
+            btnView = new Button("👁 View");
+            btnView.getStyleClass().addAll("revision-cell-btn", "revision-cell-btn-secondary");
+
+            btnMindMap = new Button("🌐 Map");
+            btnMindMap.getStyleClass().addAll("revision-cell-btn", "revision-cell-btn-secondary");
+
+            actionRow.getChildren().addAll(btnReview, btnView, btnMindMap);
+
+            card.getChildren().addAll(titleRow, metaRow, actionRow);
+
+            setGraphic(null);
+            setText(null);
+            setPrefWidth(0);
         }
 
-        Label lblInterval = new Label(sr.getIntervalDays() + "d");
-        lblInterval.getStyleClass().add("badge-interval");
-        lblInterval.setStyle("-fx-font-size: 10px; -fx-padding: 2 6;");
-        titleRow.getChildren().add(lblInterval);
+        @Override
+        protected void updateItem(ScheduledReview sr, boolean empty) {
+            super.updateItem(sr, empty);
 
-        // Meta row
-        HBox metaRow = new HBox(6);
-        metaRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+            if (empty || sr == null) {
+                setGraphic(null);
+                return;
+            }
 
-        if (note.getSubject() != null && !note.getSubject().isBlank()) {
-            Label lblSubj = new Label(note.getSubject().trim());
-            lblSubj.getStyleClass().add("badge-subject");
-            lblSubj.setStyle("-fx-font-size: 10px; -fx-padding: 1 6;");
-            metaRow.getChildren().add(lblSubj);
+            Note note = sr.getNote();
+
+            // Update title
+            lblTitle.setText(note.getTitle() != null ? note.getTitle() : "Untitled Note");
+
+            // Update overdue badge
+            boolean overdue = sr.isOverdue();
+            lblOverdue.setVisible(overdue);
+            lblOverdue.setManaged(overdue);
+
+            // Update interval
+            lblInterval.setText(sr.getIntervalDays() + "d");
+
+            // Update subject
+            boolean hasSubject = note.getSubject() != null && !note.getSubject().isBlank();
+            lblSubject.setVisible(hasSubject);
+            lblSubject.setManaged(hasSubject);
+            if (hasSubject) {
+                lblSubject.setText(note.getSubject().trim());
+            }
+
+            // Update difficulty badge
+            String diff = note.getDifficulty() != null ? note.getDifficulty().toUpperCase() : Difficulty.MEDIUM.name();
+            lblDifficulty.setText(diff);
+            lblDifficulty.getStyleClass().removeAll("badge-easy", "badge-medium", "badge-hard");
+            switch (diff) {
+                case "EASY" -> lblDifficulty.getStyleClass().add("badge-easy");
+                case "HARD" -> lblDifficulty.getStyleClass().add("badge-hard");
+                default -> lblDifficulty.getStyleClass().add("badge-medium");
+            }
+
+            // Update due status
+            lblDueStatus.setText(overdue
+                    ? Math.abs(sr.getDaysUntilDue()) + " days overdue"
+                    : "Due today");
+
+            // Wire actions (re-wire on each update since the item may have changed)
+            btnReview.setOnAction(e -> handleReviewSingle(sr));
+            btnView.setOnAction(e -> handleViewNote(note));
+            btnMindMap.setOnAction(e -> handleOpenInMindMap(note));
+
+            setGraphic(card);
         }
-
-        String diff = note.getDifficulty() != null ? note.getDifficulty().toUpperCase() : Difficulty.MEDIUM.name();
-        Label lblDiff = new Label(diff);
-        lblDiff.setStyle("-fx-font-size: 10px; -fx-padding: 1 6;");
-        switch (diff) {
-            case "EASY" -> lblDiff.getStyleClass().add("badge-easy");
-            case "HARD" -> lblDiff.getStyleClass().add("badge-hard");
-            default -> lblDiff.getStyleClass().add("badge-medium");
-        }
-        metaRow.getChildren().add(lblDiff);
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        metaRow.getChildren().add(spacer);
-
-        Label lblDueStatus = new Label(sr.isOverdue()
-                ? Math.abs(sr.getDaysUntilDue()) + " days overdue"
-                : "Due today");
-        lblDueStatus.setStyle("-fx-font-size: 11px; -fx-text-fill: #dc2626; -fx-font-weight: 600;");
-        metaRow.getChildren().add(lblDueStatus);
-
-        // Action row
-        HBox actionRow = new HBox(6);
-        actionRow.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
-
-        Button btnReview = new Button("▶ Review");
-        btnReview.getStyleClass().add("btn-primary");
-        btnReview.setStyle("-fx-font-size: 11px; -fx-padding: 4 10;");
-        btnReview.setOnAction(e -> handleReviewSingle(sr));
-
-        Button btnView = new Button("👁 View");
-        btnView.getStyleClass().add("btn-secondary");
-        btnView.setStyle("-fx-font-size: 11px; -fx-padding: 4 10;");
-        btnView.setOnAction(e -> handleViewNote(sr.getNote()));
-
-        Button btnMindMap = new Button("🌐 Mind Map");
-        btnMindMap.getStyleClass().add("btn-secondary");
-        btnMindMap.setStyle("-fx-font-size: 11px; -fx-padding: 4 10;");
-        btnMindMap.setOnAction(e -> handleOpenInMindMap(sr.getNote()));
-
-        actionRow.getChildren().addAll(btnReview, btnView, btnMindMap);
-
-        card.getChildren().addAll(titleRow, metaRow, actionRow);
-        return card;
     }
 
-    private void renderUpcomingList(List<ScheduledReview> upcomingReviews) {
-        if (boxUpcomingList == null) return;
-        boxUpcomingList.getChildren().clear();
+    // =========================================================================
+    // Virtualized Cell: Upcoming Review
+    // =========================================================================
 
-        if (upcomingReviews.isEmpty()) {
-            if (boxEmptyUpcoming != null) {
-                boxEmptyUpcoming.setVisible(true);
-                boxEmptyUpcoming.setManaged(true);
+    /**
+     * Custom ListCell for upcoming reviews. Creates UI once, updates data on reuse.
+     */
+    private class UpcomingReviewCell extends ListCell<ScheduledReview> {
+        private final VBox card;
+        private final Label lblTitle;
+        private final Label lblInterval;
+        private final Label lblSubject;
+        private final Label lblDifficulty;
+        private final Label lblDate;
+        private final Button btnView;
+        private final Button btnMindMap;
+
+        UpcomingReviewCell() {
+            card = new VBox(6);
+            card.getStyleClass().add("revision-cell-card");
+
+            // Title row
+            HBox titleRow = new HBox(8);
+            titleRow.setAlignment(Pos.CENTER_LEFT);
+
+            lblTitle = new Label();
+            lblTitle.getStyleClass().add("revision-cell-title");
+            lblTitle.setMaxWidth(Double.MAX_VALUE);
+            HBox.setHgrow(lblTitle, Priority.ALWAYS);
+
+            lblInterval = new Label();
+            lblInterval.getStyleClass().add("badge-interval");
+            lblInterval.setStyle("-fx-font-size: 10px; -fx-padding: 2 6;");
+
+            titleRow.getChildren().addAll(lblTitle, lblInterval);
+
+            // Meta row
+            HBox metaRow = new HBox(6);
+            metaRow.setAlignment(Pos.CENTER_LEFT);
+
+            lblSubject = new Label();
+            lblSubject.getStyleClass().add("badge-subject");
+            lblSubject.setStyle("-fx-font-size: 10px; -fx-padding: 1 6;");
+
+            lblDifficulty = new Label();
+            lblDifficulty.setStyle("-fx-font-size: 10px; -fx-padding: 1 6;");
+
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+
+            lblDate = new Label();
+            lblDate.getStyleClass().add("revision-cell-upcoming-date");
+
+            metaRow.getChildren().addAll(lblSubject, lblDifficulty, spacer, lblDate);
+
+            // Action row
+            HBox actionRow = new HBox(6);
+            actionRow.setAlignment(Pos.CENTER_RIGHT);
+
+            btnView = new Button("👁 View");
+            btnView.getStyleClass().addAll("revision-cell-btn", "revision-cell-btn-secondary");
+
+            btnMindMap = new Button("🌐 Map");
+            btnMindMap.getStyleClass().addAll("revision-cell-btn", "revision-cell-btn-secondary");
+
+            actionRow.getChildren().addAll(btnView, btnMindMap);
+
+            card.getChildren().addAll(titleRow, metaRow, actionRow);
+
+            setGraphic(null);
+            setText(null);
+            setPrefWidth(0);
+        }
+
+        @Override
+        protected void updateItem(ScheduledReview sr, boolean empty) {
+            super.updateItem(sr, empty);
+
+            if (empty || sr == null) {
+                setGraphic(null);
+                return;
             }
-        } else {
-            if (boxEmptyUpcoming != null) {
-                boxEmptyUpcoming.setVisible(false);
-                boxEmptyUpcoming.setManaged(false);
+
+            Note note = sr.getNote();
+
+            // Update title
+            lblTitle.setText(note.getTitle() != null ? note.getTitle() : "Untitled Note");
+
+            // Update interval
+            lblInterval.setText(sr.getIntervalDays() + "d");
+
+            // Update subject
+            boolean hasSubject = note.getSubject() != null && !note.getSubject().isBlank();
+            lblSubject.setVisible(hasSubject);
+            lblSubject.setManaged(hasSubject);
+            if (hasSubject) {
+                lblSubject.setText(note.getSubject().trim());
             }
-            for (ScheduledReview sr : upcomingReviews) {
-                boxUpcomingList.getChildren().add(createUpcomingCard(sr));
+
+            // Update difficulty badge
+            String diff = note.getDifficulty() != null ? note.getDifficulty().toUpperCase() : Difficulty.MEDIUM.name();
+            lblDifficulty.setText(diff);
+            lblDifficulty.getStyleClass().removeAll("badge-easy", "badge-medium", "badge-hard");
+            switch (diff) {
+                case "EASY" -> lblDifficulty.getStyleClass().add("badge-easy");
+                case "HARD" -> lblDifficulty.getStyleClass().add("badge-hard");
+                default -> lblDifficulty.getStyleClass().add("badge-medium");
             }
+
+            // Update date
+            long days = sr.getDaysUntilDue();
+            String dateText = (days == 1) ? "Tomorrow" : "In " + days + " days";
+            if (sr.getReviewDate() != null) {
+                dateText += " (" + sr.getReviewDate().format(DATE_FORMATTER) + ")";
+            }
+            lblDate.setText("📅 " + dateText);
+
+            // Wire actions
+            btnView.setOnAction(e -> handleViewNote(note));
+            btnMindMap.setOnAction(e -> handleOpenInMindMap(note));
+
+            setGraphic(card);
         }
     }
 
-    private VBox createUpcomingCard(ScheduledReview sr) {
-        VBox card = new VBox(6);
-        card.getStyleClass().add("review-item-card");
-
-        Note note = sr.getNote();
-
-        // Title row
-        HBox titleRow = new HBox(8);
-        titleRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-
-        Label lblTitle = new Label(note.getTitle() != null ? note.getTitle() : "Untitled Note");
-        lblTitle.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #0f172a;");
-        lblTitle.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(lblTitle, Priority.ALWAYS);
-
-        titleRow.getChildren().add(lblTitle);
-
-        Label lblInterval = new Label(sr.getIntervalDays() + "d");
-        lblInterval.getStyleClass().add("badge-interval");
-        lblInterval.setStyle("-fx-font-size: 10px; -fx-padding: 2 6;");
-        titleRow.getChildren().add(lblInterval);
-
-        // Schedule & Meta row
-        HBox metaRow = new HBox(6);
-        metaRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-
-        if (note.getSubject() != null && !note.getSubject().isBlank()) {
-            Label lblSubj = new Label(note.getSubject().trim());
-            lblSubj.getStyleClass().add("badge-subject");
-            lblSubj.setStyle("-fx-font-size: 10px; -fx-padding: 1 6;");
-            metaRow.getChildren().add(lblSubj);
-        }
-
-        String diff = note.getDifficulty() != null ? note.getDifficulty().toUpperCase() : Difficulty.MEDIUM.name();
-        Label lblDiff = new Label(diff);
-        lblDiff.setStyle("-fx-font-size: 10px; -fx-padding: 1 6;");
-        switch (diff) {
-            case "EASY" -> lblDiff.getStyleClass().add("badge-easy");
-            case "HARD" -> lblDiff.getStyleClass().add("badge-hard");
-            default -> lblDiff.getStyleClass().add("badge-medium");
-        }
-        metaRow.getChildren().add(lblDiff);
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        metaRow.getChildren().add(spacer);
-
-        long days = sr.getDaysUntilDue();
-        String dateText = (days == 1) ? "Tomorrow" : "In " + days + " days";
-        if (sr.getReviewDate() != null) {
-            dateText += " (" + sr.getReviewDate().format(DATE_FORMATTER) + ")";
-        }
-        Label lblDate = new Label("📅 " + dateText);
-        lblDate.setStyle("-fx-font-size: 11px; -fx-text-fill: #2563eb; -fx-font-weight: 500;");
-        metaRow.getChildren().add(lblDate);
-
-        // Action row
-        HBox actionRow = new HBox(6);
-        actionRow.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
-
-        Button btnView = new Button("👁 View");
-        btnView.getStyleClass().add("btn-secondary");
-        btnView.setStyle("-fx-font-size: 11px; -fx-padding: 4 10;");
-        btnView.setOnAction(e -> handleViewNote(sr.getNote()));
-
-        Button btnMindMap = new Button("🌐 Mind Map");
-        btnMindMap.getStyleClass().add("btn-secondary");
-        btnMindMap.setStyle("-fx-font-size: 11px; -fx-padding: 4 10;");
-        btnMindMap.setOnAction(e -> handleOpenInMindMap(sr.getNote()));
-
-        actionRow.getChildren().addAll(btnView, btnMindMap);
-
-        card.getChildren().addAll(titleRow, metaRow, actionRow);
-        return card;
-    }
+    // =========================================================================
+    // Action Handlers
+    // =========================================================================
 
     @FXML
     private void handleStartSession() {
@@ -435,4 +563,3 @@ public class RevisionController {
         loadRevisionData();
     }
 }
-

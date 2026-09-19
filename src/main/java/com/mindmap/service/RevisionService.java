@@ -12,7 +12,6 @@ import com.mindmap.repository.NoteRepository;
 import com.mindmap.repository.RevisionRepository;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -74,38 +73,22 @@ public class RevisionService {
 
     /**
      * Retrieves all scheduled reviews that are due on or before today.
+     * Uses a single JOIN query for efficiency with large review lists.
      *
      * @return List of due ScheduledReview items with Note details.
      */
     public List<ScheduledReview> getDueReviews() {
-        LocalDate today = LocalDate.now();
-        List<Revision> dueRevisions = revisionRepository.findDue(today);
-        List<ScheduledReview> result = new ArrayList<>();
-
-        for (Revision rev : dueRevisions) {
-            Optional<Note> noteOpt = noteRepository.findById(rev.getNoteId());
-            noteOpt.ifPresent(note -> result.add(new ScheduledReview(rev, note)));
-        }
-
-        return result;
+        return revisionRepository.findDueWithNotes(LocalDate.now());
     }
 
     /**
      * Retrieves all scheduled reviews due strictly after today, sorted ascending by review date.
+     * Uses a single JOIN query for efficiency with large review lists.
      *
      * @return List of upcoming ScheduledReview items with Note details.
      */
     public List<ScheduledReview> getUpcomingReviews() {
-        LocalDate today = LocalDate.now();
-        List<Revision> upcomingRevisions = revisionRepository.findUpcomingAfter(today);
-        List<ScheduledReview> result = new ArrayList<>();
-
-        for (Revision rev : upcomingRevisions) {
-            Optional<Note> noteOpt = noteRepository.findById(rev.getNoteId());
-            noteOpt.ifPresent(note -> result.add(new ScheduledReview(rev, note)));
-        }
-
-        return result;
+        return revisionRepository.findUpcomingWithNotes(LocalDate.now());
     }
 
     /**

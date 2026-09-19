@@ -3,27 +3,28 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.mindmap.controller.RevisionController"
-      spacing="16"
+      spacing="20"
       styleClass="screen-container"
       stylesheets="@../css/style.css">
 
     <padding>
-        <Insets top="20" right="20" bottom="20" left="20"/>
+        <Insets top="24" right="24" bottom="24" left="24"/>
     </padding>
 
     <!-- Header Section -->
     <HBox alignment="CENTER_LEFT" spacing="12">
-        <VBox spacing="3" HBox.hgrow="ALWAYS" minWidth="120">
+        <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="120">
             <Label text="Revision" styleClass="view-header"/>
             <Label text="Active recall and spaced repetition schedule" styleClass="view-subtitle"/>
         </VBox>
@@ -38,28 +39,28 @@
     <!-- Spaced Repetition Summary Metrics Bar -->
     <HBox spacing="14" alignment="CENTER_LEFT">
         <!-- Due Today Metric Card -->
-        <VBox spacing="4" HBox.hgrow="ALWAYS" styleClass="card" style="-fx-padding: 12 16; -fx-background-color: #ffffff;">
+        <VBox spacing="6" HBox.hgrow="ALWAYS" styleClass="card" style="-fx-padding: 14 18; -fx-background-color: #ffffff;">
             <Label text="DUE TODAY" styleClass="inspector-section-header" style="-fx-text-fill: #dc2626;"/>
             <HBox alignment="BASELINE_LEFT" spacing="8">
-                <Label fx:id="lblStatDueToday" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                <Label fx:id="lblStatDueToday" text="0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
                 <Label text="notes need review" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
             </HBox>
         </VBox>
 
         <!-- Upcoming Metric Card -->
-        <VBox spacing="4" HBox.hgrow="ALWAYS" styleClass="card" style="-fx-padding: 12 16; -fx-background-color: #ffffff;">
-            <Label text="UPCOMING REVIEWS" styleClass="inspector-section-header" style="-fx-text-fill: #2563eb;"/>
+        <VBox spacing="6" HBox.hgrow="ALWAYS" styleClass="card" style="-fx-padding: 14 18; -fx-background-color: #ffffff;">
+            <Label text="UPCOMING" styleClass="inspector-section-header" style="-fx-text-fill: #2563eb;"/>
             <HBox alignment="BASELINE_LEFT" spacing="8">
-                <Label fx:id="lblStatUpcoming" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                <Label fx:id="lblStatUpcoming" text="0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
                 <Label text="scheduled future reviews" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
             </HBox>
         </VBox>
 
         <!-- Total Scheduled Metric Card -->
-        <VBox spacing="4" HBox.hgrow="ALWAYS" styleClass="card" style="-fx-padding: 12 16; -fx-background-color: #ffffff;">
+        <VBox spacing="6" HBox.hgrow="ALWAYS" styleClass="card" style="-fx-padding: 14 18; -fx-background-color: #ffffff;">
             <Label text="TOTAL SCHEDULED" styleClass="inspector-section-header" style="-fx-text-fill: #10b981;"/>
             <HBox alignment="BASELINE_LEFT" spacing="8">
-                <Label fx:id="lblStatTotal" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                <Label fx:id="lblStatTotal" text="0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
                 <Label text="active in memory engine" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
             </HBox>
         </VBox>
@@ -69,47 +70,41 @@
     <HBox spacing="14" VBox.vgrow="ALWAYS">
 
         <!-- Column 1: Due Today -->
-        <VBox spacing="12" HBox.hgrow="ALWAYS" styleClass="card" minWidth="280">
-            <HBox alignment="CENTER_LEFT" spacing="8">
-                <Label text="Due Today" styleClass="card-title" style="-fx-font-size: 15px;"/>
-                <Label fx:id="lblDueBadge" text="0" styleClass="connection-relation-badge" style="-fx-background-color: #fee2e2; -fx-text-fill: #dc2626;"/>
+        <VBox spacing="10" HBox.hgrow="ALWAYS" styleClass="revision-column" minWidth="280">
+            <HBox alignment="CENTER_LEFT" spacing="8" styleClass="revision-column-header">
+                <Label text="Due Today" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                <Label fx:id="lblDueBadge" text="0" styleClass="revision-count-badge, revision-count-due"/>
                 <Region HBox.hgrow="ALWAYS"/>
             </HBox>
 
-            <!-- Scrollable Due List -->
-            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="inspector-scroll" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0;">
-                <VBox fx:id="boxDueContainer" spacing="10">
-                    <!-- Dynamic Due Items or Empty State -->
-                    <VBox fx:id="boxEmptyDue" alignment="CENTER" spacing="8" styleClass="placeholder-box" style="-fx-padding: 30 16;">
-                        <Label text="🎉" styleClass="placeholder-icon-small"/>
-                        <Label text="You're all caught up!" styleClass="placeholder-heading"/>
-                        <Label text="No reviews are due today. Check back tomorrow or add notes to the schedule." styleClass="placeholder-subtext" alignment="CENTER" wrapText="true"/>
-                    </VBox>
-                    <VBox fx:id="boxDueList" spacing="8"/>
+            <!-- Virtualized Due List -->
+            <StackPane VBox.vgrow="ALWAYS">
+                <ListView fx:id="listDue" styleClass="revision-list"/>
+                <VBox fx:id="boxEmptyDue" alignment="CENTER" spacing="8" styleClass="placeholder-box" style="-fx-padding: 40 16;">
+                    <Label text="🎉" style="-fx-font-size: 28px;"/>
+                    <Label text="You're all caught up!" styleClass="placeholder-heading"/>
+                    <Label text="No reviews are due today. Check back tomorrow or add notes to the schedule." styleClass="placeholder-subtext" alignment="CENTER" wrapText="true"/>
                 </VBox>
-            </ScrollPane>
+            </StackPane>
         </VBox>
 
         <!-- Column 2: Upcoming Reviews -->
-        <VBox spacing="12" HBox.hgrow="ALWAYS" styleClass="card" minWidth="280">
-            <HBox alignment="CENTER_LEFT" spacing="8">
-                <Label text="Upcoming Reviews" styleClass="card-title" style="-fx-font-size: 15px;"/>
-                <Label fx:id="lblUpcomingBadge" text="0" styleClass="connection-relation-badge" style="-fx-background-color: #e0f2fe; -fx-text-fill: #0369a1;"/>
+        <VBox spacing="10" HBox.hgrow="ALWAYS" styleClass="revision-column" minWidth="280">
+            <HBox alignment="CENTER_LEFT" spacing="8" styleClass="revision-column-header">
+                <Label text="Upcoming Reviews" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                <Label fx:id="lblUpcomingBadge" text="0" styleClass="revision-count-badge, revision-count-upcoming"/>
                 <Region HBox.hgrow="ALWAYS"/>
             </HBox>
 
-            <!-- Scrollable Upcoming List -->
-            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="inspector-scroll" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0;">
-                <VBox fx:id="boxUpcomingContainer" spacing="10">
-                    <!-- Dynamic Upcoming Items or Empty State -->
-                    <VBox fx:id="boxEmptyUpcoming" alignment="CENTER" spacing="8" styleClass="placeholder-box" style="-fx-padding: 30 16;">
-                        <Label text="📅" styleClass="placeholder-icon-small"/>
-                        <Label text="No upcoming reviews scheduled." styleClass="placeholder-heading"/>
-                        <Label text="Reviews will be scheduled here automatically as you complete study sessions." styleClass="placeholder-subtext" alignment="CENTER" wrapText="true"/>
-                    </VBox>
-                    <VBox fx:id="boxUpcomingList" spacing="8"/>
+            <!-- Virtualized Upcoming List -->
+            <StackPane VBox.vgrow="ALWAYS">
+                <ListView fx:id="listUpcoming" styleClass="revision-list"/>
+                <VBox fx:id="boxEmptyUpcoming" alignment="CENTER" spacing="8" styleClass="placeholder-box" style="-fx-padding: 40 16;">
+                    <Label text="📅" style="-fx-font-size: 28px;"/>
+                    <Label text="No upcoming reviews scheduled." styleClass="placeholder-heading"/>
+                    <Label text="Reviews will be scheduled here automatically as you complete study sessions." styleClass="placeholder-subtext" alignment="CENTER" wrapText="true"/>
                 </VBox>
-            </ScrollPane>
+            </StackPane>
         </VBox>
 
     </HBox>
