@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mindmap.controller.TimelineController"
+      spacing="20"
+      styleClass="screen-container">
+
+    <padding>
+        <Insets top="32" right="36" bottom="32" left="36"/>
+    </padding>
+
+    <!-- Header Section -->
+    <VBox spacing="4">
+        <Label text="Learning Timeline" styleClass="view-header"/>
+        <Label text="Chronological record of study sessions, notes, and milestones" styleClass="view-subtitle"/>
+    </VBox>
+
+    <!-- Scrollable Content Area -->
+    <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS" styleClass="scroll-pane-clean">
+        <VBox alignment="CENTER" spacing="12" styleClass="card" VBox.vgrow="ALWAYS">
+            <padding>
+                <Insets top="60" right="40" bottom="60" left="40"/>
+            </padding>
+            <Label text="📅" styleClass="placeholder-icon"/>
+            <Label text="Your learning history will appear here." styleClass="placeholder-heading"/>
+            <Label text="As you create notes and complete review sessions, your study activity will be tracked chronologically." styleClass="placeholder-subtext"/>
+        </VBox>
+    </ScrollPane>
+
+</VBox>

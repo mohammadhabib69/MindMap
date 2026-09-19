@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mindmap.controller.RevisionController"
+      spacing="24"
+      styleClass="screen-container">
+
+    <padding>
+        <Insets top="32" right="36" bottom="32" left="36"/>
+    </padding>
+
+    <!-- Header Section -->
+    <VBox spacing="4">
+        <Label text="Revision" styleClass="view-header"/>
+        <Label text="Active recall and spaced repetition schedule" styleClass="view-subtitle"/>
+    </VBox>
+
+    <!-- Section 1: Due Today -->
+    <VBox spacing="12" styleClass="card">
+        <Label text="Due Today" styleClass="card-title"/>
+        <VBox alignment="CENTER" spacing="8" styleClass="placeholder-box">
+            <Label text="🔄" styleClass="placeholder-icon-small"/>
+            <Label text="No reviews scheduled yet." styleClass="placeholder-heading"/>
+            <Label text="Notes due for review will appear here based on your spaced repetition intervals." styleClass="placeholder-subtext"/>
+        </VBox>
+    </VBox>
+
+    <!-- Section 2: Upcoming Reviews -->
+    <VBox spacing="12" styleClass="card" VBox.vgrow="ALWAYS">
+        <Label text="Upcoming Reviews" styleClass="card-title"/>
+        <VBox alignment="CENTER" spacing="8" styleClass="placeholder-box" VBox.vgrow="ALWAYS">
+            <Label text="📅" styleClass="placeholder-icon-small"/>
+            <Label text="No upcoming reviews scheduled." styleClass="placeholder-heading"/>
+            <Label text="Your upcoming review timeline will be listed here." styleClass="placeholder-subtext"/>
+        </VBox>
+    </VBox>
+
+</VBox>

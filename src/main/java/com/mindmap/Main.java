@@ -23,9 +23,11 @@ import java.util.logging.Logger;
 public class Main extends Application {
 
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
-    private static final String APP_TITLE = "MindMap";
-    private static final int WINDOW_WIDTH = 600;
-    private static final int WINDOW_HEIGHT = 400;
+    private static final String APP_TITLE = "MindMap - Personal Knowledge Base";
+    private static final int WINDOW_WIDTH = 1100;
+    private static final int WINDOW_HEIGHT = 720;
+    private static final int MIN_WIDTH = 1000;
+    private static final int MIN_HEIGHT = 650;
 
     private String initErrorMessage = null;
 
@@ -70,8 +72,8 @@ public class Main extends Application {
             }
 
             primaryStage.setScene(scene);
-            primaryStage.setMinWidth(450);
-            primaryStage.setMinHeight(300);
+            primaryStage.setMinWidth(MIN_WIDTH);
+            primaryStage.setMinHeight(MIN_HEIGHT);
             primaryStage.show();
             LOGGER.info("MindMap window displayed successfully.");
         } catch (Exception e) {

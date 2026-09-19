@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mindmap.controller.SearchController"
+      spacing="20"
+      styleClass="screen-container">
+
+    <padding>
+        <Insets top="32" right="36" bottom="32" left="36"/>
+    </padding>
+
+    <!-- Header Section -->
+    <VBox spacing="4">
+        <Label text="Search Knowledge" styleClass="view-header"/>
+        <Label text="Find notes, subjects, and connected ideas across your notebook" styleClass="view-subtitle"/>
+    </VBox>
+
+    <!-- Search Input Bar -->
+    <HBox spacing="12" alignment="CENTER_LEFT">
+        <TextField fx:id="txtSearchQuery" promptText="Enter keywords, tags, or subject titles..." HBox.hgrow="ALWAYS" styleClass="input-field"/>
+        <Button fx:id="btnExecuteSearch" text="Search" onAction="#handleSearch" styleClass="btn-primary"/>
+    </HBox>
+
+    <!-- Results Area Placeholder -->
+    <StackPane VBox.vgrow="ALWAYS" styleClass="card">
+        <VBox alignment="CENTER" spacing="10">
+            <Label text="🔍" styleClass="placeholder-icon"/>
+            <Label text="Search Results" styleClass="placeholder-heading"/>
+            <Label text="Search functionality will be implemented in a later phase." styleClass="placeholder-subtext"/>
+        </VBox>
+    </StackPane>
+
+</VBox>

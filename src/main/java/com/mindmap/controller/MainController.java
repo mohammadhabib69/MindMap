@@ -1,21 +1,146 @@
 package com.mindmap.controller;
 
 import com.mindmap.database.DatabaseManager;
+import com.mindmap.util.ViewManager;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
+import javafx.scene.Parent;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.layout.StackPane;
+
+import java.util.logging.Logger;
 
 /**
- * Controller for the Phase 1 test view.
+ * Main application controller managing sidebar navigation and dynamic content loading.
  */
 public class MainController {
 
+    private static final Logger LOGGER = Logger.getLogger(MainController.class.getName());
+
     @FXML
-    private Label statusLabel;
+    private Button btnDashboard;
+
+    @FXML
+    private Button btnNotes;
+
+    @FXML
+    private Button btnMindMap;
+
+    @FXML
+    private Button btnSearch;
+
+    @FXML
+    private Button btnRevision;
+
+    @FXML
+    private Button btnTimeline;
+
+    @FXML
+    private Button btnSettings;
+
+    @FXML
+    private Button btnAbout;
+
+    @FXML
+    private Button btnExit;
+
+    @FXML
+    private StackPane contentArea;
+
+    private Button currentActiveButton;
 
     @FXML
     public void initialize() {
-        if (statusLabel != null) {
-            statusLabel.setText("Database: Connected (" + DatabaseManager.getDatabasePath() + ")");
+        // Load default dashboard screen on startup
+        showDashboard();
+    }
+
+    @FXML
+    private void showDashboard() {
+        navigateTo("/fxml/dashboard.fxml", btnDashboard);
+    }
+
+    @FXML
+    private void showNotes() {
+        navigateTo("/fxml/notes.fxml", btnNotes);
+    }
+
+    @FXML
+    private void showMindMap() {
+        navigateTo("/fxml/mindmap.fxml", btnMindMap);
+    }
+
+    @FXML
+    private void showSearch() {
+        navigateTo("/fxml/search.fxml", btnSearch);
+    }
+
+    @FXML
+    private void showRevision() {
+        navigateTo("/fxml/revision.fxml", btnRevision);
+    }
+
+    @FXML
+    private void showTimeline() {
+        navigateTo("/fxml/timeline.fxml", btnTimeline);
+    }
+
+    @FXML
+    private void showSettings() {
+        navigateTo("/fxml/settings.fxml", btnSettings);
+    }
+
+    @FXML
+    private void handleAbout() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("About MindMap");
+        alert.setHeaderText("MindMap: Personal Knowledge Base & Study Organizer");
+        alert.setContentText("""
+                Version: 1.0-SNAPSHOT (Phase 2)
+                Framework: JavaFX 21 & SQLite JDBC
+                Database: """ + DatabaseManager.JDBC_URL + """
+
+                
+                MindMap helps you take notes, organize subjects, discover connections with knowledge graphs, and retain information through spaced repetition.
+                """);
+        alert.showAndWait();
+    }
+
+    @FXML
+    private void handleExit() {
+        LOGGER.info("Application exit requested by user.");
+        Platform.exit();
+    }
+
+    /**
+     * Navigates to the specified FXML screen and updates the active navigation button state.
+     *
+     * @param fxmlPath The path to the FXML file.
+     * @param targetButton The corresponding sidebar button.
+     */
+    private void navigateTo(String fxmlPath, Button targetButton) {
+        Parent view = ViewManager.loadView(fxmlPath);
+        if (contentArea != null && view != null) {
+            contentArea.getChildren().setAll(view);
+            setActiveButton(targetButton);
+        }
+    }
+
+    /**
+     * Updates the visual active state on the navigation buttons.
+     *
+     * @param button The button to activate.
+     */
+    private void setActiveButton(Button button) {
+        if (currentActiveButton != null) {
+            currentActiveButton.getStyleClass().remove("active");
+        }
+        if (button != null) {
+            if (!button.getStyleClass().contains("active")) {
+                button.getStyleClass().add("active");
+            }
+            currentActiveButton = button;
         }
     }
 }
