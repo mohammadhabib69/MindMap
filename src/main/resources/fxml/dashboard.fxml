@@ -17,15 +17,18 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane xmlns="http://javafx.com/javafx"
+<ScrollPane fx:id="scrollDashboard"
+            xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.mindmap.controller.DashboardController"
             fitToWidth="true"
+            hbarPolicy="NEVER"
+            vbarPolicy="AS_NEEDED"
             styleClass="inspector-scroll"
             style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0;"
             stylesheets="@../css/style.css">
 
-    <VBox spacing="20" styleClass="screen-container">
+    <VBox fx:id="contentContainer" spacing="20" styleClass="screen-container">
         <padding>
             <Insets top="20" right="24" bottom="24" left="24"/>
         </padding>
@@ -34,9 +37,9 @@
         <HBox alignment="CENTER_LEFT" spacing="12">
             <VBox spacing="3" HBox.hgrow="ALWAYS" minWidth="140">
                 <Label text="Dashboard" styleClass="view-header"/>
-                <Label text="Your personal knowledge and learning overview" styleClass="view-subtitle"/>
+                <Label text="Your personal knowledge and learning overview" styleClass="view-subtitle" wrapText="true"/>
             </VBox>
-            <FlowPane hgap="8" vgap="6" alignment="CENTER_RIGHT" HBox.hgrow="NEVER">
+            <FlowPane fx:id="paneHeaderButtons" hgap="8" vgap="6" alignment="CENTER_RIGHT" prefWrapLength="360" HBox.hgrow="NEVER">
                 <Button fx:id="btnNewNote" text="+ New Note" onAction="#handleNewNote" styleClass="btn-primary" style="-fx-font-size: 12px; -fx-padding: 6 14;"/>
                 <Button fx:id="btnStartReview" text="▶ Start Review" onAction="#handleStartReview" styleClass="btn-secondary" style="-fx-font-size: 12px; -fx-padding: 6 12;"/>
                 <Button fx:id="btnOpenMindMap" text="🌐 Mind Map" onAction="#handleOpenMindMap" styleClass="btn-secondary" style="-fx-font-size: 12px; -fx-padding: 6 12;"/>
@@ -45,9 +48,9 @@
         </HBox>
 
         <!-- Primary Metrics Cards -->
-        <HBox spacing="12" alignment="CENTER_LEFT">
+        <FlowPane fx:id="paneMetrics" hgap="12" vgap="12" alignment="TOP_LEFT">
             <!-- Total Notes -->
-            <VBox fx:id="cardTotalNotes" spacing="4" HBox.hgrow="ALWAYS" styleClass="card" style="-fx-padding: 12 16; -fx-background-color: #ffffff;">
+            <VBox fx:id="cardTotalNotes" spacing="4" styleClass="dashboard-metric-card" minWidth="130" prefWidth="155">
                 <Label text="TOTAL NOTES" styleClass="inspector-section-header" style="-fx-text-fill: #2563eb;"/>
                 <HBox alignment="BASELINE_LEFT" spacing="8">
                     <Label fx:id="lblTotalNotes" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
@@ -56,7 +59,7 @@
             </VBox>
 
             <!-- Total Connections -->
-            <VBox fx:id="cardTotalConnections" spacing="4" HBox.hgrow="ALWAYS" styleClass="card" style="-fx-padding: 12 16; -fx-background-color: #ffffff;">
+            <VBox fx:id="cardTotalConnections" spacing="4" styleClass="dashboard-metric-card" minWidth="130" prefWidth="155">
                 <Label text="CONNECTIONS" styleClass="inspector-section-header" style="-fx-text-fill: #8b5cf6;"/>
                 <HBox alignment="BASELINE_LEFT" spacing="8">
                     <Label fx:id="lblTotalConnections" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
@@ -65,7 +68,7 @@
             </VBox>
 
             <!-- Reviews Due Today -->
-            <VBox fx:id="cardReviewsDue" spacing="4" HBox.hgrow="ALWAYS" styleClass="card" style="-fx-padding: 12 16; -fx-background-color: #ffffff;">
+            <VBox fx:id="cardReviewsDue" spacing="4" styleClass="dashboard-metric-card" minWidth="130" prefWidth="155">
                 <Label text="DUE TODAY" styleClass="inspector-section-header" style="-fx-text-fill: #dc2626;"/>
                 <HBox alignment="BASELINE_LEFT" spacing="8">
                     <Label fx:id="lblDueToday" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #dc2626;"/>
@@ -74,7 +77,7 @@
             </VBox>
 
             <!-- Upcoming Reviews -->
-            <VBox fx:id="cardUpcomingReviews" spacing="4" HBox.hgrow="ALWAYS" styleClass="card" style="-fx-padding: 12 16; -fx-background-color: #ffffff;">
+            <VBox fx:id="cardUpcomingReviews" spacing="4" styleClass="dashboard-metric-card" minWidth="130" prefWidth="155">
                 <Label text="UPCOMING" styleClass="inspector-section-header" style="-fx-text-fill: #0284c7;"/>
                 <HBox alignment="BASELINE_LEFT" spacing="8">
                     <Label fx:id="lblUpcomingReviews" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
@@ -83,19 +86,19 @@
             </VBox>
 
             <!-- Total Tags -->
-            <VBox fx:id="cardTotalTags" spacing="4" HBox.hgrow="ALWAYS" styleClass="card" style="-fx-padding: 12 16; -fx-background-color: #ffffff;">
+            <VBox fx:id="cardTotalTags" spacing="4" styleClass="dashboard-metric-card" minWidth="130" prefWidth="155">
                 <Label text="TOTAL TAGS" styleClass="inspector-section-header" style="-fx-text-fill: #10b981;"/>
                 <HBox alignment="BASELINE_LEFT" spacing="8">
                     <Label fx:id="lblTotalTags" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
                     <Label text="index tags" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
                 </HBox>
             </VBox>
-        </HBox>
+        </FlowPane>
 
         <!-- Middle Section: Knowledge Distribution & Revision/Graph Overview -->
-        <HBox spacing="14" alignment="TOP_LEFT">
+        <FlowPane fx:id="paneMiddleSection" hgap="14" vgap="14" alignment="TOP_LEFT">
             <!-- Left Card: Knowledge Distribution -->
-            <VBox spacing="12" HBox.hgrow="ALWAYS" styleClass="card" minWidth="320" prefWidth="480">
+            <VBox fx:id="cardKnowledgeDistribution" spacing="12" styleClass="dashboard-card" minWidth="320" prefWidth="480">
                 <HBox alignment="CENTER_LEFT" spacing="8">
                     <Label text="Knowledge Distribution" styleClass="card-title"/>
                     <Region HBox.hgrow="ALWAYS"/>
@@ -106,22 +109,22 @@
                 <StackPane minHeight="220" prefHeight="240">
                     <HBox fx:id="boxChartsContainer" spacing="12" alignment="CENTER">
                         <!-- BarChart: Subjects -->
-                        <VBox spacing="4" HBox.hgrow="ALWAYS" alignment="CENTER">
+                        <VBox spacing="4" HBox.hgrow="ALWAYS" alignment="CENTER" minWidth="160">
                             <Label text="Notes by Subject" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #475569;"/>
-                            <BarChart fx:id="chartSubjects" legendVisible="false" animated="false" prefHeight="200" prefWidth="250" styleClass="dashboard-chart">
+                            <BarChart fx:id="chartSubjects" legendVisible="false" animated="false" prefHeight="200" minWidth="160" styleClass="dashboard-chart">
                                 <xAxis>
-                                    <CategoryAxis label="" tickLabelRotation="30"/>
+                                    <CategoryAxis label="" animated="false"/>
                                 </xAxis>
                                 <yAxis>
-                                    <NumberAxis label="" minorTickVisible="false" tickUnit="5"/>
+                                    <NumberAxis label="" animated="false" minorTickVisible="false" tickUnit="5"/>
                                 </yAxis>
                             </BarChart>
                         </VBox>
 
                         <!-- PieChart: Difficulty -->
-                        <VBox spacing="4" HBox.hgrow="ALWAYS" alignment="CENTER">
+                        <VBox spacing="4" HBox.hgrow="ALWAYS" alignment="CENTER" minWidth="140">
                             <Label text="Notes by Difficulty" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #475569;"/>
-                            <PieChart fx:id="chartDifficulty" legendVisible="true" animated="false" prefHeight="200" prefWidth="210" styleClass="dashboard-chart"/>
+                            <PieChart fx:id="chartDifficulty" legendVisible="true" labelsVisible="false" animated="false" prefHeight="200" minWidth="140" styleClass="dashboard-chart"/>
                         </VBox>
                     </HBox>
 
@@ -135,8 +138,8 @@
             </VBox>
 
             <!-- Right Card: Revision & Knowledge Graph Summaries -->
-            <VBox spacing="14" HBox.hgrow="ALWAYS" styleClass="card" minWidth="300" prefWidth="420">
-                <!-- Section 1: Study & Revision Overview -->
+            <VBox fx:id="cardRevisionOverview" spacing="14" styleClass="dashboard-card" minWidth="300" prefWidth="420">
+                <!-- Section 1: Study & Spaced Repetition Overview -->
                 <VBox spacing="8">
                     <HBox alignment="CENTER_LEFT" spacing="8">
                         <Label text="Study &amp; Spaced Repetition" styleClass="card-title"/>
@@ -175,7 +178,7 @@
                 <!-- Divider -->
                 <Region style="-fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;"/>
 
-                <!-- Section 2: Knowledge Graph Summary -->
+                <!-- Section 2: Knowledge Graph Structure -->
                 <VBox spacing="8">
                     <HBox alignment="CENTER_LEFT" spacing="8">
                         <Label text="Knowledge Graph Structure" styleClass="card-title"/>
@@ -194,15 +197,15 @@
                         </VBox>
                     </HBox>
 
-                    <Label fx:id="lblGraphRatio" text="0% of notes are linked by conceptual connections" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
+                    <Label fx:id="lblGraphRatio" text="0% of notes are linked by conceptual connections" wrapText="true" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
                 </VBox>
             </VBox>
-        </HBox>
+        </FlowPane>
 
         <!-- Lower Section: Recent Learning Activity & Recently Updated Notes -->
-        <HBox spacing="14" alignment="TOP_LEFT">
+        <FlowPane fx:id="paneLowerSection" hgap="14" vgap="14" alignment="TOP_LEFT">
             <!-- Left: Recent Learning Activity -->
-            <VBox spacing="10" HBox.hgrow="ALWAYS" styleClass="card" minWidth="320" prefWidth="480">
+            <VBox fx:id="cardRecentActivity" spacing="10" styleClass="dashboard-card" minWidth="320" prefWidth="480">
                 <HBox alignment="CENTER_LEFT" spacing="8">
                     <Label text="Recent Learning Activity" styleClass="card-title"/>
                     <Region HBox.hgrow="ALWAYS"/>
@@ -222,7 +225,7 @@
             </VBox>
 
             <!-- Right: Recently Updated Notes -->
-            <VBox spacing="10" HBox.hgrow="ALWAYS" styleClass="card" minWidth="300" prefWidth="420">
+            <VBox fx:id="cardRecentNotes" spacing="10" styleClass="dashboard-card" minWidth="300" prefWidth="420">
                 <HBox alignment="CENTER_LEFT" spacing="8">
                     <Label text="Recently Updated Notes" styleClass="card-title"/>
                     <Region HBox.hgrow="ALWAYS"/>
@@ -240,7 +243,7 @@
                     <Label text="Create your first note to populate your knowledge base." styleClass="placeholder-subtext"/>
                 </VBox>
             </VBox>
-        </HBox>
+        </FlowPane>
 
     </VBox>
 </ScrollPane>

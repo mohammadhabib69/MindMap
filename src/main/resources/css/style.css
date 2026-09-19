@@ -1244,3 +1244,32 @@
     -fx-background-color: #f8fafc;
     -fx-border-color: #cbd5e1;
 }
+
+.dashboard-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 18px;
+    -fx-effect: dropshadow(three-pass-box, rgba(15, 23, 42, 0.05), 6, 0, 0, 2);
+}
+
+.dashboard-card:hover {
+    -fx-border-color: #cbd5e1;
+}
+
+.dashboard-metric-card {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 12px 16px;
+    -fx-effect: dropshadow(three-pass-box, rgba(15, 23, 42, 0.04), 4, 0, 0, 1);
+}
+
+.dashboard-metric-card:hover {
+    -fx-border-color: #cbd5e1;
+}
+

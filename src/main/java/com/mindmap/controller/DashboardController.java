@@ -19,7 +19,9 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -38,11 +40,24 @@ import java.util.logging.Logger;
  * Controller for the data-driven Learning Dashboard screen.
  * Displays key metrics, distribution charts, revision progress, recent activity,
  * and recent notes using real SQLite data via DashboardService.
+ * Features responsive FlowPane-based wrapping and lightweight layout adaptation.
  */
 public class DashboardController {
 
     private static final Logger LOGGER = Logger.getLogger(DashboardController.class.getName());
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MMM dd, yyyy");
+
+    // Layout Containers & Responsive Cards
+    @FXML private ScrollPane scrollDashboard;
+    @FXML private VBox contentContainer;
+
+    // Primary Metric Cards
+    @FXML private FlowPane paneMetrics;
+    @FXML private VBox cardTotalNotes;
+    @FXML private VBox cardTotalConnections;
+    @FXML private VBox cardReviewsDue;
+    @FXML private VBox cardUpcomingReviews;
+    @FXML private VBox cardTotalTags;
 
     // Primary Metric Labels
     @FXML private Label lblTotalNotes;
@@ -50,6 +65,11 @@ public class DashboardController {
     @FXML private Label lblDueToday;
     @FXML private Label lblUpcomingReviews;
     @FXML private Label lblTotalTags;
+
+    // Middle Section: Knowledge Distribution & Revision
+    @FXML private FlowPane paneMiddleSection;
+    @FXML private VBox cardKnowledgeDistribution;
+    @FXML private VBox cardRevisionOverview;
 
     // Charts
     @FXML private HBox boxChartsContainer;
@@ -70,7 +90,10 @@ public class DashboardController {
     @FXML private Label lblIsolatedNotes;
     @FXML private Label lblGraphRatio;
 
-    // Lower Lists
+    // Lower Section: Recent Activity & Recent Notes
+    @FXML private FlowPane paneLowerSection;
+    @FXML private VBox cardRecentActivity;
+    @FXML private VBox cardRecentNotes;
     @FXML private VBox boxRecentActivity;
     @FXML private VBox boxEmptyActivity;
     @FXML private VBox boxRecentNotes;
@@ -98,10 +121,132 @@ public class DashboardController {
         return dashboardService;
     }
 
+    public ScrollPane getScrollDashboard() {
+        return scrollDashboard;
+    }
+
+    public VBox getContentContainer() {
+        return contentContainer;
+    }
+
+    public FlowPane getPaneMetrics() {
+        return paneMetrics;
+    }
+
+    public FlowPane getPaneMiddleSection() {
+        return paneMiddleSection;
+    }
+
+    public FlowPane getPaneLowerSection() {
+        return paneLowerSection;
+    }
+
+    public BarChart<String, Number> getChartSubjects() {
+        return chartSubjects;
+    }
+
+    public PieChart getChartDifficulty() {
+        return chartDifficulty;
+    }
+
+    public VBox getCardKnowledgeDistribution() {
+        return cardKnowledgeDistribution;
+    }
+
+    public VBox getCardRevisionOverview() {
+        return cardRevisionOverview;
+    }
+
     @FXML
     public void initialize() {
+        setupResponsiveLayout();
         loadDashboardData();
     }
+
+    /**
+     * Sets up a lightweight listener on container width to adapt card layout smoothly.
+     * Operates purely on layout properties; never triggers DB queries or chart reloads.
+     */
+    private void setupResponsiveLayout() {
+        if (contentContainer != null) {
+            contentContainer.widthProperty().addListener((obs, oldW, newW) -> {
+                if (newW != null && newW.doubleValue() > 0) {
+                    applyResponsiveWidths(newW.doubleValue());
+                }
+            });
+        }
+    }
+
+    /**
+     * Lightweight responsive layout calculation.
+     * Adjusts prefWidth of dashboard cards so they wrap naturally into rows
+     * and expand to fill available space without horizontal scrollbars or clipping.
+     * NO database queries, NO chart recreation, NO node reconstruction.
+     *
+     * @param containerWidth Current width of content container
+     */
+    public void applyResponsiveWidths(double containerWidth) {
+        if (containerWidth <= 100) return;
+
+        // Content padding is 24px left + 24px right = 48px
+        double usableWidth = Math.max(280, containerWidth - 48);
+
+        // 1. Primary Metrics Cards (5 cards, 12px gap)
+        if (paneMetrics != null) {
+            int cols;
+            if (usableWidth >= 860) {
+                cols = 5;
+            } else if (usableWidth >= 520) {
+                cols = 3;
+            } else {
+                cols = 2;
+            }
+            double metricCardWidth = Math.floor((usableWidth - (cols - 1) * 12.0) / cols);
+            setCardWidth(cardTotalNotes, metricCardWidth);
+            setCardWidth(cardTotalConnections, metricCardWidth);
+            setCardWidth(cardReviewsDue, metricCardWidth);
+            setCardWidth(cardUpcomingReviews, metricCardWidth);
+            setCardWidth(cardTotalTags, metricCardWidth);
+        }
+
+        // 2. Middle Section (Knowledge Distribution & Revision, 14px gap)
+        if (paneMiddleSection != null) {
+            if (usableWidth >= 800) {
+                // Side-by-side: 54% / 46% split
+                double wLeft = Math.floor((usableWidth - 14.0) * 0.54);
+                double wRight = Math.floor(usableWidth - 14.0 - wLeft);
+                setCardWidth(cardKnowledgeDistribution, wLeft);
+                setCardWidth(cardRevisionOverview, wRight);
+            } else {
+                // Stacked: Both span full usable width
+                setCardWidth(cardKnowledgeDistribution, usableWidth);
+                setCardWidth(cardRevisionOverview, usableWidth);
+            }
+        }
+
+        // 3. Lower Section (Recent Activity & Recent Notes, 14px gap)
+        if (paneLowerSection != null) {
+            if (usableWidth >= 800) {
+                // Side-by-side: 52% / 48% split
+                double wLeft = Math.floor((usableWidth - 14.0) * 0.52);
+                double wRight = Math.floor(usableWidth - 14.0 - wLeft);
+                setCardWidth(cardRecentActivity, wLeft);
+                setCardWidth(cardRecentNotes, wRight);
+            } else {
+                // Stacked: Both span full usable width
+                setCardWidth(cardRecentActivity, usableWidth);
+                setCardWidth(cardRecentNotes, usableWidth);
+            }
+        }
+    }
+
+    private void setCardWidth(Region card, double width) {
+        if (card != null && width > 0) {
+            card.setPrefWidth(width);
+            card.setMaxWidth(width);
+        }
+    }
+
 
     /**
      * Loads aggregated dashboard data and populates all UI components.
@@ -259,6 +404,7 @@ public class DashboardController {
         // Event type badge
         Label badge = new Label();
         badge.getStyleClass().add("timeline-type-badge");
+        badge.setMinWidth(Region.USE_PREF_SIZE);
 
         String type = ev.getEventType() != null ? ev.getEventType().toUpperCase() : "EVENT";
         switch (type) {
@@ -282,6 +428,7 @@ public class DashboardController {
 
         // Title / Description
         VBox textBox = new VBox(2);
+        textBox.setMinWidth(60);
         HBox.setHgrow(textBox, Priority.ALWAYS);
 
         String titleText = ev.hasNote() ? ev.getNoteTitle() : ev.getDescription();
@@ -298,6 +445,7 @@ public class DashboardController {
         // Timestamp
         Label lblTime = new Label(ev.getFormattedDate() + " " + ev.getFormattedTime());
         lblTime.setStyle("-fx-font-size: 10px; -fx-text-fill: #94a3b8;");
+        lblTime.setMinWidth(Region.USE_PREF_SIZE);
 
         row.getChildren().addAll(badge, textBox, lblTime);
 
@@ -341,6 +489,7 @@ public class DashboardController {
 
         // Title and Subject
         VBox textBox = new VBox(2);
+        textBox.setMinWidth(60);
         HBox.setHgrow(textBox, Priority.ALWAYS);
 
         Label lblTitle = new Label(note.getTitle() != null ? note.getTitle() : "Untitled Note");
@@ -378,6 +527,7 @@ public class DashboardController {
         // Actions
         HBox actionBox = new HBox(4);
         actionBox.setAlignment(Pos.CENTER_RIGHT);
+        actionBox.setMinWidth(Region.USE_PREF_SIZE);
 
         Button btnView = new Button("View");
         btnView.getStyleClass().addAll("timeline-action-btn", "btn-secondary");
