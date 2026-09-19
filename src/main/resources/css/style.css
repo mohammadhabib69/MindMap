@@ -540,28 +540,35 @@
     -fx-background-color: #f8fafc;
 }
 
-/* Graph Node Card */
+/* Graph Node Card - Compact 2D Pill/Card */
 .graph-node {
     -fx-background-color: #ffffff;
-    -fx-background-radius: 10px;
-    -fx-border-radius: 10px;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
     -fx-border-color: #cbd5e1;
     -fx-border-width: 1.5px;
-    -fx-padding: 10px 14px;
+    -fx-padding: 4px 8px;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.10), 10, 0.1, 0, 3);
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.07), 6, 0.1, 0, 2);
 }
 
 .graph-node:hover {
-    -fx-border-color: #94a3b8;
-    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.18), 16, 0.15, 0, 6);
+    -fx-border-color: #3b82f6;
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.25), 10, 0.15, 0, 3);
 }
 
 .graph-node-selected {
     -fx-background-color: #ffffff;
-    -fx-border-color: #3b82f6;
+    -fx-border-color: #2563eb;
     -fx-border-width: 2px;
-    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.45), 18, 0.25, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.45), 14, 0.25, 0, 0);
+}
+
+.graph-node-connected {
+    -fx-background-color: #f0fdf4;
+    -fx-border-color: #10b981;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.35), 12, 0.2, 0, 0);
 }
 
 .graph-node-dimmed {
@@ -569,19 +576,19 @@
 }
 
 .graph-node-title {
-    -fx-font-size: 13px;
-    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
     -fx-text-fill: #0f172a;
 }
 
 .graph-node-subject {
-    -fx-font-size: 10px;
+    -fx-font-size: 9px;
     -fx-font-weight: bold;
     -fx-text-fill: #2563eb;
     -fx-background-color: #eff6ff;
-    -fx-padding: 2px 6px;
-    -fx-background-radius: 6px;
-    -fx-border-radius: 6px;
+    -fx-padding: 0px 4px;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
     -fx-border-color: #dbeafe;
     -fx-border-width: 1px;
 }
@@ -589,19 +596,19 @@
 /* Graph Edges */
 .graph-edge-line {
     -fx-stroke: #94a3b8;
-    -fx-stroke-width: 2px;
+    -fx-stroke-width: 1.5px;
 }
 
 .graph-edge-line:hover {
     -fx-stroke: #3b82f6;
-    -fx-stroke-width: 3px;
+    -fx-stroke-width: 2.5px;
     -fx-cursor: hand;
 }
 
 .graph-edge-line-selected {
     -fx-stroke: #2563eb;
-    -fx-stroke-width: 3px;
-    -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.5), 10, 0.2, 0, 0);
+    -fx-stroke-width: 2.5px;
+    -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.5), 8, 0.2, 0, 0);
 }
 
 .graph-edge-arrow {
@@ -613,21 +620,23 @@
 }
 
 .graph-edge-label {
-    -fx-background-color: #f1f5f9;
-    -fx-text-fill: #475569;
-    -fx-font-size: 10px;
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #334155;
+    -fx-font-size: 9px;
     -fx-font-weight: bold;
-    -fx-padding: 2px 6px;
-    -fx-background-radius: 6px;
-    -fx-border-radius: 6px;
+    -fx-padding: 2px 5px;
+    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
     -fx-border-color: #cbd5e1;
     -fx-border-width: 1px;
     -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 4, 0, 0, 1);
 }
 
 .graph-edge-label:hover {
-    -fx-background-color: #e2e8f0;
-    -fx-text-fill: #1e293b;
+    -fx-background-color: #eff6ff;
+    -fx-text-fill: #1d4ed8;
+    -fx-border-color: #93c5fd;
     -fx-border-color: #94a3b8;
 }
 

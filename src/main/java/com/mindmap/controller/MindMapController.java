@@ -5,6 +5,7 @@ import com.mindmap.model.Note;
 import com.mindmap.service.ConnectionService;
 import com.mindmap.service.NoteService;
 import com.mindmap.util.AnimationUtil;
+import com.mindmap.visualization.Graph2DLayout;
 import com.mindmap.visualization.KnowledgeSpace3D;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -20,11 +21,15 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
+import javafx.util.Duration;
+import java.util.HashSet;
+import java.util.Set;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.FlowPane;
@@ -197,32 +202,55 @@ public class MindMapController {
     }
 
     private void setupCanvasPanningAndZooming() {
-        // Pan viewport on background drag
+        // Pan viewport on middle/right drag anywhere, or left drag on canvas background
         graphCanvasPane.setOnMousePressed(event -> {
-            if (event.getButton() == MouseButton.PRIMARY && event.getTarget() == graphCanvasPane) {
+            boolean isPanButton = (event.getButton() == MouseButton.SECONDARY)
+                    || (event.getButton() == MouseButton.MIDDLE)
+                    || (event.getButton() == MouseButton.PRIMARY && event.getTarget() == graphCanvasPane);
+
+            if (isPanButton) {
                 dragAnchorX = event.getSceneX() - panX;
                 dragAnchorY = event.getSceneY() - panY;
-                handleDeselect();
+                graphCanvasPane.setCursor(Cursor.CLOSED_HAND);
+                if (event.getButton() == MouseButton.PRIMARY) {
+                    handleDeselect();
+                }
             }
         });
 
         graphCanvasPane.setOnMouseDragged(event -> {
-            if (event.getButton() == MouseButton.PRIMARY && event.getTarget() == graphCanvasPane) {
+            boolean isPanButton = (event.getButton() == MouseButton.SECONDARY)
+                    || (event.getButton() == MouseButton.MIDDLE)
+                    || (event.getButton() == MouseButton.PRIMARY && event.getTarget() == graphCanvasPane);
+
+            if (isPanButton) {
                 panX = event.getSceneX() - dragAnchorX;
                 panY = event.getSceneY() - dragAnchorY;
                 applyTransform();
             }
         });
 
-        // Zoom via mouse wheel
+        graphCanvasPane.setOnMouseReleased(event -> {
+            graphCanvasPane.setCursor(Cursor.DEFAULT);
+        });
+
+        // Zoom via mouse wheel centered on mouse pointer
         graphCanvasPane.setOnScroll(event -> {
             double delta = event.getDeltaY();
-            if (delta > 0) {
-                zoomFactor = Math.min(2.5, zoomFactor * 1.08);
-            } else if (delta < 0) {
-                zoomFactor = Math.max(0.4, zoomFactor / 1.08);
+            if (delta == 0) return;
+
+            double oldZoom = zoomFactor;
+            double factor = (delta > 0) ? 1.12 : (1.0 / 1.12);
+            double newZoom = Math.max(0.15, Math.min(3.0, oldZoom * factor));
+
+            if (newZoom != oldZoom) {
+                double mouseX = event.getX();
+                double mouseY = event.getY();
+                panX = mouseX - (mouseX - panX) * (newZoom / oldZoom);
+                panY = mouseY - (mouseY - panY) * (newZoom / oldZoom);
+                zoomFactor = newZoom;
+                applyTransform();
             }
-            applyTransform();
             event.consume();
         });
     }
@@ -345,106 +373,65 @@ public class MindMapController {
         int count = nodeViews.size();
         if (count == 0) return;
 
-        double canvasW = graphCanvasPane.getWidth();
-        double canvasH = graphCanvasPane.getHeight();
-        if (canvasW <= 0) canvasW = 750;
-        if (canvasH <= 0) canvasH = 550;
+        double canvasW = graphCanvasPane.getWidth() > 100 ? graphCanvasPane.getWidth() : 750;
+        double canvasH = graphCanvasPane.getHeight() > 100 ? graphCanvasPane.getHeight() : 550;
 
-        double centerX = canvasW / 2.0;
-        double centerY = canvasH / 2.0;
+        Graph2DLayout.LayoutResult result = Graph2DLayout.calculateLayout(
+                new ArrayList<>(notesMap.values()), currentConnections, canvasW, canvasH);
 
-        List<NodeCardView> cards = new ArrayList<>(nodeViews.values());
-
-        if (count == 1) {
-            NodeCardView single = cards.get(0);
-            single.setLayoutX(centerX - 80);
-            single.setLayoutY(centerY - 35);
-            updateAllEdgeGeometries();
-            return;
-        }
-
-        // Initial geometric arrangement
-        if (count <= 10) {
-            double radius = Math.min(260.0, Math.min(canvasW, canvasH) * 0.35);
-            for (int i = 0; i < count; i++) {
-                double angle = (2 * Math.PI * i) / count;
-                double x = centerX + radius * Math.cos(angle) - 80;
-                double y = centerY + radius * Math.sin(angle) - 35;
-                cards.get(i).setLayoutX(x);
-                cards.get(i).setLayoutY(y);
+        for (Map.Entry<Integer, NodeCardView> entry : nodeViews.entrySet()) {
+            Point2D pt = result.getPosition(entry.getKey());
+            if (pt != null) {
+                entry.getValue().setLayoutX(pt.getX());
+                entry.getValue().setLayoutY(pt.getY());
             }
-        } else {
-            // Multi-ring concentric circle arrangement
-            int innerCount = Math.min(6, count / 2);
-            int outerCount = count - innerCount;
-            double r1 = 150.0;
-            double r2 = 280.0;
-
-            for (int i = 0; i < innerCount; i++) {
-                double angle = (2 * Math.PI * i) / innerCount;
-                cards.get(i).setLayoutX(centerX + r1 * Math.cos(angle) - 80);
-                cards.get(i).setLayoutY(centerY + r1 * Math.sin(angle) - 35);
-            }
-            for (int i = 0; i < outerCount; i++) {
-                double angle = (2 * Math.PI * i) / outerCount;
-                cards.get(innerCount + i).setLayoutX(centerX + r2 * Math.cos(angle) - 80);
-                cards.get(innerCount + i).setLayoutY(centerY + r2 * Math.sin(angle) - 35);
-            }
-        }
-
-        // Lightweight force relaxation pass (20 iterations)
-        for (int step = 0; step < 20; step++) {
-            // Node-to-node repulsion
-            for (int i = 0; i < count; i++) {
-                NodeCardView u = cards.get(i);
-                for (int j = i + 1; j < count; j++) {
-                    NodeCardView v = cards.get(j);
-                    double dx = (v.getLayoutX() + 80) - (u.getLayoutX() + 80);
-                    double dy = (v.getLayoutY() + 35) - (u.getLayoutY() + 35);
-                    double dist = Math.hypot(dx, dy);
-                    if (dist < 220 && dist > 1.0) {
-                        double repForce = (220 - dist) * 0.08;
-                        double fx = (dx / dist) * repForce;
-                        double fy = (dy / dist) * repForce;
-                        u.setLayoutX(u.getLayoutX() - fx);
-                        u.setLayoutY(u.getLayoutY() - fy);
-                        v.setLayoutX(v.getLayoutX() + fx);
-                        v.setLayoutY(v.getLayoutY() + fy);
-                    }
-                }
-            }
-
-            // Edge attraction
-            for (EdgeView edge : edgeViews) {
-                NodeCardView u = edge.fromNode;
-                NodeCardView v = edge.toNode;
-                double dx = (v.getLayoutX() + 80) - (u.getLayoutX() + 80);
-                double dy = (v.getLayoutY() + 35) - (u.getLayoutY() + 35);
-                double dist = Math.hypot(dx, dy);
-                double targetDist = 180.0;
-                if (dist > targetDist) {
-                    double attForce = (dist - targetDist) * 0.04;
-                    double fx = (dx / dist) * attForce;
-                    double fy = (dy / dist) * attForce;
-                    u.setLayoutX(u.getLayoutX() + fx);
-                    u.setLayoutY(u.getLayoutY() + fy);
-                    v.setLayoutX(v.getLayoutX() - fx);
-                    v.setLayoutY(v.getLayoutY() - fy);
-                }
-            }
-        }
-
-        // Clamp to visible viewport
-        for (NodeCardView card : cards) {
-            double maxX = Math.max(10, canvasW - 170);
-            double maxY = Math.max(10, canvasH - 85);
-            double clampedX = Math.max(10, Math.min(maxX, card.getLayoutX()));
-            double clampedY = Math.max(10, Math.min(maxY, card.getLayoutY()));
-            card.setLayoutX(clampedX);
-            card.setLayoutY(clampedY);
         }
 
         updateAllEdgeGeometries();
+        fitGraphToViewport();
+    }
+
+    private void fitGraphToViewport() {
+        if (nodeViews.isEmpty()) {
+            zoomFactor = 1.0;
+            panX = 0;
+            panY = 0;
+            applyTransform();
+            return;
+        }
+
+        double canvasW = graphCanvasPane.getWidth() > 100 ? graphCanvasPane.getWidth() : 750;
+        double canvasH = graphCanvasPane.getHeight() > 100 ? graphCanvasPane.getHeight() : 550;
+
+        double minX = Double.MAX_VALUE;
+        double minY = Double.MAX_VALUE;
+        double maxX = -Double.MAX_VALUE;
+        double maxY = -Double.MAX_VALUE;
+
+        for (NodeCardView card : nodeViews.values()) {
+            double x = card.getLayoutX();
+            double y = card.getLayoutY();
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (x + Graph2DLayout.NODE_WIDTH > maxX) maxX = x + Graph2DLayout.NODE_WIDTH;
+            if (y + Graph2DLayout.NODE_HEIGHT > maxY) maxY = y + Graph2DLayout.NODE_HEIGHT;
+        }
+
+        double graphW = (maxX - minX) + 80.0;
+        double graphH = (maxY - minY) + 80.0;
+
+        double fitZoom = 1.0;
+        if (graphW > canvasW || graphH > canvasH) {
+            fitZoom = Math.min(canvasW / graphW, canvasH / graphH);
+        }
+        zoomFactor = Math.max(0.18, Math.min(1.0, fitZoom));
+
+        double centerX = (minX + maxX) / 2.0;
+        double centerY = (minY + maxY) / 2.0;
+
+        panX = (canvasW / 2.0) - (centerX * zoomFactor);
+        panY = (canvasH / 2.0) - (centerY * zoomFactor);
+        applyTransform();
     }
 
     private void updateAllEdgeGeometries() {
@@ -458,19 +445,39 @@ public class MindMapController {
     // ==================================================
 
     public void selectNode(Note note) {
-        handleDeselect();
+        clearHighlights();
         this.selectedNote = note;
 
-        // Highlight selected node card
-        NodeCardView card = nodeViews.get(note.getId());
-        if (card != null) {
-            card.getStyleClass().add("graph-node-selected");
+        Set<Integer> connectedNoteIds = new HashSet<>();
+        for (EdgeView edge : edgeViews) {
+            boolean isFrom = edge.connection.getFromNoteId() == note.getId();
+            boolean isTo = edge.connection.getToNoteId() == note.getId();
+            if (isFrom || isTo) {
+                edge.setSelected(true);
+                connectedNoteIds.add(isFrom ? edge.connection.getToNoteId() : edge.connection.getFromNoteId());
+            } else {
+                edge.setDimmed(true);
+            }
         }
 
-        // Highlight connected edges
-        for (EdgeView edge : edgeViews) {
-            if (edge.connection.getFromNoteId() == note.getId() || edge.connection.getToNoteId() == note.getId()) {
-                edge.setSelected(true);
+        // Highlight selected node card
+        NodeCardView selectedCard = nodeViews.get(note.getId());
+        if (selectedCard != null) {
+            selectedCard.setSelected(true);
+            selectedCard.setDimmed(false);
+        }
+
+        // Highlight connected neighbor nodes, dim other nodes
+        for (Map.Entry<Integer, NodeCardView> entry : nodeViews.entrySet()) {
+            int nId = entry.getKey();
+            NodeCardView c = entry.getValue();
+            if (nId == note.getId()) {
+                // already handled
+            } else if (connectedNoteIds.contains(nId)) {
+                c.setConnectedHighlight(true);
+                c.setDimmed(false);
+            } else {
+                c.setDimmed(true);
             }
         }
 
@@ -483,12 +490,26 @@ public class MindMapController {
     }
 
     public void selectConnection(Connection connection) {
-        handleDeselect();
+        clearHighlights();
         this.selectedConnection = connection;
 
         for (EdgeView edge : edgeViews) {
             if (edge.connection.getId() == connection.getId()) {
                 edge.setSelected(true);
+            } else {
+                edge.setDimmed(true);
+            }
+        }
+
+        // Dim nodes except the endpoints
+        for (Map.Entry<Integer, NodeCardView> entry : nodeViews.entrySet()) {
+            int nId = entry.getKey();
+            NodeCardView c = entry.getValue();
+            if (nId == connection.getFromNoteId() || nId == connection.getToNoteId()) {
+                c.setConnectedHighlight(true);
+                c.setDimmed(false);
+            } else {
+                c.setDimmed(true);
             }
         }
 
@@ -499,32 +520,43 @@ public class MindMapController {
 
         Note fromNote = notesMap.get(connection.getFromNoteId());
         if (fromNote != null) {
-            selectNode(fromNote);
+            this.selectedNote = fromNote;
+            populateInspectorForNote(fromNote);
         }
     }
 
     @FXML
     private void handleDeselect() {
-        if (selectedNote != null) {
-            NodeCardView card = nodeViews.get(selectedNote.getId());
-            if (card != null) {
-                card.getStyleClass().remove("graph-node-selected");
-            }
-        }
-        for (EdgeView edge : edgeViews) {
-            edge.setSelected(false);
-        }
+        clearHighlights();
+        selectedNote = null;
+        selectedConnection = null;
+
         if (knowledgeSpace3D != null) {
             knowledgeSpace3D.clearSelection();
         }
-        selectedNote = null;
-        selectedConnection = null;
+
+        // Reapply search filter if search is active
+        if (txtSearch != null && !txtSearch.getText().trim().isEmpty()) {
+            applySearchFilter(txtSearch.getText());
+        }
 
         // Show Overview state in inspector
         boxOverview.setVisible(true);
         boxOverview.setManaged(true);
         boxSelectedNote.setVisible(false);
         boxSelectedNote.setManaged(false);
+    }
+
+    private void clearHighlights() {
+        for (NodeCardView card : nodeViews.values()) {
+            card.setSelected(false);
+            card.setConnectedHighlight(false);
+            card.setDimmed(false);
+        }
+        for (EdgeView edge : edgeViews) {
+            edge.setSelected(false);
+            edge.setDimmed(false);
+        }
     }
 
     private void populateInspectorForNote(Note note) {
@@ -870,8 +902,8 @@ public class MindMapController {
             graphCanvasPane.setManaged(true);
         }
         if (btnFocusSelected != null) {
-            btnFocusSelected.setVisible(false);
-            btnFocusSelected.setManaged(false);
+            btnFocusSelected.setVisible(true);
+            btnFocusSelected.setManaged(true);
         }
         if (btnAutoLayout != null) {
             btnAutoLayout.setVisible(true);
@@ -904,8 +936,10 @@ public class MindMapController {
             if (card != null) {
                 double canvasW = graphCanvasPane.getWidth() > 0 ? graphCanvasPane.getWidth() : 750;
                 double canvasH = graphCanvasPane.getHeight() > 0 ? graphCanvasPane.getHeight() : 550;
-                panX = (canvasW / 2.0) - (card.getLayoutX() + 80) * zoomFactor;
-                panY = (canvasH / 2.0) - (card.getLayoutY() + 35) * zoomFactor;
+                double centerX = card.getLayoutX() + (Graph2DLayout.NODE_WIDTH / 2.0);
+                double centerY = card.getLayoutY() + (Graph2DLayout.NODE_HEIGHT / 2.0);
+                panX = (canvasW / 2.0) - (centerX * zoomFactor);
+                panY = (canvasH / 2.0) - (centerY * zoomFactor);
                 applyTransform();
             }
         }
@@ -954,7 +988,7 @@ public class MindMapController {
         if (is3DMode && knowledgeSpace3D != null) {
             knowledgeSpace3D.getCameraController().zoomBy(180.0);
         } else {
-            zoomFactor = Math.min(2.5, zoomFactor * 1.15);
+            zoomFactor = Math.min(3.0, zoomFactor * 1.15);
             applyTransform();
         }
     }
@@ -964,23 +998,22 @@ public class MindMapController {
         if (is3DMode && knowledgeSpace3D != null) {
             knowledgeSpace3D.getCameraController().zoomBy(-180.0);
         } else {
-            zoomFactor = Math.max(0.4, zoomFactor / 1.15);
+            zoomFactor = Math.max(0.15, zoomFactor / 1.15);
             applyTransform();
         }
     }
 
     @FXML
     private void handleResetView() {
-        if (knowledgeSpace3D != null) {
-            knowledgeSpace3D.resetView();
-        }
-        zoomFactor = 1.0;
-        panX = 0;
-        panY = 0;
-        applyTransform();
-        runAutoLayout();
-        if (is3DMode && lblZoomLevel != null) {
-            lblZoomLevel.setText("3D");
+        if (is3DMode) {
+            if (knowledgeSpace3D != null) {
+                knowledgeSpace3D.resetView();
+            }
+            if (lblZoomLevel != null) {
+                lblZoomLevel.setText("3D");
+            }
+        } else {
+            fitGraphToViewport();
         }
     }
 
@@ -1007,25 +1040,35 @@ public class MindMapController {
 
         public NodeCardView(Note note) {
             this.note = note;
-            setPrefWidth(160);
-            setMaxWidth(160);
-            setSpacing(6);
+            setPrefWidth(Graph2DLayout.NODE_WIDTH);
+            setMaxWidth(Graph2DLayout.NODE_WIDTH);
+            setPrefHeight(Graph2DLayout.NODE_HEIGHT);
+            setMaxHeight(Graph2DLayout.NODE_HEIGHT);
+            setSpacing(2);
             getStyleClass().add("graph-node");
 
             // Subject Badge Header
             if (note.getSubject() != null && !note.getSubject().trim().isEmpty()) {
                 Label subjectBadge = new Label(note.getSubject().trim());
                 subjectBadge.getStyleClass().add("graph-node-subject");
-                subjectBadge.setMaxWidth(140);
+                subjectBadge.setTextOverrun(OverrunStyle.ELLIPSIS);
+                subjectBadge.setMaxWidth(109);
                 getChildren().add(subjectBadge);
             }
 
             // Title Label
             Label titleLabel = new Label(note.getTitle());
             titleLabel.getStyleClass().add("graph-node-title");
-            titleLabel.setWrapText(true);
-            titleLabel.setMaxHeight(40);
+            titleLabel.setTextOverrun(OverrunStyle.ELLIPSIS);
+            titleLabel.setMaxWidth(109);
             getChildren().add(titleLabel);
+
+            // Fast, helpful Tooltip with full title and subject
+            String tooltipText = note.getTitle() + (note.getSubject() != null && !note.getSubject().isBlank()
+                    ? " (" + note.getSubject().trim() + ")" : "");
+            Tooltip tooltip = new Tooltip(tooltipText);
+            tooltip.setShowDelay(Duration.millis(250));
+            Tooltip.install(this, tooltip);
 
             setupInteractions();
         }
@@ -1035,8 +1078,8 @@ public class MindMapController {
 
             setOnMouseEntered(e -> {
                 if (!isDragging && !dimmed) {
-                    setScaleX(1.03);
-                    setScaleY(1.03);
+                    setScaleX(1.05);
+                    setScaleY(1.05);
                 }
             });
 
@@ -1068,8 +1111,8 @@ public class MindMapController {
                         isDragging = true;
                     }
 
-                    double newX = Math.max(10, nodeStartX + dx);
-                    double newY = Math.max(10, nodeStartY + dy);
+                    double newX = nodeStartX + dx;
+                    double newY = nodeStartY + dy;
 
                     setLayoutX(newX);
                     setLayoutY(newY);
@@ -1088,10 +1131,32 @@ public class MindMapController {
             });
         }
 
+        public void setSelected(boolean selected) {
+            if (selected) {
+                if (!getStyleClass().contains("graph-node-selected")) {
+                    getStyleClass().add("graph-node-selected");
+                }
+            } else {
+                getStyleClass().remove("graph-node-selected");
+            }
+        }
+
+        public void setConnectedHighlight(boolean connected) {
+            if (connected) {
+                if (!getStyleClass().contains("graph-node-connected")) {
+                    getStyleClass().add("graph-node-connected");
+                }
+            } else {
+                getStyleClass().remove("graph-node-connected");
+            }
+        }
+
         public void setDimmed(boolean dimmed) {
             this.dimmed = dimmed;
             if (dimmed) {
-                getStyleClass().add("graph-node-dimmed");
+                if (!getStyleClass().contains("graph-node-dimmed")) {
+                    getStyleClass().add("graph-node-dimmed");
+                }
             } else {
                 getStyleClass().remove("graph-node-dimmed");
             }
@@ -1122,6 +1187,8 @@ public class MindMapController {
         private final Line line = new Line();
         private final Polygon arrow = new Polygon();
         private final Label badge = new Label();
+        private boolean isHovered = false;
+        private boolean isSelected = false;
 
         public EdgeView(Connection connection, NodeCardView fromNode, NodeCardView toNode) {
             this.connection = connection;
@@ -1133,6 +1200,16 @@ public class MindMapController {
 
             badge.setText(connection.getRelation() != null ? connection.getRelation() : "Related");
             badge.getStyleClass().add("graph-edge-label");
+            badge.setVisible(false);
+            badge.setManaged(false);
+
+            // Hover interactions to display relation label dynamically
+            line.setOnMouseEntered(e -> { isHovered = true; updateBadgeVisibility(); });
+            line.setOnMouseExited(e -> { isHovered = false; updateBadgeVisibility(); });
+            arrow.setOnMouseEntered(e -> { isHovered = true; updateBadgeVisibility(); });
+            arrow.setOnMouseExited(e -> { isHovered = false; updateBadgeVisibility(); });
+            badge.setOnMouseEntered(e -> { isHovered = true; updateBadgeVisibility(); });
+            badge.setOnMouseExited(e -> { isHovered = false; updateBadgeVisibility(); });
 
             // Click edge to select connection
             line.setOnMouseClicked(e -> {
@@ -1151,11 +1228,17 @@ public class MindMapController {
             updateGeometry();
         }
 
+        private void updateBadgeVisibility() {
+            boolean visible = isSelected || isHovered;
+            badge.setVisible(visible);
+            badge.setManaged(visible);
+        }
+
         public void updateGeometry() {
-            double w1 = fromNode.getWidth() > 0 ? fromNode.getWidth() : 160.0;
-            double h1 = fromNode.getHeight() > 0 ? fromNode.getHeight() : 70.0;
-            double w2 = toNode.getWidth() > 0 ? toNode.getWidth() : 160.0;
-            double h2 = toNode.getHeight() > 0 ? toNode.getHeight() : 70.0;
+            double w1 = fromNode.getWidth() > 0 ? fromNode.getWidth() : Graph2DLayout.NODE_WIDTH;
+            double h1 = fromNode.getHeight() > 0 ? fromNode.getHeight() : Graph2DLayout.NODE_HEIGHT;
+            double w2 = toNode.getWidth() > 0 ? toNode.getWidth() : Graph2DLayout.NODE_WIDTH;
+            double h2 = toNode.getHeight() > 0 ? toNode.getHeight() : Graph2DLayout.NODE_HEIGHT;
 
             double x1 = fromNode.getLayoutX() + w1 / 2.0;
             double y1 = fromNode.getLayoutY() + h1 / 2.0;
@@ -1176,13 +1259,13 @@ public class MindMapController {
                 double ux = dx / len;
                 double uy = dy / len;
 
-                // Offset tip of arrowhead just outside target card edge (~50px)
-                double offset = 50.0;
+                // Offset tip of arrowhead just outside target card edge (~32px)
+                double offset = 32.0;
                 double tipX = x2 - ux * offset;
                 double tipY = y2 - uy * offset;
 
-                double arrowLen = 10.0;
-                double arrowHalfWidth = 5.0;
+                double arrowLen = 9.0;
+                double arrowHalfWidth = 4.5;
 
                 double baseX = tipX - ux * arrowLen;
                 double baseY = tipY - uy * arrowLen;
@@ -1203,7 +1286,7 @@ public class MindMapController {
                 double midX = (x1 + x2) / 2.0;
                 double midY = (y1 + y2) / 2.0;
 
-                double badgeW = badge.getWidth() > 0 ? badge.getWidth() : 50.0;
+                double badgeW = badge.getWidth() > 0 ? badge.getWidth() : 48.0;
                 double badgeH = badge.getHeight() > 0 ? badge.getHeight() : 18.0;
 
                 badge.setLayoutX(midX - badgeW / 2.0);
@@ -1212,6 +1295,8 @@ public class MindMapController {
         }
 
         public void setSelected(boolean selected) {
+            this.isSelected = selected;
+            updateBadgeVisibility();
             if (selected) {
                 if (!line.getStyleClass().contains("graph-edge-line-selected")) {
                     line.getStyleClass().add("graph-edge-line-selected");
