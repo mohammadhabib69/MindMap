@@ -174,4 +174,78 @@ public class ConnectionRepository {
             throw new DatabaseException("Failed to delete connection between notes", e);
         }
     }
+
+    /**
+     * Checks if a directed connection exists from fromNoteId to toNoteId.
+     *
+     * @param fromNoteId Source note ID.
+     * @param toNoteId Target note ID.
+     * @return True if a connection exists, false otherwise.
+     */
+    public boolean exists(int fromNoteId, int toNoteId) {
+        String sql = "SELECT 1 FROM connections WHERE from_note_id = ? AND to_note_id = ? LIMIT 1;";
+
+        try (java.sql.Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, fromNoteId);
+            stmt.setInt(2, toNoteId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error checking if connection exists between " + fromNoteId + " and " + toNoteId, e);
+            throw new DatabaseException("Failed to check if connection exists", e);
+        }
+    }
+
+    /**
+     * Finds a directed connection between two specific notes.
+     */
+    public Optional<Connection> findBetween(int fromNoteId, int toNoteId) {
+        String sql = "SELECT id, from_note_id, to_note_id, relation FROM connections WHERE from_note_id = ? AND to_note_id = ?;";
+
+        try (java.sql.Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, fromNoteId);
+            stmt.setInt(2, toNoteId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(new Connection(
+                            rs.getInt("id"),
+                            rs.getInt("from_note_id"),
+                            rs.getInt("to_note_id"),
+                            rs.getString("relation")
+                    ));
+                }
+            }
+            return Optional.empty();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error finding connection between " + fromNoteId + " and " + toNoteId, e);
+            throw new DatabaseException("Failed to query connection between notes", e);
+        }
+    }
+
+    /**
+     * Returns the total count of connections in the database.
+     */
+    public int count() {
+        String sql = "SELECT COUNT(*) FROM connections;";
+
+        try (java.sql.Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error counting connections: " + e.getMessage(), e);
+            throw new DatabaseException("Failed to count connections", e);
+        }
+    }
 }
