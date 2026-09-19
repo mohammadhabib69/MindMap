@@ -3,6 +3,7 @@ package com.mindmap.controller;
 import com.mindmap.model.Difficulty;
 import com.mindmap.model.Note;
 import com.mindmap.service.NoteService;
+import com.mindmap.service.RevisionService;
 import com.mindmap.util.ValidationException;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -141,6 +142,13 @@ public class NoteEditorController {
             if (mode == NoteEditorMode.CREATE) {
                 Note newNote = new Note(title, content, subject, difficulty);
                 this.note = noteService.createNoteWithTags(newNote, tagNames);
+                if (this.note != null && this.note.getId() > 0) {
+                    try {
+                        new RevisionService().scheduleInitialReview(this.note.getId());
+                    } catch (Exception e) {
+                        LOGGER.log(Level.WARNING, "Could not auto-schedule initial revision: " + e.getMessage());
+                    }
+                }
             } else if (mode == NoteEditorMode.EDIT && note != null) {
                 note.setTitle(title);
                 note.setContent(content);

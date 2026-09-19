@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mindmap.controller.ReviewDialogController"
+      spacing="16"
+      prefWidth="560"
+      prefHeight="520"
+      minWidth="400"
+      minHeight="420"
+      styleClass="review-dialog-root"
+      stylesheets="@../css/style.css">
+
+    <padding>
+        <Insets top="20" right="24" bottom="20" left="24"/>
+    </padding>
+
+    <!-- Top Bar: Title, Session Progress, Close Button -->
+    <HBox alignment="CENTER_LEFT" spacing="10">
+        <VBox spacing="2" HBox.hgrow="ALWAYS">
+            <Label text="Study Review" styleClass="view-header" style="-fx-font-size: 17px;"/>
+            <Label fx:id="lblProgress" text="Review 1 of 1" style="-fx-font-size: 12px; -fx-text-fill: #64748b; -fx-font-weight: 500;"/>
+        </VBox>
+        <Button text="✕" onAction="#handleClose" styleClass="btn-delete-mini" style="-fx-font-size: 13px; -fx-padding: 3 8;"/>
+    </HBox>
+
+    <!-- Review Content Container -->
+    <VBox fx:id="boxReviewContainer" spacing="14" VBox.vgrow="ALWAYS">
+
+        <!-- Question / Concept Front Card -->
+        <VBox spacing="10" styleClass="review-card-front">
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label fx:id="lblSubject" text="Subject" styleClass="badge-subject"/>
+                <Label fx:id="lblDifficulty" text="MEDIUM" styleClass="badge-difficulty"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblCurrentInterval" text="Interval: 1d" styleClass="badge-interval"/>
+            </HBox>
+
+            <!-- Note Title -->
+            <Label fx:id="lblTitle" text="Concept Title" wrapText="true" minWidth="0" maxWidth="Infinity" styleClass="review-title"/>
+
+            <!-- Tags Flow -->
+            <FlowPane fx:id="flowTags" hgap="4" vgap="4"/>
+        </VBox>
+
+        <!-- State 1: Before Reveal Trigger -->
+        <VBox fx:id="boxRevealPrompt" alignment="CENTER" spacing="12" VBox.vgrow="ALWAYS" style="-fx-padding: 24 16; -fx-background-color: #f8fafc; -fx-background-radius: 10px; -fx-border-color: #e2e8f0; -fx-border-radius: 10px; -fx-border-width: 1px;">
+            <Label text="🤔" style="-fx-font-size: 32px;"/>
+            <Label text="Test Your Recall" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+            <Label text="Try to remember the key concepts, explanation, or formulas before looking." style="-fx-font-size: 12px; -fx-text-fill: #64748b;" wrapText="true" alignment="CENTER"/>
+            <Button fx:id="btnReveal" text="👁 Show Note Content" onAction="#handleReveal" styleClass="btn-primary" style="-fx-font-size: 13px; -fx-padding: 8 20; -fx-cursor: hand;"/>
+        </VBox>
+
+        <!-- State 2: Answer Revealed Card -->
+        <VBox fx:id="boxRevealedContent" spacing="12" VBox.vgrow="ALWAYS" visible="false" managed="false">
+
+            <!-- Scrollable Content View -->
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="review-content-scroll" maxHeight="200">
+                <VBox spacing="6" style="-fx-padding: 12; -fx-background-color: #ffffff; -fx-background-radius: 8px; -fx-border-color: #e2e8f0; -fx-border-radius: 8px; -fx-border-width: 1px;">
+                    <Label fx:id="lblContent" text="Note content goes here..." wrapText="true" minWidth="0" maxWidth="Infinity" styleClass="review-content-text"/>
+                </VBox>
+            </ScrollPane>
+
+            <!-- Quick Links -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Button fx:id="btnViewFull" text="👁 Open Note" onAction="#handleOpenNote" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 4 8;"/>
+                <Button fx:id="btnOpenMindMap" text="🌐 Open in Mind Map" onAction="#handleOpenInMindMap" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 4 8;"/>
+            </HBox>
+
+            <Separator style="-fx-padding: 2 0;"/>
+
+            <!-- Retention Grading Section -->
+            <VBox spacing="8" alignment="CENTER">
+                <Label text="How well did you remember this note?" style="-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #334155;"/>
+                <HBox spacing="8" alignment="CENTER">
+                    <Button fx:id="btnAgain" text="🔄 Again (1d)" onAction="#handleAgain" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-outcome-again"/>
+                    <Button fx:id="btnHard" text="⚡ Hard (+2d)" onAction="#handleHard" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-outcome-hard"/>
+                    <Button fx:id="btnGood" text="👍 Good (+3d)" onAction="#handleGood" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-outcome-good"/>
+                    <Button fx:id="btnEasy" text="🌟 Easy (+4d)" onAction="#handleEasy" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-outcome-easy"/>
+                </HBox>
+            </VBox>
+
+        </VBox>
+
+    </VBox>
+
+    <!-- State 3: Session Finished Celebration -->
+    <VBox fx:id="boxCompleted" alignment="CENTER" spacing="14" visible="false" managed="false" VBox.vgrow="ALWAYS" style="-fx-padding: 30 20;">
+        <Label text="🎉" style="-fx-font-size: 48px;"/>
+        <Label text="Review Session Complete!" styleClass="view-header" style="-fx-font-size: 18px;"/>
+        <Label fx:id="lblCompletedSummary" text="You've reviewed all due notes in this study session." style="-fx-font-size: 13px; -fx-text-fill: #64748b;" wrapText="true" alignment="CENTER"/>
+        <Button text="Done &amp; Back to Schedule" onAction="#handleClose" styleClass="btn-primary" style="-fx-font-size: 13px; -fx-padding: 8 24;"/>
+    </VBox>
+
+</VBox>

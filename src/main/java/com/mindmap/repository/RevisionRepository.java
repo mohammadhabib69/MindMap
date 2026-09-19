@@ -171,6 +171,142 @@ public class RevisionRepository {
     }
 
     /**
+     * Finds all upcoming revisions scheduled after a specific date that are PENDING.
+     */
+    public List<Revision> findUpcomingAfter(LocalDate date) {
+        String sql = """
+                SELECT id, note_id, review_date, status, interval_days, created_at
+                FROM revisions
+                WHERE review_date > ? AND (status IS NULL OR status = 'PENDING')
+                ORDER BY review_date ASC;
+                """;
+        List<Revision> revisions = new ArrayList<>();
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, DateUtil.formatDate(date));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    revisions.add(mapResultSetToRevision(rs));
+                }
+            }
+            return revisions;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error finding upcoming revisions after date: " + e.getMessage(), e);
+            throw new DatabaseException("Failed to query upcoming revisions", e);
+        }
+    }
+
+    /**
+     * Finds an active (PENDING) revision for a note, if any.
+     */
+    public Optional<Revision> findActiveByNoteId(int noteId) {
+        String sql = """
+                SELECT id, note_id, review_date, status, interval_days, created_at
+                FROM revisions
+                WHERE note_id = ? AND (status IS NULL OR status = 'PENDING')
+                ORDER BY review_date ASC
+                LIMIT 1;
+                """;
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, noteId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapResultSetToRevision(rs));
+                }
+            }
+            return Optional.empty();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error finding active revision for note ID: " + noteId, e);
+            throw new DatabaseException("Failed to query active revision for note ID " + noteId, e);
+        }
+    }
+
+    /**
+     * Returns the count of revisions due on or before the given date.
+     */
+    public int countDue(LocalDate date) {
+        String sql = """
+                SELECT COUNT(*)
+                FROM revisions
+                WHERE review_date <= ? AND (status IS NULL OR status = 'PENDING');
+                """;
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, DateUtil.formatDate(date));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+            return 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error counting due revisions: " + e.getMessage(), e);
+            throw new DatabaseException("Failed to count due revisions", e);
+        }
+    }
+
+    /**
+     * Returns the count of upcoming revisions scheduled after the given date.
+     */
+    public int countUpcoming(LocalDate date) {
+        String sql = """
+                SELECT COUNT(*)
+                FROM revisions
+                WHERE review_date > ? AND (status IS NULL OR status = 'PENDING');
+                """;
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, DateUtil.formatDate(date));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+            return 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error counting upcoming revisions: " + e.getMessage(), e);
+            throw new DatabaseException("Failed to count upcoming revisions", e);
+        }
+    }
+
+    /**
+     * Returns the total count of active/pending scheduled revisions.
+     */
+    public int countTotalScheduled() {
+        String sql = """
+                SELECT COUNT(*)
+                FROM revisions
+                WHERE status IS NULL OR status = 'PENDING';
+                """;
+
+        try (Connection conn = DatabaseManager.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error counting total scheduled revisions: " + e.getMessage(), e);
+            throw new DatabaseException("Failed to count total scheduled revisions", e);
+        }
+    }
+
+    /**
      * Updates an existing revision.
      */
     public boolean update(Revision revision) {
