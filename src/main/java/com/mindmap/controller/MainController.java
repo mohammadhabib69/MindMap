@@ -1,6 +1,7 @@
 package com.mindmap.controller;
 
 import com.mindmap.database.DatabaseManager;
+import com.mindmap.model.Note;
 import com.mindmap.util.AnimationUtil;
 import com.mindmap.util.ViewManager;
 import javafx.application.Platform;
@@ -49,10 +50,17 @@ public class MainController {
     @FXML
     private StackPane contentArea;
 
+    private static MainController instance;
+
+    public static MainController getInstance() {
+        return instance;
+    }
+
     private Button currentActiveButton;
 
     @FXML
     public void initialize() {
+        instance = this;
         setupSidebarAnimations();
         // Load default dashboard screen on startup
         showDashboard();
@@ -112,7 +120,7 @@ public class MainController {
         alert.setHeaderText("MindMap: Personal Knowledge Base & Study Organizer");
         alert.setContentText("""
                 Version: 1.0-SNAPSHOT
-                Phase: Phase 6 - Interactive 3D Knowledge Space
+                Phase: Phase 7 - Advanced Search & Filtering
                 Framework: JavaFX 21 & SQLite JDBC
                 Database: """ + DatabaseManager.JDBC_URL + """
 
@@ -139,6 +147,22 @@ public class MainController {
         if (contentArea != null && view != null) {
             contentArea.getChildren().setAll(view);
             setActiveButton(targetButton);
+        }
+    }
+
+    /**
+     * Navigates to the Mind Map view, selects the specified note, and focuses the camera/canvas on it.
+     *
+     * @param note The note to display and focus in Mind Map.
+     */
+    public void openInMindMap(Note note) {
+        ViewManager.ViewResult result = ViewManager.loadViewWithController("/fxml/mindmap.fxml");
+        if (contentArea != null && result.getRoot() != null) {
+            contentArea.getChildren().setAll(result.getRoot());
+            setActiveButton(btnMindMap);
+            if (result.getController() instanceof MindMapController mindMapController && note != null) {
+                Platform.runLater(() -> mindMapController.focusNote(note));
+            }
         }
     }
 

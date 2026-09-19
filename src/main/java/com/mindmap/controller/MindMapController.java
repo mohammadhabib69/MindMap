@@ -883,8 +883,20 @@ public class MindMapController {
         runAutoLayout();
     }
 
+    /**
+     * Programmatically selects a note and focuses the 2D canvas or 3D camera on it.
+     *
+     * @param note The note to select and focus.
+     */
+    public void focusNote(Note note) {
+        if (note != null) {
+            selectNode(note);
+            handleFocusSelected();
+        }
+    }
+
     @FXML
-    private void handleFocusSelected() {
+    public void handleFocusSelected() {
         if (is3DMode && knowledgeSpace3D != null) {
             knowledgeSpace3D.focusSelected();
         } else if (!is3DMode && selectedNote != null) {

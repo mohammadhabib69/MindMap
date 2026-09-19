@@ -27,7 +27,7 @@ public class SettingsController {
             lblAppVersion.setText("1.0-SNAPSHOT");
         }
         if (lblAppPhase != null) {
-            lblAppPhase.setText("Phase 6 - Interactive 3D Knowledge Space");
+            lblAppPhase.setText("Phase 7 - Advanced Search & Filtering");
         }
     }
 }

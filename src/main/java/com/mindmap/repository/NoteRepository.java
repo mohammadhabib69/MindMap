@@ -2,7 +2,10 @@ package com.mindmap.repository;
 
 import com.mindmap.database.DatabaseException;
 import com.mindmap.database.DatabaseManager;
+import com.mindmap.model.ConnectionFilterPreset;
+import com.mindmap.model.DateFilterPreset;
 import com.mindmap.model.Note;
+import com.mindmap.model.SearchCriteria;
 import com.mindmap.model.Tag;
 import com.mindmap.util.DateUtil;
 
@@ -11,7 +14,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -230,6 +235,29 @@ public class NoteRepository {
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error counting distinct subjects: " + e.getMessage(), e);
             throw new DatabaseException("Failed to count distinct subjects", e);
+        }
+    }
+
+    /**
+     * Retrieves a sorted list of all distinct, non-empty subjects across notes.
+     *
+     * @return Alphabetically ordered list of distinct subject names.
+     */
+    public List<String> findAllDistinctSubjects() {
+        String sql = "SELECT DISTINCT TRIM(subject) AS subject_name FROM notes WHERE subject IS NOT NULL AND TRIM(subject) <> '' ORDER BY TRIM(subject) COLLATE NOCASE ASC;";
+        List<String> subjects = new ArrayList<>();
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                subjects.add(rs.getString("subject_name"));
+            }
+            return subjects;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error querying distinct subjects: " + e.getMessage(), e);
+            throw new DatabaseException("Failed to query distinct subjects", e);
         }
     }
 
@@ -455,6 +483,7 @@ public class NoteRepository {
 
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT n.id, n.title, n.content, n.subject, n.difficulty, n.created_at, n.updated_at, ");
+        sql.append("(SELECT COUNT(*) FROM connections c WHERE c.from_note_id = n.id OR c.to_note_id = n.id) AS connection_count, ");
         sql.append("t.id AS tag_id, t.name AS tag_name ");
         sql.append("FROM notes n ");
 
@@ -495,6 +524,140 @@ public class NoteRepository {
         }
     }
 
+    /**
+     * Advanced multi-criteria search combining keyword matching, subject, difficulty, tag,
+     * date range, and connection status filters using logical AND semantics.
+     *
+     * @param criteria Multi-criteria search filter object.
+     * @return List of matching Note entities with tags and connection counts.
+     */
+    public List<Note> searchByCriteria(SearchCriteria criteria) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT n.id, n.title, n.content, n.subject, n.difficulty, n.created_at, n.updated_at, ");
+        sql.append("(SELECT COUNT(*) FROM connections c WHERE c.from_note_id = n.id OR c.to_note_id = n.id) AS connection_count, ");
+        sql.append("t.id AS tag_id, t.name AS tag_name ");
+        sql.append("FROM notes n ");
+        sql.append("LEFT JOIN note_tags nt ON n.id = nt.note_id ");
+        sql.append("LEFT JOIN tags t ON nt.tag_id = t.id ");
+
+        List<String> whereClauses = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
+
+        if (criteria != null) {
+            // 1. Text Search across Title, Content, Subject, or Tags
+            if (criteria.hasQuery()) {
+                String queryWildcard = "%" + criteria.getQuery().trim().toLowerCase() + "%";
+                whereClauses.add("""
+                        (LOWER(n.title) LIKE ? OR LOWER(n.content) LIKE ? OR LOWER(n.subject) LIKE ? OR EXISTS (
+                            SELECT 1 FROM note_tags nt_q
+                            JOIN tags t_q ON nt_q.tag_id = t_q.id
+                            WHERE nt_q.note_id = n.id AND LOWER(t_q.name) LIKE ?
+                        ))
+                        """);
+                params.add(queryWildcard);
+                params.add(queryWildcard);
+                params.add(queryWildcard);
+                params.add(queryWildcard);
+            }
+
+            // 2. Subject Filter
+            if (criteria.hasSubject()) {
+                whereClauses.add("LOWER(TRIM(n.subject)) = LOWER(?)");
+                params.add(criteria.getSubject().trim());
+            }
+
+            // 3. Difficulty Filter
+            if (criteria.hasDifficulty()) {
+                whereClauses.add("UPPER(n.difficulty) = UPPER(?)");
+                params.add(criteria.getDifficulty().trim());
+            }
+
+            // 4. Tag Filter
+            if (criteria.hasTag()) {
+                whereClauses.add("""
+                        EXISTS (
+                            SELECT 1 FROM note_tags nt_f
+                            JOIN tags t_f ON nt_f.tag_id = t_f.id
+                            WHERE nt_f.note_id = n.id AND LOWER(t_f.name) = LOWER(?)
+                        )
+                        """);
+                params.add(criteria.getTag().trim());
+            }
+
+            // 5. Date Filter
+            if (criteria.hasDateFilter()) {
+                LocalDate today = LocalDate.now();
+                LocalDateTime startDateTime = null;
+                LocalDateTime endDateTime = null;
+
+                DateFilterPreset preset = criteria.getDateFilter();
+                switch (preset) {
+                    case TODAY -> {
+                        startDateTime = today.atStartOfDay();
+                        endDateTime = today.atTime(LocalTime.MAX);
+                    }
+                    case LAST_7_DAYS -> {
+                        startDateTime = today.minusDays(7).atStartOfDay();
+                        endDateTime = today.atTime(LocalTime.MAX);
+                    }
+                    case LAST_30_DAYS -> {
+                        startDateTime = today.minusDays(30).atStartOfDay();
+                        endDateTime = today.atTime(LocalTime.MAX);
+                    }
+                    case CUSTOM -> {
+                        if (criteria.getCustomStartDate() != null) {
+                            startDateTime = criteria.getCustomStartDate().atStartOfDay();
+                        }
+                        if (criteria.getCustomEndDate() != null) {
+                            endDateTime = criteria.getCustomEndDate().atTime(LocalTime.MAX);
+                        }
+                    }
+                    default -> {}
+                }
+
+                if (startDateTime != null) {
+                    whereClauses.add("n.updated_at >= ?");
+                    params.add(DateUtil.formatDateTime(startDateTime));
+                }
+                if (endDateTime != null) {
+                    whereClauses.add("n.updated_at <= ?");
+                    params.add(DateUtil.formatDateTime(endDateTime));
+                }
+            }
+
+            // 6. Connection Filter
+            if (criteria.hasConnectionFilter()) {
+                ConnectionFilterPreset connPreset = criteria.getConnectionFilter();
+                switch (connPreset) {
+                    case HAS_CONNECTIONS -> whereClauses.add("EXISTS (SELECT 1 FROM connections c WHERE c.from_note_id = n.id OR c.to_note_id = n.id)");
+                    case NO_CONNECTIONS -> whereClauses.add("NOT EXISTS (SELECT 1 FROM connections c WHERE c.from_note_id = n.id OR c.to_note_id = n.id)");
+                    default -> {}
+                }
+            }
+        }
+
+        if (!whereClauses.isEmpty()) {
+            sql.append("WHERE ").append(String.join(" AND ", whereClauses)).append(" ");
+        }
+
+        sql.append("ORDER BY n.updated_at DESC, t.name COLLATE NOCASE ASC;");
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                return mapResultSetToNotesList(rs);
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error searching notes by criteria: " + e.getMessage(), e);
+            throw new DatabaseException("Failed to search notes by criteria", e);
+        }
+    }
+
     private List<Note> mapResultSetToNotesList(ResultSet rs) throws SQLException {
         Map<Integer, Note> noteMap = new LinkedHashMap<>();
 
@@ -510,6 +673,11 @@ public class NoteRepository {
                 note.setDifficulty(rs.getString("difficulty"));
                 note.setCreatedAt(DateUtil.parseDateTime(rs.getString("created_at")));
                 note.setUpdatedAt(DateUtil.parseDateTime(rs.getString("updated_at")));
+                try {
+                    note.setConnectionCount(rs.getInt("connection_count"));
+                } catch (SQLException ignored) {
+                    // Column might not exist in older queries
+                }
                 noteMap.put(noteId, note);
             }
 

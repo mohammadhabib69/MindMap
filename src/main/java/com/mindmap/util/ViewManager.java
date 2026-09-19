@@ -31,15 +31,45 @@ public final class ViewManager {
      * @return The loaded Parent node, or an error node if loading failed.
      */
     public static Parent loadView(String fxmlPath) {
+        return loadViewWithController(fxmlPath).getRoot();
+    }
+
+    public static class ViewResult {
+        private final Parent root;
+        private final Object controller;
+
+        public ViewResult(Parent root, Object controller) {
+            this.root = root;
+            this.controller = controller;
+        }
+
+        public Parent getRoot() {
+            return root;
+        }
+
+        public Object getController() {
+            return controller;
+        }
+    }
+
+    /**
+     * Loads an FXML view and returns both its root Parent and its initialized controller.
+     *
+     * @param fxmlPath Resource path to the FXML file.
+     * @return ViewResult containing the root and controller.
+     */
+    public static ViewResult loadViewWithController(String fxmlPath) {
         try {
             URL resource = ViewManager.class.getResource(fxmlPath);
             if (resource == null) {
                 throw new IOException("FXML resource not found: " + fxmlPath);
             }
-            return FXMLLoader.load(resource);
+            FXMLLoader loader = new FXMLLoader(resource);
+            Parent root = loader.load();
+            return new ViewResult(root, loader.getController());
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to load FXML view from: " + fxmlPath, e);
-            return createErrorPlaceholder(fxmlPath, e.getMessage());
+            return new ViewResult(createErrorPlaceholder(fxmlPath, e.getMessage()), null);
         }
     }
 

@@ -19,6 +19,7 @@ public class Note {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<Tag> tags = new ArrayList<>();
+    private int connectionCount;
 
     public Note() {
     }
@@ -136,6 +137,14 @@ public class Note {
         if (tag != null) {
             tags.remove(tag);
         }
+    }
+
+    public int getConnectionCount() {
+        return connectionCount;
+    }
+
+    public void setConnectionCount(int connectionCount) {
+        this.connectionCount = connectionCount;
     }
 
     @Override
