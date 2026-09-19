@@ -24,10 +24,10 @@ public class Main extends Application {
 
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
     private static final String APP_TITLE = "MindMap - Personal Knowledge Base";
-    private static final int WINDOW_WIDTH = 1100;
-    private static final int WINDOW_HEIGHT = 720;
-    private static final int MIN_WIDTH = 1000;
-    private static final int MIN_HEIGHT = 650;
+    private static final int WINDOW_WIDTH = 1050;
+    private static final int WINDOW_HEIGHT = 680;
+    private static final int MIN_WIDTH = 720;
+    private static final int MIN_HEIGHT = 480;
 
     private String initErrorMessage = null;
 

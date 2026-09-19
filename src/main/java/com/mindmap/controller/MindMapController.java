@@ -386,8 +386,10 @@ public class MindMapController {
 
         // Clamp to visible viewport
         for (NodeCardView card : cards) {
-            double clampedX = Math.max(20, Math.min(canvasW - 180, card.getLayoutX()));
-            double clampedY = Math.max(20, Math.min(canvasH - 90, card.getLayoutY()));
+            double maxX = Math.max(10, canvasW - 170);
+            double maxY = Math.max(10, canvasH - 85);
+            double clampedX = Math.max(10, Math.min(maxX, card.getLayoutX()));
+            double clampedY = Math.max(10, Math.min(maxY, card.getLayoutY()));
             card.setLayoutX(clampedX);
             card.setLayoutY(clampedY);
         }

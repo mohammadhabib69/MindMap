@@ -11,14 +11,14 @@
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.mindmap.controller.MainController"
-            prefWidth="1100" prefHeight="720"
+            prefWidth="1050" prefHeight="680"
             styleClass="main-root">
 
     <!-- Left Sidebar -->
     <left>
-        <VBox spacing="6" styleClass="sidebar" prefWidth="250" minWidth="220" maxWidth="280">
+        <VBox spacing="6" styleClass="sidebar" prefWidth="200" minWidth="175" maxWidth="240">
             <padding>
-                <Insets top="28" right="16" bottom="24" left="16"/>
+                <Insets top="20" right="12" bottom="20" left="12"/>
             </padding>
 
             <!-- Brand Header -->
@@ -70,7 +70,7 @@
 
     <!-- Dynamic Main Content Area -->
     <center>
-        <StackPane fx:id="contentArea" styleClass="content-area">
+        <StackPane fx:id="contentArea" minWidth="0" minHeight="0" styleClass="content-area">
             <!-- Dynamically populated with selected FXML screen -->
         </StackPane>
     </center>

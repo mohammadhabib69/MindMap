@@ -22,7 +22,7 @@
       stylesheets="@../css/style.css">
 
     <padding>
-        <Insets top="24" right="28" bottom="24" left="28"/>
+        <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
 
     <!-- Header Section -->
@@ -46,18 +46,18 @@
 
     <!-- Toolbar / Search Section -->
     <HBox alignment="CENTER_LEFT" spacing="12" style="-fx-padding: 2 0 4 0;">
-        <TextField fx:id="txtSearch" promptText="🔍 Search notes in graph..." prefWidth="300" styleClass="input-field"/>
+        <TextField fx:id="txtSearch" promptText="🔍 Search notes in graph..." prefWidth="240" minWidth="120" styleClass="input-field"/>
         <Button fx:id="btnClearSearch" text="✕ Clear" onAction="#handleClearSearch" styleClass="btn-secondary" style="-fx-padding: 6 10; -fx-font-size: 11px;"/>
         <Region HBox.hgrow="ALWAYS"/>
         <Label fx:id="lblGraphStats" text="Graph: 0 notes • 0 connections" style="-fx-font-size: 12px; -fx-text-fill: #64748b; -fx-font-weight: 500;"/>
     </HBox>
 
     <!-- Main Content Area: Graph Canvas + Side Inspector Panel -->
-    <HBox spacing="16" VBox.vgrow="ALWAYS">
+    <HBox spacing="14" VBox.vgrow="ALWAYS">
 
         <!-- Graph Canvas Area -->
-        <StackPane fx:id="canvasContainer" HBox.hgrow="ALWAYS" styleClass="graph-canvas-viewport">
-            <Pane fx:id="graphCanvasPane" styleClass="graph-canvas-grid"/>
+        <StackPane fx:id="canvasContainer" HBox.hgrow="ALWAYS" minWidth="80" minHeight="80" styleClass="graph-canvas-viewport">
+            <Pane fx:id="graphCanvasPane" minWidth="80" minHeight="80" styleClass="graph-canvas-grid"/>
 
             <!-- Banner: No Connections Yet -->
             <VBox fx:id="bannerNoConnections" alignment="TOP_CENTER" mouseTransparent="true" visible="false" style="-fx-padding: 16 0 0 0;">
@@ -76,7 +76,7 @@
         </StackPane>
 
         <!-- Side Inspector Panel -->
-        <VBox fx:id="inspectorPanel" prefWidth="320" minWidth="290" maxWidth="350" styleClass="graph-inspector" spacing="14">
+        <VBox fx:id="inspectorPanel" prefWidth="260" minWidth="200" maxWidth="300" styleClass="graph-inspector" spacing="12">
 
             <!-- State A: Overview (No note selected) -->
             <VBox fx:id="boxOverview" spacing="14" VBox.vgrow="ALWAYS">
