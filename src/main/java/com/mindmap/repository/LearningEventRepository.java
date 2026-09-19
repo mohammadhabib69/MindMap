@@ -3,6 +3,8 @@ package com.mindmap.repository;
 import com.mindmap.database.DatabaseException;
 import com.mindmap.database.DatabaseManager;
 import com.mindmap.model.LearningEvent;
+import com.mindmap.model.Note;
+import com.mindmap.model.TimelineEvent;
 import com.mindmap.util.DateUtil;
 
 import java.sql.Connection;
@@ -11,7 +13,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -164,6 +168,219 @@ public class LearningEventRepository {
             LOGGER.log(Level.SEVERE, "Error finding learning events between dates: " + e.getMessage(), e);
             throw new DatabaseException("Failed to query learning events in time range", e);
         }
+    }
+
+    /**
+     * Retrieves all timeline events with their Note details joined in a single query.
+     * Ordered chronologically by event_date DESC.
+     */
+    public List<TimelineEvent> findTimelineEvents() {
+        String sql = """
+                SELECT
+                    le.id,
+                    le.note_id,
+                    le.event_type,
+                    le.event_date,
+                    le.description,
+                    n.id AS n_id,
+                    n.title AS n_title,
+                    n.content AS n_content,
+                    n.subject AS n_subject,
+                    n.difficulty AS n_difficulty,
+                    n.created_at AS n_created_at,
+                    n.updated_at AS n_updated_at
+                FROM learning_events le
+                LEFT JOIN notes n ON le.note_id = n.id
+                ORDER BY le.event_date DESC;
+                """;
+        List<TimelineEvent> events = new ArrayList<>();
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                events.add(mapJoinedResultSet(rs));
+            }
+            return events;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error finding timeline events with notes: " + e.getMessage(), e);
+            throw new DatabaseException("Failed to query timeline events with notes", e);
+        }
+    }
+
+    /**
+     * Retrieves timeline events filtered by event type, date range, and search query.
+     * Uses a single parameterized JOIN query.
+     */
+    public List<TimelineEvent> findTimelineEventsFiltered(String eventType, LocalDate fromDate, LocalDate toDate, String searchQuery) {
+        StringBuilder sql = new StringBuilder("""
+                SELECT
+                    le.id,
+                    le.note_id,
+                    le.event_type,
+                    le.event_date,
+                    le.description,
+                    n.id AS n_id,
+                    n.title AS n_title,
+                    n.content AS n_content,
+                    n.subject AS n_subject,
+                    n.difficulty AS n_difficulty,
+                    n.created_at AS n_created_at,
+                    n.updated_at AS n_updated_at
+                FROM learning_events le
+                LEFT JOIN notes n ON le.note_id = n.id
+                WHERE 1=1
+                """);
+
+        List<Object> params = new ArrayList<>();
+
+        if (eventType != null && !eventType.trim().isEmpty() && !eventType.equalsIgnoreCase("ALL")) {
+            sql.append(" AND UPPER(le.event_type) = ?");
+            params.add(eventType.trim().toUpperCase());
+        }
+
+        if (fromDate != null) {
+            sql.append(" AND le.event_date >= ?");
+            params.add(DateUtil.formatDateTime(fromDate.atStartOfDay()));
+        }
+
+        if (toDate != null) {
+            sql.append(" AND le.event_date <= ?");
+            params.add(DateUtil.formatDateTime(toDate.atTime(LocalTime.MAX)));
+        }
+
+        if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+            String pattern = "%" + searchQuery.trim().toLowerCase() + "%";
+            sql.append(" AND (LOWER(COALESCE(n.title, '')) LIKE ? OR LOWER(COALESCE(le.description, '')) LIKE ? OR LOWER(COALESCE(n.subject, '')) LIKE ?)");
+            params.add(pattern);
+            params.add(pattern);
+            params.add(pattern);
+        }
+
+        sql.append(" ORDER BY le.event_date DESC;");
+
+        List<TimelineEvent> events = new ArrayList<>();
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    events.add(mapJoinedResultSet(rs));
+                }
+            }
+            return events;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error finding filtered timeline events: " + e.getMessage(), e);
+            throw new DatabaseException("Failed to query filtered timeline events", e);
+        }
+    }
+
+    /**
+     * Finds timeline events associated with a specific note ID with note details joined.
+     */
+    public List<TimelineEvent> findTimelineEventsByNoteId(int noteId) {
+        String sql = """
+                SELECT
+                    le.id,
+                    le.note_id,
+                    le.event_type,
+                    le.event_date,
+                    le.description,
+                    n.id AS n_id,
+                    n.title AS n_title,
+                    n.content AS n_content,
+                    n.subject AS n_subject,
+                    n.difficulty AS n_difficulty,
+                    n.created_at AS n_created_at,
+                    n.updated_at AS n_updated_at
+                FROM learning_events le
+                LEFT JOIN notes n ON le.note_id = n.id
+                WHERE le.note_id = ?
+                ORDER BY le.event_date DESC;
+                """;
+        List<TimelineEvent> events = new ArrayList<>();
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, noteId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    events.add(mapJoinedResultSet(rs));
+                }
+            }
+            return events;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error finding timeline events for note: " + e.getMessage(), e);
+            throw new DatabaseException("Failed to query timeline events for note ID " + noteId, e);
+        }
+    }
+
+    /**
+     * Counts total learning events in database.
+     */
+    public int countEvents() {
+        String sql = "SELECT COUNT(*) FROM learning_events;";
+        try (Connection conn = DatabaseManager.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            return rs.next() ? rs.getInt(1) : 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error counting learning events: " + e.getMessage(), e);
+            throw new DatabaseException("Failed to count learning events", e);
+        }
+    }
+
+    /**
+     * Counts learning events of a specific type.
+     */
+    public int countEventsByType(String eventType) {
+        String sql = "SELECT COUNT(*) FROM learning_events WHERE UPPER(event_type) = ?;";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, eventType.trim().toUpperCase());
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error counting events by type: " + e.getMessage(), e);
+            throw new DatabaseException("Failed to count events by type " + eventType, e);
+        }
+    }
+
+    private TimelineEvent mapJoinedResultSet(ResultSet rs) throws SQLException {
+        int noteIdVal = rs.getInt("note_id");
+        Integer noteId = rs.wasNull() ? null : noteIdVal;
+
+        LearningEvent le = new LearningEvent(
+                rs.getInt("id"),
+                noteId,
+                rs.getString("event_type"),
+                DateUtil.parseDateTime(rs.getString("event_date")),
+                rs.getString("description")
+        );
+
+        int nIdVal = rs.getInt("n_id");
+        Note note = null;
+        if (!rs.wasNull() && nIdVal > 0) {
+            note = new Note();
+            note.setId(nIdVal);
+            note.setTitle(rs.getString("n_title"));
+            note.setContent(rs.getString("n_content"));
+            note.setSubject(rs.getString("n_subject"));
+            note.setDifficulty(rs.getString("n_difficulty"));
+            note.setCreatedAt(DateUtil.parseDateTime(rs.getString("n_created_at")));
+            note.setUpdatedAt(DateUtil.parseDateTime(rs.getString("n_updated_at")));
+        }
+
+        return new TimelineEvent(le, note);
     }
 
     /**

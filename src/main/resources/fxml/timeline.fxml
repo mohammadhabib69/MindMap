@@ -1,36 +1,99 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.mindmap.controller.TimelineController"
-      spacing="20"
-      styleClass="screen-container">
+      spacing="16"
+      styleClass="screen-container"
+      stylesheets="@../css/style.css">
 
     <padding>
-        <Insets top="20" right="20" bottom="20" left="20"/>
+        <Insets top="20" right="24" bottom="20" left="24"/>
     </padding>
 
     <!-- Header Section -->
-    <VBox spacing="4">
-        <Label text="Learning Timeline" styleClass="view-header"/>
-        <Label text="Chronological record of study sessions, notes, and milestones" styleClass="view-subtitle"/>
-    </VBox>
-
-    <!-- Scrollable Content Area -->
-    <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS" styleClass="scroll-pane-clean">
-        <VBox alignment="CENTER" spacing="12" styleClass="card" VBox.vgrow="ALWAYS">
-            <padding>
-                <Insets top="60" right="40" bottom="60" left="40"/>
-            </padding>
-            <Label text="📅" styleClass="placeholder-icon"/>
-            <Label text="Your learning history will appear here." styleClass="placeholder-heading"/>
-            <Label text="As you create notes and complete review sessions, your study activity will be tracked chronologically." styleClass="placeholder-subtext"/>
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <VBox spacing="3" HBox.hgrow="ALWAYS" minWidth="140">
+            <Label text="Learning Timeline" styleClass="view-header"/>
+            <Label text="Chronological record of your study sessions, note activity, and milestones" styleClass="view-subtitle"/>
         </VBox>
-    </ScrollPane>
+        <Button fx:id="btnRefresh" text="🔄 Refresh" onAction="#handleRefresh" styleClass="btn-secondary" style="-fx-font-size: 12px; -fx-padding: 6 12;"/>
+    </HBox>
+
+    <!-- Summary Metrics Bar -->
+    <HBox spacing="14" alignment="CENTER_LEFT">
+        <!-- Total Events -->
+        <VBox spacing="4" HBox.hgrow="ALWAYS" styleClass="card" style="-fx-padding: 12 16; -fx-background-color: #ffffff;">
+            <Label text="TOTAL EVENTS" styleClass="inspector-section-header" style="-fx-text-fill: #2563eb;"/>
+            <HBox alignment="BASELINE_LEFT" spacing="8">
+                <Label fx:id="lblStatTotal" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                <Label text="recorded activities" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
+            </HBox>
+        </VBox>
+
+        <!-- Reviews Completed -->
+        <VBox spacing="4" HBox.hgrow="ALWAYS" styleClass="card" style="-fx-padding: 12 16; -fx-background-color: #ffffff;">
+            <Label text="REVIEWS" styleClass="inspector-section-header" style="-fx-text-fill: #10b981;"/>
+            <HBox alignment="BASELINE_LEFT" spacing="8">
+                <Label fx:id="lblStatReviews" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                <Label text="spaced repetition sessions" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
+            </HBox>
+        </VBox>
+
+        <!-- Note Activity -->
+        <VBox spacing="4" HBox.hgrow="ALWAYS" styleClass="card" style="-fx-padding: 12 16; -fx-background-color: #ffffff;">
+            <Label text="NOTE ACTIONS" styleClass="inspector-section-header" style="-fx-text-fill: #8b5cf6;"/>
+            <HBox alignment="BASELINE_LEFT" spacing="8">
+                <Label fx:id="lblStatNoteActivity" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                <Label text="creations and updates" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
+            </HBox>
+        </VBox>
+    </HBox>
+
+    <!-- Search & Filter Controls Bar -->
+    <FlowPane hgap="10" vgap="8" alignment="CENTER_LEFT" styleClass="card" style="-fx-padding: 10 14; -fx-background-color: #ffffff;">
+        <TextField fx:id="txtSearch" promptText="Search note, description, subject..." prefWidth="240" styleClass="search-field" style="-fx-font-size: 12px;"/>
+        <ComboBox fx:id="cmbEventType" prefWidth="140" promptText="All Events" styleClass="combo-box-clean" style="-fx-font-size: 12px;"/>
+        <ComboBox fx:id="cmbDateRange" prefWidth="130" promptText="All Dates" styleClass="combo-box-clean" style="-fx-font-size: 12px;"/>
+        
+        <HBox fx:id="boxCustomDates" spacing="6" alignment="CENTER_LEFT" visible="false" managed="false">
+            <DatePicker fx:id="dpFrom" promptText="From" prefWidth="115" style="-fx-font-size: 11px;"/>
+            <Label text="to" style="-fx-text-fill: #64748b; -fx-font-size: 11px;"/>
+            <DatePicker fx:id="dpTo" promptText="To" prefWidth="115" style="-fx-font-size: 11px;"/>
+        </HBox>
+
+        <Button fx:id="btnApply" text="Search" onAction="#handleApplyFilters" styleClass="btn-primary" style="-fx-font-size: 11px; -fx-padding: 5 12;"/>
+        <Button fx:id="btnReset" text="Clear" onAction="#handleResetFilters" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 5 10;"/>
+        
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="lblFilterStatus" text="" style="-fx-font-size: 11px; -fx-text-fill: #64748b; -fx-font-weight: 500;"/>
+    </FlowPane>
+
+    <!-- Main Content Area: Virtualized Timeline List -->
+    <StackPane VBox.vgrow="ALWAYS" styleClass="timeline-container">
+        <!-- Virtualized ListView -->
+        <ListView fx:id="listTimeline" styleClass="timeline-list"/>
+
+        <!-- Polished Empty State -->
+        <VBox fx:id="boxEmptyState" alignment="CENTER" spacing="12" styleClass="placeholder-box" style="-fx-padding: 50 20;" visible="false" managed="false">
+            <Label text="📅" styleClass="placeholder-icon"/>
+            <Label text="No learning activity yet." styleClass="placeholder-heading"/>
+            <Label text="Create notes and complete review sessions to build your learning timeline." styleClass="placeholder-subtext" alignment="CENTER" wrapText="true" maxWidth="420"/>
+        </VBox>
+    </StackPane>
 
 </VBox>

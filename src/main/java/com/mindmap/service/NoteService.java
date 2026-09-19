@@ -1,27 +1,40 @@
 package com.mindmap.service;
 
 import com.mindmap.model.Difficulty;
+import com.mindmap.model.LearningEvent;
+import com.mindmap.model.LearningEventType;
 import com.mindmap.model.Note;
+import com.mindmap.repository.LearningEventRepository;
 import com.mindmap.repository.NoteRepository;
 import com.mindmap.util.ValidationException;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Service managing business logic, validation, and CRUD operations for Note entities.
  */
 public class NoteService {
 
+    private static final Logger LOGGER = Logger.getLogger(NoteService.class.getName());
+
     private final NoteRepository noteRepository;
+    private final LearningEventRepository learningEventRepository;
 
     public NoteService() {
-        this(new NoteRepository());
+        this(new NoteRepository(), new LearningEventRepository());
     }
 
     public NoteService(NoteRepository noteRepository) {
+        this(noteRepository, new LearningEventRepository());
+    }
+
+    public NoteService(NoteRepository noteRepository, LearningEventRepository learningEventRepository) {
         this.noteRepository = noteRepository;
+        this.learningEventRepository = learningEventRepository != null ? learningEventRepository : new LearningEventRepository();
     }
 
     /**
@@ -40,7 +53,9 @@ public class NoteService {
         }
         note.setUpdatedAt(now);
 
-        return noteRepository.create(note);
+        Note created = noteRepository.create(note);
+        logEvent(created.getId(), LearningEventType.NOTE_CREATED.name(), "Created note: " + (created.getTitle() != null ? created.getTitle() : "Untitled"));
+        return created;
     }
 
     /**
@@ -61,7 +76,18 @@ public class NoteService {
         if (!success) {
             throw new ValidationException("Note with ID " + note.getId() + " does not exist.");
         }
+        logEvent(note.getId(), LearningEventType.NOTE_UPDATED.name(), "Updated note: " + (note.getTitle() != null ? note.getTitle() : "Untitled"));
         return note;
+    }
+
+    private void logEvent(int noteId, String eventType, String description) {
+        try {
+            if (learningEventRepository != null && noteId > 0) {
+                learningEventRepository.create(new LearningEvent(noteId, eventType, description));
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Failed to log learning event (" + eventType + ") for note " + noteId + ": " + e.getMessage());
+        }
     }
 
     /**
@@ -116,7 +142,9 @@ public class NoteService {
         note.setUpdatedAt(now);
 
         List<String> cleanTagNames = sanitizeTagNames(tagNames);
-        return noteRepository.createWithTags(note, cleanTagNames);
+        Note created = noteRepository.createWithTags(note, cleanTagNames);
+        logEvent(created.getId(), LearningEventType.NOTE_CREATED.name(), "Created note: " + (created.getTitle() != null ? created.getTitle() : "Untitled"));
+        return created;
     }
 
     /**
@@ -138,6 +166,7 @@ public class NoteService {
         if (!success) {
             throw new ValidationException("Note with ID " + note.getId() + " does not exist.");
         }
+        logEvent(note.getId(), LearningEventType.NOTE_UPDATED.name(), "Updated note: " + (note.getTitle() != null ? note.getTitle() : "Untitled"));
         return note;
     }
 

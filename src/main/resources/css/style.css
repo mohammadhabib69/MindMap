@@ -1013,3 +1013,178 @@
 
 
 
+
+/* =========================================================================
+   Timeline Screen Styles - Virtualized & Clean Timeline
+   ========================================================================= */
+
+.timeline-container {
+    -fx-background-color: transparent;
+}
+
+.timeline-list {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.timeline-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 2 0;
+}
+
+.timeline-list .list-cell:empty {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.timeline-list .list-cell:filled {
+    -fx-background-color: transparent;
+}
+
+.timeline-list .list-cell:filled:selected {
+    -fx-background-color: transparent;
+}
+
+.timeline-list .list-cell:filled:selected:focused {
+    -fx-background-color: transparent;
+}
+
+.timeline-list .scroll-bar:vertical {
+    -fx-pref-width: 6px;
+}
+
+.timeline-list .scroll-bar:vertical .thumb {
+    -fx-background-color: #cbd5e1;
+    -fx-background-radius: 3px;
+}
+
+.timeline-list .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+.timeline-list .scroll-bar:vertical .increment-button,
+.timeline-list .scroll-bar:vertical .decrement-button {
+    -fx-pref-height: 0;
+    -fx-min-height: 0;
+}
+
+/* Timeline Date Group Header */
+.timeline-header-container {
+    -fx-alignment: CENTER_LEFT;
+}
+
+.timeline-header-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+}
+
+.timeline-header-subtitle {
+    -fx-font-size: 12px;
+    -fx-text-fill: #64748b;
+}
+
+.timeline-header-count {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #475569;
+    -fx-background-color: #f1f5f9;
+    -fx-padding: 2 8;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+}
+
+/* Timeline Vertical Track */
+.timeline-connector-line {
+    -fx-background-color: #e2e8f0;
+}
+
+.timeline-dot {
+    -fx-background-radius: 11px;
+    -fx-border-radius: 11px;
+    -fx-alignment: CENTER;
+}
+
+.timeline-dot-reviewed {
+    -fx-background-color: #10b981;
+}
+
+.timeline-dot-created {
+    -fx-background-color: #2563eb;
+}
+
+.timeline-dot-updated {
+    -fx-background-color: #f59e0b;
+}
+
+.timeline-dot-default {
+    -fx-background-color: #8b5cf6;
+}
+
+/* Timeline Event Card */
+.timeline-event-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1px;
+    -fx-padding: 10 14;
+}
+
+.timeline-event-card:hover {
+    -fx-border-color: #cbd5e1;
+    -fx-background-color: #f8fafc;
+}
+
+.timeline-type-badge {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-padding: 2 6;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+}
+
+.timeline-badge-reviewed {
+    -fx-background-color: #d1fae5;
+    -fx-text-fill: #065f46;
+}
+
+.timeline-badge-created {
+    -fx-background-color: #dbeafe;
+    -fx-text-fill: #1e40af;
+}
+
+.timeline-badge-updated {
+    -fx-background-color: #fef3c7;
+    -fx-text-fill: #92400e;
+}
+
+.timeline-badge-default {
+    -fx-background-color: #ede9fe;
+    -fx-text-fill: #5b21b6;
+}
+
+.timeline-time-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: 500;
+    -fx-text-fill: #64748b;
+}
+
+.timeline-event-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.timeline-event-desc {
+    -fx-font-size: 12px;
+    -fx-text-fill: #475569;
+}
+
+.timeline-action-btn {
+    -fx-font-size: 11px;
+    -fx-padding: 3 8;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-cursor: hand;
+}
