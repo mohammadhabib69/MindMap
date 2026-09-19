@@ -11,9 +11,17 @@ public final class DateUtil {
 
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
     public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
+    public static final DateTimeFormatter DISPLAY_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private DateUtil() {
         // Prevent instantiation
+    }
+
+    /**
+     * Formats a LocalDateTime into a human-readable display string (e.g. 2026-09-19 14:30).
+     */
+    public static String formatDisplay(LocalDateTime dateTime) {
+        return dateTime != null ? dateTime.format(DISPLAY_FORMATTER) : "";
     }
 
     /**

@@ -68,6 +68,13 @@ public class TagService {
     }
 
     /**
+     * Returns the total count of distinct tags.
+     */
+    public int getTagCount() {
+        return getAllTags().size();
+    }
+
+    /**
      * Deletes a tag by its ID.
      */
     public boolean deleteTag(int id) {

@@ -100,12 +100,120 @@ public class NoteService {
     }
 
     /**
+     * Validates and persists a new Note along with its associated tags in a single transaction.
+     *
+     * @param note The note to persist.
+     * @param tagNames The tag names to link to this note.
+     * @return The persisted Note with its generated ID and tags.
+     */
+    public Note createNoteWithTags(Note note, List<String> tagNames) {
+        validateNote(note);
+
+        LocalDateTime now = LocalDateTime.now();
+        if (note.getCreatedAt() == null) {
+            note.setCreatedAt(now);
+        }
+        note.setUpdatedAt(now);
+
+        List<String> cleanTagNames = sanitizeTagNames(tagNames);
+        return noteRepository.createWithTags(note, cleanTagNames);
+    }
+
+    /**
+     * Validates and updates an existing Note and its tags in a single transaction.
+     *
+     * @param note The note to update.
+     * @param tagNames The updated list of tag names.
+     * @return The updated Note.
+     */
+    public Note updateNoteWithTags(Note note, List<String> tagNames) {
+        if (note.getId() <= 0) {
+            throw new ValidationException("Note ID must be a positive integer to update.");
+        }
+        validateNote(note);
+
+        note.setUpdatedAt(LocalDateTime.now());
+        List<String> cleanTagNames = sanitizeTagNames(tagNames);
+        boolean success = noteRepository.updateWithTags(note, cleanTagNames);
+        if (!success) {
+            throw new ValidationException("Note with ID " + note.getId() + " does not exist.");
+        }
+        return note;
+    }
+
+    /**
+     * Retrieves all notes with their tags populated.
+     */
+    public List<Note> getAllNotesWithTags() {
+        return noteRepository.findAllWithTags();
+    }
+
+    /**
+     * Retrieves a note by ID with its tags populated.
+     */
+    public Optional<Note> getNoteWithTags(int id) {
+        if (id <= 0) {
+            return Optional.empty();
+        }
+        return noteRepository.findByIdWithTags(id);
+    }
+
+    /**
+     * Searches notes by text in title, content, or subject (case-insensitive) with tags populated.
+     */
+    public List<Note> searchNotes(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            return getAllNotesWithTags();
+        }
+        return noteRepository.searchWithTags(query.trim());
+    }
+
+    /**
+     * Filters notes associated with a specific tag name using relational tables.
+     */
+    public List<Note> filterNotesByTag(String tagName) {
+        if (tagName == null || tagName.trim().isEmpty() || "All Tags".equalsIgnoreCase(tagName.trim())) {
+            return getAllNotesWithTags();
+        }
+        return noteRepository.findByTagWithTags(tagName.trim());
+    }
+
+    /**
+     * Performs combined text search and tag filtering.
+     */
+    public List<Note> searchAndFilterNotes(String query, String tagName) {
+        boolean hasQuery = (query != null && !query.trim().isEmpty());
+        boolean hasTag = (tagName != null && !tagName.trim().isEmpty() && !"All Tags".equalsIgnoreCase(tagName.trim()));
+
+        if (!hasQuery && !hasTag) {
+            return getAllNotesWithTags();
+        }
+        if (hasQuery && !hasTag) {
+            return searchNotes(query);
+        }
+        if (!hasQuery && hasTag) {
+            return filterNotesByTag(tagName);
+        }
+        return noteRepository.searchAndFilterWithTags(query.trim(), tagName.trim());
+    }
+
+    /**
      * Returns the total count of notes.
      *
      * @return Total notes count.
      */
     public int getNoteCount() {
         return noteRepository.count();
+    }
+
+    private List<String> sanitizeTagNames(List<String> rawTagNames) {
+        if (rawTagNames == null || rawTagNames.isEmpty()) {
+            return List.of();
+        }
+        return rawTagNames.stream()
+                .filter(name -> name != null && !name.trim().isEmpty())
+                .map(String::trim)
+                .toList();
     }
 
     /**

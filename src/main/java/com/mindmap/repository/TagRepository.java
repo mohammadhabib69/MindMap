@@ -24,24 +24,34 @@ public class TagRepository {
 
     /**
      * Inserts a new Tag and sets its generated ID.
-     * If the tag already exists by name, returns the existing tag without creating a duplicate.
+     * If the tag already exists by name (case-insensitive), returns the existing tag without creating a duplicate.
      *
      * @param tag The tag to create.
      * @return The created or existing Tag.
      */
     public Tag create(Tag tag) {
-        // First check if tag already exists to respect UNIQUE constraint
-        Optional<Tag> existing = findByName(tag.getName());
+        try (Connection conn = DatabaseManager.getConnection()) {
+            return create(tag, conn);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error creating tag: " + e.getMessage(), e);
+            throw new DatabaseException("Failed to insert tag into database", e);
+        }
+    }
+
+    /**
+     * Inserts a new Tag or returns the existing one using an existing Connection (for transactions).
+     */
+    public Tag create(Tag tag, Connection conn) throws SQLException {
+        Optional<Tag> existing = findByName(tag.getName(), conn);
         if (existing.isPresent()) {
             tag.setId(existing.get().getId());
+            tag.setName(existing.get().getName());
             return tag;
         }
 
         String sql = "INSERT INTO tags (name) VALUES (?);";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
+        try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, tag.getName().trim());
             stmt.executeUpdate();
 
@@ -54,9 +64,6 @@ public class TagRepository {
             }
 
             return tag;
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Error creating tag: " + e.getMessage(), e);
-            throw new DatabaseException("Failed to insert tag into database", e);
         }
     }
 
@@ -84,14 +91,24 @@ public class TagRepository {
     }
 
     /**
-     * Finds a tag by its name.
+     * Finds a tag by its name (case-insensitive).
      */
     public Optional<Tag> findByName(String name) {
-        String sql = "SELECT id, name FROM tags WHERE name = ?;";
+        try (Connection conn = DatabaseManager.getConnection()) {
+            return findByName(name, conn);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error finding tag by name: " + name, e);
+            throw new DatabaseException("Failed to query tag with name " + name, e);
+        }
+    }
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+    /**
+     * Finds a tag by its name using an existing Connection (case-insensitive).
+     */
+    public Optional<Tag> findByName(String name, Connection conn) throws SQLException {
+        String sql = "SELECT id, name FROM tags WHERE name = ? COLLATE NOCASE;";
 
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, name.trim());
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -100,9 +117,6 @@ public class TagRepository {
                 }
             }
             return Optional.empty();
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Error finding tag by name: " + name, e);
-            throw new DatabaseException("Failed to query tag with name " + name, e);
         }
     }
 
@@ -110,7 +124,7 @@ public class TagRepository {
      * Retrieves all tags ordered by name.
      */
     public List<Tag> findAll() {
-        String sql = "SELECT id, name FROM tags ORDER BY name ASC;";
+        String sql = "SELECT id, name FROM tags ORDER BY name COLLATE NOCASE ASC;";
         List<Tag> tags = new ArrayList<>();
 
         try (Connection conn = DatabaseManager.getConnection();
@@ -148,17 +162,23 @@ public class TagRepository {
      * Links a tag to a note in note_tags table.
      */
     public void addTagToNote(int noteId, int tagId) {
-        String sql = "INSERT OR IGNORE INTO note_tags (note_id, tag_id) VALUES (?, ?);";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, noteId);
-            stmt.setInt(2, tagId);
-            stmt.executeUpdate();
+        try (Connection conn = DatabaseManager.getConnection()) {
+            addTagToNote(noteId, tagId, conn);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error linking tag ID " + tagId + " to note ID " + noteId, e);
             throw new DatabaseException("Failed to link tag to note", e);
+        }
+    }
+
+    /**
+     * Links a tag to a note in note_tags table using an existing Connection.
+     */
+    public void addTagToNote(int noteId, int tagId, Connection conn) throws SQLException {
+        String sql = "INSERT OR IGNORE INTO note_tags (note_id, tag_id) VALUES (?, ?);";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, noteId);
+            stmt.setInt(2, tagId);
+            stmt.executeUpdate();
         }
     }
 
@@ -181,6 +201,29 @@ public class TagRepository {
     }
 
     /**
+     * Removes all tag links for a note in note_tags table using an existing Connection.
+     */
+    public void removeTagsForNote(int noteId, Connection conn) throws SQLException {
+        String sql = "DELETE FROM note_tags WHERE note_id = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, noteId);
+            stmt.executeUpdate();
+        }
+    }
+
+    /**
+     * Removes all tag links for a note.
+     */
+    public void removeTagsForNote(int noteId) {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            removeTagsForNote(noteId, conn);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error removing tags for note ID " + noteId, e);
+            throw new DatabaseException("Failed to remove tags for note", e);
+        }
+    }
+
+    /**
      * Retrieves all tags associated with a specific note.
      */
     public List<Tag> findTagsByNoteId(int noteId) {
@@ -189,7 +232,7 @@ public class TagRepository {
                 FROM tags t
                 JOIN note_tags nt ON t.id = nt.tag_id
                 WHERE nt.note_id = ?
-                ORDER BY t.name ASC;
+                ORDER BY t.name COLLATE NOCASE ASC;
                 """;
         List<Tag> tags = new ArrayList<>();
 

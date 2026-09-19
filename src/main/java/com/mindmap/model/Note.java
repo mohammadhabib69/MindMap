@@ -1,7 +1,10 @@
 package com.mindmap.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Represents a study note in the knowledge base.
@@ -15,6 +18,7 @@ public class Note {
     private String difficulty;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<Tag> tags = new ArrayList<>();
 
     public Note() {
     }
@@ -36,6 +40,16 @@ public class Note {
         this.difficulty = difficulty;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+    }
+
+    public Note(String title, String content, String subject, String difficulty, List<Tag> tags) {
+        this(title, content, subject, difficulty);
+        setTags(tags);
+    }
+
+    public Note(int id, String title, String content, String subject, String difficulty, LocalDateTime createdAt, LocalDateTime updatedAt, List<Tag> tags) {
+        this(id, title, content, subject, difficulty, createdAt, updatedAt);
+        setTags(tags);
     }
 
     public int getId() {
@@ -94,6 +108,36 @@ public class Note {
         this.updatedAt = updatedAt;
     }
 
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = (tags != null) ? tags : new ArrayList<>();
+    }
+
+    public String getTagsString() {
+        if (tags == null || tags.isEmpty()) {
+            return "";
+        }
+        return tags.stream()
+                .map(Tag::getName)
+                .filter(name -> name != null && !name.trim().isEmpty())
+                .collect(Collectors.joining(", "));
+    }
+
+    public void addTag(Tag tag) {
+        if (tag != null && !tags.contains(tag)) {
+            tags.add(tag);
+        }
+    }
+
+    public void removeTag(Tag tag) {
+        if (tag != null) {
+            tags.remove(tag);
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -114,6 +158,7 @@ public class Note {
                 ", title='" + title + '\'' +
                 ", subject='" + subject + '\'' +
                 ", difficulty='" + difficulty + '\'' +
+                ", tags=" + getTagsString() +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
                 '}';
