@@ -65,7 +65,7 @@
     </HBox>
 
     <!-- Main Content Area: Graph Canvas + Side Inspector Panel -->
-    <HBox spacing="14" VBox.vgrow="ALWAYS">
+    <HBox spacing="14" VBox.vgrow="ALWAYS" alignment="TOP_LEFT">
 
         <!-- Visual Canvas Area (hosts both 2D and 3D) -->
         <StackPane fx:id="canvasContainer" HBox.hgrow="ALWAYS" minWidth="80" minHeight="80" styleClass="graph-canvas-viewport">
@@ -93,13 +93,13 @@
         </StackPane>
 
         <!-- Side Inspector Panel -->
-        <VBox fx:id="inspectorPanel" prefWidth="260" minWidth="200" maxWidth="300" styleClass="graph-inspector" spacing="12">
+        <VBox fx:id="inspectorPanel" prefWidth="255" minWidth="200" maxWidth="275" maxHeight="-Infinity" styleClass="graph-inspector" spacing="12">
 
             <!-- State A: Overview (No note selected) -->
-            <VBox fx:id="boxOverview" spacing="14" VBox.vgrow="ALWAYS">
+            <VBox fx:id="boxOverview" spacing="14">
                 <VBox spacing="4">
                     <Label text="Space Inspector" styleClass="inspector-header"/>
-                    <Label text="Select a 3D node or connection to inspect its details and relationships." style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
+                    <Label text="Select a 3D node or connection to inspect its details and relationships." wrapText="true" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
                 </VBox>
 
                 <VBox spacing="8" style="-fx-background-color: #f8fafc; -fx-padding: 12; -fx-border-color: #e2e8f0; -fx-border-radius: 8px; -fx-background-radius: 8px;">
@@ -125,13 +125,11 @@
                     <Label text="• Click cylinder: View link" style="-fx-font-size: 11px; -fx-text-fill: #475569;"/>
                 </VBox>
 
-                <Region VBox.vgrow="ALWAYS"/>
-
                 <Button text="+ Connect Notes" onAction="#handleAddConnection" maxWidth="Infinity" styleClass="btn-primary"/>
             </VBox>
 
             <!-- State B: Selected Note Details -->
-            <VBox fx:id="boxSelectedNote" spacing="12" VBox.vgrow="ALWAYS" visible="false" managed="false">
+            <VBox fx:id="boxSelectedNote" spacing="12" visible="false" managed="false">
                 <HBox alignment="CENTER_LEFT" spacing="6">
                     <Label text="Note Details" styleClass="inspector-header"/>
                     <Region HBox.hgrow="ALWAYS"/>
@@ -139,7 +137,7 @@
                 </HBox>
 
                 <!-- Note Title -->
-                <Label fx:id="lblSelectedTitle" text="Note Title" wrapText="true" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                <Label fx:id="lblSelectedTitle" text="Note Title" wrapText="true" minWidth="0" maxWidth="Infinity" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
 
                 <!-- Badges -->
                 <HBox spacing="8" alignment="CENTER_LEFT">
@@ -151,13 +149,13 @@
                 <FlowPane fx:id="flowSelectedTags" hgap="4" vgap="4"/>
 
                 <!-- Action Buttons for Selected Note -->
-                <HBox spacing="8">
-                    <Button fx:id="btnViewSelected" text="👁 View" onAction="#handleViewSelectedNote" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 6 8;"/>
-                    <Button fx:id="btnEditSelected" text="✏ Edit" onAction="#handleEditSelectedNote" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 6 8;"/>
-                    <Button fx:id="btnConnectFromSelected" text="+ Link" onAction="#handleConnectFromSelected" HBox.hgrow="ALWAYS" maxWidth="Infinity" styleClass="btn-primary" style="-fx-font-size: 11px; -fx-padding: 6 8;"/>
-                </HBox>
+                <FlowPane fx:id="paneSelectedActions" hgap="6" vgap="6" alignment="CENTER_LEFT">
+                    <Button fx:id="btnViewSelected" text="View Note" onAction="#handleViewSelectedNote" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 5 10; -fx-cursor: hand;"/>
+                    <Button fx:id="btnEditSelected" text="Edit Note" onAction="#handleEditSelectedNote" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 5 10; -fx-cursor: hand;"/>
+                    <Button fx:id="btnConnectFromSelected" text="+ Link" onAction="#handleConnectFromSelected" styleClass="btn-primary" style="-fx-font-size: 11px; -fx-padding: 5 10; -fx-cursor: hand;"/>
+                </FlowPane>
 
-                <Button fx:id="btnInspectorFocus" text="🎯 Focus Camera on Node" onAction="#handleFocusSelected" maxWidth="Infinity" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 6 8;"/>
+                <Button fx:id="btnInspectorFocus" text="🎯 Focus Node" onAction="#handleFocusSelected" maxWidth="Infinity" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 6 10; -fx-cursor: hand;"/>
 
                 <Separator style="-fx-padding: 4 0 4 0;"/>
 
@@ -169,7 +167,7 @@
                 </HBox>
 
                 <!-- Connections Scroll List -->
-                <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0;">
+                <ScrollPane fx:id="scrollConnections" fitToWidth="true" minHeight="0" prefHeight="-Infinity" maxHeight="160" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 0;">
                     <VBox fx:id="boxConnectionsList" spacing="6">
                         <!-- Dynamic connection items will be populated here -->
                     </VBox>

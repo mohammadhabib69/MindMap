@@ -619,9 +619,8 @@ public class MindMapController {
         lblConnectionCount.setText(String.valueOf(noteConnections.size()));
 
         if (noteConnections.isEmpty()) {
-            Label emptyLabel = new Label("No connections yet.\nClick '+ Link' above to connect to another note.");
-            emptyLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #94a3b8; -fx-font-style: italic; -fx-padding: 8 0;");
-            emptyLabel.setWrapText(true);
+            Label emptyLabel = new Label("No connections yet.");
+            emptyLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #94a3b8; -fx-font-style: italic; -fx-padding: 4 0 2 0;");
             boxConnectionsList.getChildren().add(emptyLabel);
             return;
         }
@@ -637,7 +636,7 @@ public class MindMapController {
 
         if (!outgoing.isEmpty()) {
             Label lblOut = new Label("OUTGOING (" + outgoing.size() + ")");
-            lblOut.setStyle("-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #64748b; -fx-padding: 4 0 2 0;");
+            lblOut.setStyle("-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #64748b; -fx-padding: 2 0 2 0;");
             boxConnectionsList.getChildren().add(lblOut);
 
             for (Connection conn : outgoing) {
@@ -649,7 +648,7 @@ public class MindMapController {
 
         if (!incoming.isEmpty()) {
             Label lblIn = new Label("INCOMING (" + incoming.size() + ")");
-            lblIn.setStyle("-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #64748b; -fx-padding: 6 0 2 0;");
+            lblIn.setStyle("-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #64748b; -fx-padding: 4 0 2 0;");
             boxConnectionsList.getChildren().add(lblIn);
 
             for (Connection conn : incoming) {
@@ -661,18 +660,18 @@ public class MindMapController {
     }
 
     private HBox createConnectionItemRow(String dirArrow, String relation, String otherTitle, Connection conn) {
-        HBox row = new HBox(8);
+        HBox row = new HBox(6);
         row.setAlignment(Pos.CENTER_LEFT);
         row.getStyleClass().add("connection-item");
 
         Label arrowLabel = new Label(dirArrow);
-        arrowLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #3b82f6; -fx-font-size: 12px;");
+        arrowLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #3b82f6; -fx-font-size: 11px;");
 
-        Label relationBadge = new Label(relation);
+        Label relationBadge = new Label(relation != null ? relation : "Related");
         relationBadge.getStyleClass().add("connection-relation-badge");
 
         Label titleLabel = new Label(otherTitle);
-        titleLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #1e293b; -fx-font-weight: 500;");
+        titleLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #1e293b; -fx-font-weight: 500;");
         titleLabel.setWrapText(true);
         titleLabel.setMaxWidth(130);
         HBox.setHgrow(titleLabel, Priority.ALWAYS);
