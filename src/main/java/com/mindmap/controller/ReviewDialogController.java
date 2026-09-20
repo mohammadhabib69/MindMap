@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import com.mindmap.util.UiUtils;
 
 /**
  * Controller for the Spaced Repetition study review dialog.
@@ -222,6 +223,7 @@ public class ReviewDialogController {
                 throwable -> {
                     setOutcomeButtonsDisable(false);
                     LOGGER.log(Level.SEVERE, "Failed to complete review: " + throwable.getMessage(), throwable);
+                    UiUtils.showError("Review Error", "Failed to save review outcome: " + throwable.getMessage());
                     currentIndex++;
                     loadCurrentReview();
                 }
@@ -270,6 +272,7 @@ public class ReviewDialogController {
             stage.showAndWait();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Could not open note viewer: " + e.getMessage(), e);
+            UiUtils.showError("Error", "Could not open note viewer: " + e.getMessage());
         }
     }
 

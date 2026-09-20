@@ -85,6 +85,14 @@ public class NoteEditorController {
 
     public void setDialogStage(Stage dialogStage) {
         this.dialogStage = dialogStage;
+        this.dialogStage.setOnCloseRequest(event -> {
+            if (hasUnsavedChanges()) {
+                boolean discard = UiUtils.showConfirmation("Unsaved Changes", "You have unsaved changes. Leave without saving?");
+                if (!discard) {
+                    event.consume(); // Cancel the close request
+                }
+            }
+        });
     }
 
     public void setNoteService(NoteService noteService) {

@@ -84,18 +84,25 @@ public class PdfExportService {
         if (destination == null) throw new IllegalArgumentException("Destination file cannot be null");
 
         Document document = new Document(PageSize.A4, 36, 36, 36, 36);
+        FileOutputStream fos = null;
         try {
-            FileOutputStream fos = new FileOutputStream(destination);
+            fos = new FileOutputStream(destination);
             PdfWriter.getInstance(document, fos);
             document.open();
 
             addHeader(document, "MindMap Note Export");
             addNoteToDocument(document, note);
             document.close();
-            fos.close();
         } catch (Exception e) {
+            if (document.isOpen()) {
+                try { document.close(); } catch (Exception ignored) {}
+            }
             LOGGER.log(Level.SEVERE, "Failed to export single note to PDF", e);
             throw new PdfExportException("Failed to export note: " + e.getMessage(), e);
+        } finally {
+            if (fos != null) {
+                try { fos.close(); } catch (IOException ignored) {}
+            }
         }
     }
 
@@ -106,8 +113,9 @@ public class PdfExportService {
         if (destination == null) throw new IllegalArgumentException("Destination file cannot be null");
 
         Document document = new Document(PageSize.A4, 36, 36, 36, 36);
+        FileOutputStream fos = null;
         try {
-            FileOutputStream fos = new FileOutputStream(destination);
+            fos = new FileOutputStream(destination);
             PdfWriter.getInstance(document, fos);
             document.open();
 
@@ -118,10 +126,16 @@ public class PdfExportService {
                 addNoteToDocument(document, notes.get(i));
             }
             document.close();
-            fos.close();
         } catch (Exception e) {
+            if (document.isOpen()) {
+                try { document.close(); } catch (Exception ignored) {}
+            }
             LOGGER.log(Level.SEVERE, "Failed to export all notes to PDF", e);
             throw new PdfExportException("Failed to export notes: " + e.getMessage(), e);
+        } finally {
+            if (fos != null) {
+                try { fos.close(); } catch (IOException ignored) {}
+            }
         }
     }
 
