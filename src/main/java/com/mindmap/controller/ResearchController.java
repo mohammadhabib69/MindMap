@@ -172,23 +172,54 @@ public class ResearchController {
     private void handleCreateNote() {
         if (currentSummary == null) return;
         
+        Note draftNote = createDraftNote(currentSummary);
+
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/note_editor.fxml"));
+            javafx.scene.Parent root = loader.load();
+
+            NoteEditorController controller = loader.getController();
+            controller.setNoteService(new com.mindmap.service.NoteService());
+
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.setTitle("Create Note from Research");
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            if (txtSearch.getScene() != null && txtSearch.getScene().getWindow() != null) {
+                stage.initOwner(txtSearch.getScene().getWindow());
+            }
+            stage.setScene(new javafx.scene.Scene(root));
+            controller.setDialogStage(stage);
+            controller.setNote(draftNote, NoteEditorMode.CREATE);
+
+            stage.showAndWait();
+        } catch (java.io.IOException e) {
+            LOGGER.log(Level.SEVERE, "Failed to open note editor dialog from Research", e);
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText(null);
+            alert.setContentText("Could not open note editor: " + e.getMessage());
+            alert.showAndWait();
+        }
+    }
+    // Visible for testing
+    public Note createDraftNote(WikipediaPageSummary summary) {
         Note draftNote = new Note();
-        draftNote.setTitle(currentSummary.getTitle());
-        String content = currentSummary.getExtract() + "\n\n---\nSource: Wikipedia\n" + currentSummary.getPageUrl();
+        draftNote.setTitle(summary.getTitle() != null ? summary.getTitle() : "Untitled");
+        
+        String extract = summary.getExtract() != null ? summary.getExtract() : "";
+        String url = summary.getPageUrl() != null ? summary.getPageUrl() : "";
+        
+        String content = extract;
+        if (!url.isEmpty()) {
+            content += "\n\n---\nSource: Wikipedia\n" + url;
+        }
+        
         draftNote.setContent(content);
         draftNote.setSubject("Research");
         draftNote.setDifficulty("Medium");
         draftNote.setCreatedAt(LocalDateTime.now());
         draftNote.setUpdatedAt(LocalDateTime.now());
-
-        StackPane contentArea = (StackPane) txtSearch.getScene().lookup("#contentArea");
-        
-        ViewManager.ViewResult result = ViewManager.loadViewWithController("/fxml/note_editor.fxml");
-        if (contentArea != null && result.getRoot() != null) {
-            contentArea.getChildren().setAll(result.getRoot());
-            if (result.getController() instanceof NoteEditorController editorController) {
-                editorController.setNote(draftNote, NoteEditorMode.CREATE);
-            }
-        }
+        return draftNote;
     }
 }
+
