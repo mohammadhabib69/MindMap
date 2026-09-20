@@ -57,7 +57,24 @@
         </GridPane>
     </VBox>
 
-    <!-- Section 3: Application -->
+    <!-- Section 3: Data Management -->
+    <VBox spacing="12" styleClass="card">
+        <Label text="Data Management" styleClass="card-title"/>
+        <GridPane hgap="16" vgap="12">
+            <columnConstraints>
+                <ColumnConstraints prefWidth="180"/>
+                <ColumnConstraints hgrow="ALWAYS"/>
+            </columnConstraints>
+            
+            <Label text="Export MindMap Data:" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+            <javafx.scene.control.Button text="Export to JSON..." onAction="#handleExport" styleClass="btn-secondary" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+            <Label text="Import MindMap Data:" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+            <javafx.scene.control.Button text="Import from JSON..." onAction="#handleImport" styleClass="btn-secondary" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+        </GridPane>
+    </VBox>
+
+    <!-- Section 4: Application -->
     <VBox spacing="12" styleClass="card" VBox.vgrow="ALWAYS">
         <Label text="Application" styleClass="card-title"/>
         <GridPane hgap="16" vgap="12">
