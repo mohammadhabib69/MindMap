@@ -1273,3 +1273,17 @@
     -fx-border-color: #cbd5e1;
 }
 
+
+/* SplitPane Resizer Styling */
+.main-root.split-pane {
+    -fx-background-color: #f1f5f9;
+    -fx-padding: 0;
+}
+.main-root.split-pane > .split-pane-divider {
+    -fx-padding: 0 1 0 0;
+    -fx-background-color: transparent;
+}
+.main-root.split-pane > .split-pane-divider:hover {
+    -fx-background-color: rgba(148, 163, 184, 0.5);
+    -fx-cursor: h-resize;
+}

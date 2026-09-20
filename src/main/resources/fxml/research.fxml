@@ -38,31 +38,31 @@
     <Label fx:id="lblStatus" text="" styleClass="setting-value" style="-fx-text-fill: #64748b;" />
 
     <!-- Split Pane for Results and Details -->
-    <SplitPane VBox.vgrow="ALWAYS" dividerPositions="0.4" style="-fx-background-color: transparent;">
+        <SplitPane VBox.vgrow="ALWAYS" dividerPositions="0.35" style="-fx-background-color: transparent; -fx-padding: 0;">
         <!-- Left: Results List -->
-        <VBox spacing="8">
-            <Label text="Results" styleClass="inspector-section-header"/>
-            <ListView fx:id="listResults" VBox.vgrow="ALWAYS" styleClass="edge-to-edge-list"/>
+        <VBox spacing="12" styleClass="card" style="-fx-padding: 16;">
+            <Label text="RESULTS" styleClass="inspector-section-header" style="-fx-text-fill: #64748b;"/>
+            <ListView fx:id="listResults" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;"/>
         </VBox>
 
         <!-- Right: Detail View -->
-        <VBox spacing="12">
-            <Label text="Selected Result" styleClass="inspector-section-header"/>
+        <VBox spacing="12" styleClass="card" style="-fx-padding: 16;">
+            <Label text="SELECTED RESULT" styleClass="inspector-section-header" style="-fx-text-fill: #64748b;"/>
             
-            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="edge-to-edge-scroll">
-                <VBox spacing="12" style="-fx-padding: 0 16 0 0;">
-                    <Label fx:id="lblTitle" wrapText="true" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
-                    <Label fx:id="lblSummary" wrapText="true" style="-fx-font-size: 14px; -fx-text-fill: #334155;"/>
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: #ffffff; -fx-border-color: transparent; -fx-padding: 0;">
+                <VBox spacing="12" style="-fx-padding: 4 12 4 4;">
+                    <Label fx:id="lblTitle" wrapText="true" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                    <Label fx:id="lblSummary" wrapText="true" style="-fx-font-size: 14.5px; -fx-text-fill: #334155; -fx-line-spacing: 0.3em;"/>
                     
-                    <HBox fx:id="boxSource" spacing="4" visible="false" managed="false">
+                    <HBox fx:id="boxSource" spacing="6" visible="false" managed="false" alignment="CENTER_LEFT" style="-fx-padding: 12 0 0 0;">
                         <Label text="Source:" style="-fx-font-weight: bold; -fx-text-fill: #64748b;"/>
-                        <Label fx:id="lblSource" text="Wikipedia" style="-fx-text-fill: #64748b;"/>
+                        <Label fx:id="lblSource" text="Wikipedia" style="-fx-text-fill: #3b82f6;"/>
                     </HBox>
                 </VBox>
             </ScrollPane>
 
-            <HBox spacing="10" alignment="CENTER_RIGHT" fx:id="boxActions" visible="false">
-                <Button fx:id="btnOpenSource" text="Open Source" onAction="#handleOpenSource" styleClass="btn-secondary"/>
+            <HBox spacing="12" alignment="CENTER_RIGHT" fx:id="boxActions" visible="false">
+                <Button fx:id="btnOpenSource" text="Open in Browser" onAction="#handleOpenSource" styleClass="btn-secondary"/>
                 <Button fx:id="btnCreateNote" text="Create Note" onAction="#handleCreateNote" styleClass="btn-primary"/>
             </HBox>
         </VBox>

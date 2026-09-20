@@ -8,15 +8,15 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx"
+<SplitPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.mindmap.controller.MainController"
             prefWidth="1050" prefHeight="680"
-            styleClass="main-root">
+            styleClass="main-root" dividerPositions="0.2">
 
     <!-- Left Sidebar -->
-    <left>
-        <VBox spacing="6" styleClass="sidebar" prefWidth="200" minWidth="175" maxWidth="240">
+    
+        <VBox spacing="6" styleClass="sidebar" prefWidth="220" minWidth="180" maxWidth="360" SplitPane.resizableWithParent="false">
             <padding>
                 <Insets top="20" right="12" bottom="20" left="12"/>
             </padding>
@@ -69,13 +69,13 @@
                         onAction="#handleExit" styleClass="nav-button, nav-button-muted"/>
             </VBox>
         </VBox>
-    </left>
+    
 
     <!-- Dynamic Main Content Area -->
-    <center>
-        <StackPane fx:id="contentArea" minWidth="0" minHeight="0" styleClass="content-area">
+    
+        <StackPane fx:id="contentArea" minWidth="400" minHeight="0" styleClass="content-area">
             <!-- Dynamically populated with selected FXML screen -->
         </StackPane>
-    </center>
+    
 
-</BorderPane>
+</SplitPane>
