@@ -96,11 +96,19 @@ public class NoteEditorController {
         if (mode == NoteEditorMode.CREATE) {
             lblDialogTitle.setText("Create New Note");
             btnSave.setText("Create Note");
-            txtTitle.clear();
-            txtSubject.clear();
-            txtTags.clear();
-            txtContent.clear();
-            cmbDifficulty.setValue(Difficulty.MEDIUM.name());
+            if (note != null) {
+                txtTitle.setText(note.getTitle() != null ? note.getTitle() : "");
+                txtSubject.setText(note.getSubject() != null ? note.getSubject() : "");
+                txtTags.setText(note.getTagsString() != null ? note.getTagsString() : "");
+                txtContent.setText(note.getContent() != null ? note.getContent() : "");
+                cmbDifficulty.setValue(note.getDifficulty() != null ? note.getDifficulty() : Difficulty.MEDIUM.name());
+            } else {
+                txtTitle.clear();
+                txtSubject.clear();
+                txtTags.clear();
+                txtContent.clear();
+                cmbDifficulty.setValue(Difficulty.MEDIUM.name());
+            }
         } else if (mode == NoteEditorMode.EDIT && note != null) {
             lblDialogTitle.setText("Edit Note");
             btnSave.setText("Save Changes");

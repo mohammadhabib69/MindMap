@@ -33,6 +33,10 @@ public class ResearchNoteMappingTest {
         assertTrue(note.getContent().contains("https://en.wikipedia.org/wiki/Machine_Learning"));
         assertEquals("Research", note.getSubject());
         assertEquals("Medium", note.getDifficulty());
+        
+        String tags = note.getTagsString();
+        assertTrue(tags.contains("wikipedia"));
+        assertTrue(tags.contains("machine-learning"));
     }
 
     @Test
@@ -49,5 +53,9 @@ public class ResearchNoteMappingTest {
         assertEquals("", note.getContent());
         assertEquals("Research", note.getSubject());
         assertEquals("Medium", note.getDifficulty());
+        
+        String tags = note.getTagsString();
+        assertTrue(tags.contains("wikipedia"));
+        assertFalse(tags.contains("machine-learning"));
     }
 }

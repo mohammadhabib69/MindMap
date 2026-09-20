@@ -219,6 +219,13 @@ public class ResearchController {
         draftNote.setDifficulty("Medium");
         draftNote.setCreatedAt(LocalDateTime.now());
         draftNote.setUpdatedAt(LocalDateTime.now());
+        
+        draftNote.addTag(new com.mindmap.model.Tag("wikipedia"));
+        if (summary.getTitle() != null && !summary.getTitle().trim().isEmpty()) {
+            String topicTag = summary.getTitle().trim().toLowerCase().replace(" ", "-");
+            draftNote.addTag(new com.mindmap.model.Tag(topicTag));
+        }
+        
         return draftNote;
     }
 }
