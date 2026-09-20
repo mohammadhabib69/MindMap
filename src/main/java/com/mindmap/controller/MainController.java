@@ -37,6 +37,9 @@ public class MainController {
 
     @FXML
     private Button btnTimeline;
+    @FXML
+    private Button btnResearch;
+
 
     @FXML
     private Button btnSettings;
@@ -73,6 +76,8 @@ public class MainController {
         AnimationUtil.addSidebarNavHoverEffect(btnSearch);
         AnimationUtil.addSidebarNavHoverEffect(btnRevision);
         AnimationUtil.addSidebarNavHoverEffect(btnTimeline);
+        AnimationUtil.addSidebarNavHoverEffect(btnResearch);
+
         AnimationUtil.addSidebarNavHoverEffect(btnSettings);
         AnimationUtil.addSidebarNavHoverEffect(btnAbout);
         AnimationUtil.addSidebarNavHoverEffect(btnExit);
@@ -109,6 +114,11 @@ public class MainController {
     }
 
     @FXML
+    public void showResearch() {
+        navigateTo("/fxml/research.fxml", btnResearch);
+    }
+
+
     public void showSettings() {
         navigateTo("/fxml/settings.fxml", btnSettings);
     }

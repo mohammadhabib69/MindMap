@@ -50,6 +50,9 @@
                 <Button fx:id="btnTimeline" text="📅  Timeline" maxWidth="Infinity" alignment="BASELINE_LEFT"
                         onAction="#showTimeline" styleClass="nav-button"/>
 
+                <Button fx:id="btnResearch" text="🌐  Research" maxWidth="Infinity" alignment="BASELINE_LEFT"
+                        onAction="#showResearch" styleClass="nav-button"/>
+
                 <Button fx:id="btnSettings" text="⚙  Settings" maxWidth="Infinity" alignment="BASELINE_LEFT"
                         onAction="#showSettings" styleClass="nav-button"/>
             </VBox>
