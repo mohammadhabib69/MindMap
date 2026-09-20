@@ -66,7 +66,7 @@ public class WikipediaService {
         }
 
         try {
-            String encodedTitle = URLEncoder.encode(title.trim(), StandardCharsets.UTF_8);
+            String encodedTitle = URLEncoder.encode(title.trim().replace(" ", "_"), StandardCharsets.UTF_8).replace("+", "%20");
             String url = "https://en.wikipedia.org/api/rest_v1/page/summary/" + encodedTitle;
             
             String jsonResponse = client.sendGetRequest(url);
