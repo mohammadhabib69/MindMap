@@ -154,4 +154,49 @@ public class SettingsController {
             }
         });
     }
+
+    @FXML
+    private void handleExportPdfAll() {
+        javafx.stage.Window window = lblDatabaseUrl.getScene().getWindow();
+        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        fileChooser.setTitle("Export All Notes to PDF");
+        fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("PDF Document", "*.pdf"));
+        fileChooser.setInitialFileName("MindMap_Notes.pdf");
+        
+        java.io.File file = fileChooser.showSaveDialog(window);
+        if (file != null) {
+            final com.mindmap.export.pdf.PdfExportService pdfService = new com.mindmap.export.pdf.PdfExportService();
+            final com.mindmap.service.NoteService noteService = new com.mindmap.service.NoteService();
+            
+            com.mindmap.concurrency.TaskExecutor.runAsync(
+                () -> {
+                    java.util.List<com.mindmap.model.Note> allNotes = noteService.getAllNotes();
+                    if (allNotes == null || allNotes.isEmpty()) {
+                        throw new com.mindmap.export.pdf.PdfExportException("No notes available to export.");
+                    }
+                    // Eagerly load tags for all notes
+                    for (com.mindmap.model.Note n : allNotes) {
+                        noteService.getNoteWithTags(n.getId()).ifPresent(fresh -> n.setTags(fresh.getTags()));
+                    }
+                    pdfService.exportMultipleNotes(allNotes, file);
+                    return true;
+                },
+                success -> {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Export Successful");
+                    alert.setHeaderText(null);
+                    alert.setContentText("All notes exported to PDF successfully.");
+                    alert.showAndWait();
+                },
+                error -> {
+                    LOGGER.log(Level.SEVERE, "Failed to export PDF", error);
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Export Failed");
+                    alert.setHeaderText("An error occurred while generating the PDF");
+                    alert.setContentText(error.getMessage());
+                    alert.showAndWait();
+                }
+            );
+        }
+    }
 }

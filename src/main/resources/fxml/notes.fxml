@@ -36,6 +36,7 @@
         <ComboBox fx:id="cmbTagFilter" promptText="All Tags" prefWidth="140" minWidth="90" styleClass="input-field"/>
         <Button fx:id="btnClearFilter" text="Reset" onAction="#handleClearFilter" styleClass="btn-secondary"/>
         <HBox spacing="6" alignment="CENTER_RIGHT">
+            <Button fx:id="btnExportPdf" text="Export PDF" onAction="#handleExportPdf" disable="true" styleClass="btn-secondary"/>
             <Button fx:id="btnViewNote" text="View" onAction="#handleViewNote" disable="true" styleClass="btn-secondary"/>
             <Button fx:id="btnEditNote" text="Edit" onAction="#handleEditNote" disable="true" styleClass="btn-secondary"/>
             <Button fx:id="btnDeleteNote" text="Delete" onAction="#handleDeleteNote" disable="true" styleClass="btn-danger"/>

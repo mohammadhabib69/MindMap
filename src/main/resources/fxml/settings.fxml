@@ -71,6 +71,9 @@
 
             <Label text="Import MindMap Data:" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
             <javafx.scene.control.Button text="Import from JSON..." onAction="#handleImport" styleClass="btn-secondary" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+            <Label text="Export All Notes to PDF:" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+            <javafx.scene.control.Button text="Export to PDF..." onAction="#handleExportPdfAll" styleClass="btn-secondary" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
         </GridPane>
     </VBox>
 

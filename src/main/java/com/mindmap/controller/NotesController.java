@@ -57,6 +57,8 @@ public class NotesController {
 
     @FXML
     private Button btnViewNote;
+    @FXML
+    private Button btnExportPdf;
 
     @FXML
     private Button btnEditNote;
@@ -405,5 +407,46 @@ public class NotesController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    @FXML
+    private void handleExportPdf() {
+        com.mindmap.model.Note selected = tableNotes.getSelectionModel().getSelectedItem();
+        if (selected == null) return;
+        
+        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        fileChooser.setTitle("Export Note as PDF");
+        fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("PDF Document", "*.pdf"));
+        
+        String safeName = selected.getTitle() != null ? selected.getTitle().replaceAll("[\\\\/:*?\"<>|]", "_") : "Note";
+        fileChooser.setInitialFileName(safeName + ".pdf");
+        
+        java.io.File file = fileChooser.showSaveDialog(tableNotes.getScene().getWindow());
+        if (file != null) {
+            final com.mindmap.export.pdf.PdfExportService pdfService = new com.mindmap.export.pdf.PdfExportService();
+            final com.mindmap.model.Note noteToExport = noteService.getNoteWithTags(selected.getId()).orElse(selected);
+            
+            com.mindmap.concurrency.TaskExecutor.runAsync(
+                () -> {
+                    pdfService.exportSingleNote(noteToExport, file);
+                    return true;
+                },
+                success -> {
+                    javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+                    alert.setTitle("Export Successful");
+                    alert.setHeaderText(null);
+                    alert.setContentText("PDF exported successfully.");
+                    alert.showAndWait();
+                },
+                error -> {
+                    LOGGER.log(java.util.logging.Level.SEVERE, "Failed to export PDF", error);
+                    javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+                    alert.setTitle("Export Failed");
+                    alert.setHeaderText("An error occurred while generating the PDF");
+                    alert.setContentText(error.getMessage());
+                    alert.showAndWait();
+                }
+            );
+        }
     }
 }
