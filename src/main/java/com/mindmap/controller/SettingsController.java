@@ -44,7 +44,7 @@ public class SettingsController {
             lblAppVersion.setText("1.0-SNAPSHOT");
         }
         if (lblAppPhase != null) {
-            lblAppPhase.setText("Phase 12 - Data Import/Export");
+            lblAppPhase.setText("Phase 18 - Final Release QA");
         }
     }
 

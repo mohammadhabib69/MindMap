@@ -125,20 +125,59 @@ public class MainController {
     }
 
     @FXML
-    private void handleAbout() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("About MindMap");
-        alert.setHeaderText("MindMap: Personal Knowledge Base & Study Organizer");
-        alert.setContentText("""
-                Version: 1.0-SNAPSHOT
-                Phase: Phase 7 - Advanced Search & Filtering
-                Framework: JavaFX 21 & SQLite JDBC
-                Database: """ + DatabaseManager.JDBC_URL + """
-
-                
-                MindMap helps you take notes, organize subjects, discover connections with interactive 2D & 3D knowledge spaces, and retain information through spaced repetition.
-                """);
-        alert.showAndWait();
+        private void handleAbout() {
+        javafx.scene.control.Dialog<Void> dialog = new javafx.scene.control.Dialog<>();
+        dialog.setTitle("About MindMap");
+        
+        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
+        dialog.getDialogPane().getStyleClass().add("card");
+        
+        javafx.scene.layout.VBox content = new javafx.scene.layout.VBox(20);
+        content.setPadding(new javafx.geometry.Insets(24, 32, 24, 32));
+        content.setAlignment(javafx.geometry.Pos.CENTER);
+        
+        javafx.scene.layout.VBox header = new javafx.scene.layout.VBox(4);
+        header.setAlignment(javafx.geometry.Pos.CENTER);
+        javafx.scene.control.Label title = new javafx.scene.control.Label("MindMap");
+        title.setStyle("-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
+        javafx.scene.control.Label subtitle = new javafx.scene.control.Label("Personal Knowledge Base\n& Study Organizer");
+        subtitle.setStyle("-fx-font-size: 16px; -fx-text-fill: #475569; -fx-alignment: center; -fx-text-alignment: center;");
+        javafx.scene.control.Label version = new javafx.scene.control.Label("1.0-SNAPSHOT");
+        version.setStyle("-fx-font-size: 12px; -fx-text-fill: #94a3b8; -fx-padding: 8 0 0 0;");
+        header.getChildren().addAll(title, subtitle, version);
+        
+        javafx.scene.control.Separator sep1 = new javafx.scene.control.Separator();
+        
+        javafx.scene.control.Label desc = new javafx.scene.control.Label(
+            "MindMap helps you take notes, organize subjects,\n" +
+            "discover connections with interactive 2D and 3D\n" +
+            "knowledge spaces, and retain information through\n" +
+            "spaced repetition."
+        );
+        desc.setStyle("-fx-font-size: 14px; -fx-text-fill: #334155; -fx-text-alignment: center; -fx-alignment: center;");
+        
+        javafx.scene.layout.VBox tech = new javafx.scene.layout.VBox(8);
+        tech.setAlignment(javafx.geometry.Pos.CENTER);
+        javafx.scene.control.Label techHeader = new javafx.scene.control.Label("TECHNOLOGY");
+        techHeader.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #64748b;");
+        javafx.scene.control.Label techList = new javafx.scene.control.Label("JavaFX 21\nSQLite\nJackson\nOpenPDF");
+        techList.setStyle("-fx-font-size: 13px; -fx-text-fill: #1e293b; -fx-text-alignment: center; -fx-alignment: center;");
+        tech.getChildren().addAll(techHeader, techList);
+        
+        javafx.scene.layout.VBox proj = new javafx.scene.layout.VBox(8);
+        proj.setAlignment(javafx.geometry.Pos.CENTER);
+        javafx.scene.control.Label projHeader = new javafx.scene.control.Label("PROJECT");
+        projHeader.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #64748b;");
+        javafx.scene.control.Label projList = new javafx.scene.control.Label("Phase 18 - Final Release QA\nDatabase: SQLite");
+        projList.setStyle("-fx-font-size: 13px; -fx-text-fill: #1e293b; -fx-text-alignment: center; -fx-alignment: center;");
+        proj.getChildren().addAll(projHeader, projList);
+        
+        content.getChildren().addAll(header, sep1, desc, tech, proj);
+        
+        dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().getButtonTypes().add(javafx.scene.control.ButtonType.CLOSE);
+        
+        dialog.showAndWait();
     }
 
     @FXML
