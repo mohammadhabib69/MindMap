@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import com.mindmap.util.UiUtils;
 
 public class ResearchController {
     private static final Logger LOGGER = Logger.getLogger(ResearchController.class.getName());
@@ -139,21 +140,17 @@ public class ResearchController {
     private void handleError(Throwable error) {
         setLoadingState(false, "An error occurred.");
         Platform.runLater(() -> {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setHeaderText("Wikipedia Integration Error");
+            
             if (error instanceof ExternalApiException) {
                 if (error.getMessage().contains("interrupted") || error.getMessage().contains("Network error") || error.getMessage().contains("timed out")) {
-                    alert.setTitle("Connection Error");
-                    alert.setContentText("Unable to connect to Wikipedia.\nPlease check your internet connection and try again.");
+                    UiUtils.showError("Connection Error", "Unable to connect to Wikipedia.\nPlease check your internet connection and try again.");
                 } else {
-                    alert.setTitle("API Error");
-                    alert.setContentText("Wikipedia returned an error.\nPlease try again later.\nDetails: " + error.getMessage());
+                    UiUtils.showError("API Error", "Wikipedia returned an error.\nPlease try again later.\nDetails: " + error.getMessage());
                 }
             } else {
-                alert.setTitle("Unexpected Error");
-                alert.setContentText("An unexpected error occurred: " + error.getMessage());
+                UiUtils.showError("Unexpected Error", "An unexpected error occurred: " + error.getMessage());
             }
-            alert.show();
+
         });
     }
 
@@ -194,11 +191,7 @@ public class ResearchController {
             stage.showAndWait();
         } catch (java.io.IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to open note editor dialog from Research", e);
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText(null);
-            alert.setContentText("Could not open note editor: " + e.getMessage());
-            alert.showAndWait();
+            UiUtils.showError("Error", "Could not open note editor: " + e.getMessage());
         }
     }
     // Visible for testing

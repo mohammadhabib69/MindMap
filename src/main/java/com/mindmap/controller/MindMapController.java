@@ -53,6 +53,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import com.mindmap.util.UiUtils;
 
 /**
  * Controller for the Mind Map (Knowledge Graph) 2D screen.
@@ -733,7 +734,7 @@ public class MindMapController {
             }
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to open connection dialog: " + e.getMessage(), e);
-            showErrorAlert("Error", "Could not open connection dialog: " + e.getMessage());
+            UiUtils.showError("Error", "Could not open connection dialog: " + e.getMessage());
         }
     }
 
@@ -755,7 +756,7 @@ public class MindMapController {
             if (deleted) {
                 loadGraphData();
             } else {
-                showErrorAlert("Delete Failed", "Could not delete connection from database.");
+                UiUtils.showError("Delete Failed", "Could not delete connection from database.");
             }
         }
     }

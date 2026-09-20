@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import com.mindmap.util.UiUtils;
+import java.util.Objects;
 
 /**
  * Controller for the Note Editor dialog supporting CREATE and EDIT modes.
@@ -60,6 +62,11 @@ public class NoteEditorController {
     private Note note;
     private NoteEditorMode mode = NoteEditorMode.CREATE;
     private boolean saved = false;
+    private String originalTitle = "";
+    private String originalSubject = "";
+    private String originalTags = "";
+    private String originalContent = "";
+    private String originalDifficulty = "";
 
     @FXML
     public void initialize() {
@@ -101,9 +108,24 @@ public class NoteEditorController {
                 txtSubject.setText(note.getSubject() != null ? note.getSubject() : "");
                 txtTags.setText(note.getTagsString() != null ? note.getTagsString() : "");
                 txtContent.setText(note.getContent() != null ? note.getContent() : "");
+            originalTitle = txtTitle.getText();
+            originalSubject = txtSubject.getText();
+            originalTags = txtTags.getText();
+            originalContent = txtContent.getText();
+            originalDifficulty = cmbDifficulty.getValue();
                 cmbDifficulty.setValue(note.getDifficulty() != null ? note.getDifficulty() : Difficulty.MEDIUM.name());
+                originalTitle = txtTitle.getText();
+                originalSubject = txtSubject.getText();
+                originalTags = txtTags.getText();
+                originalContent = txtContent.getText();
+                originalDifficulty = cmbDifficulty.getValue();
             } else {
                 txtTitle.clear();
+                originalTitle = "";
+                originalSubject = "";
+                originalTags = "";
+                originalContent = "";
+                originalDifficulty = Difficulty.MEDIUM.name();
                 txtSubject.clear();
                 txtTags.clear();
                 txtContent.clear();
@@ -115,8 +137,18 @@ public class NoteEditorController {
             txtTitle.setText(note.getTitle());
             txtSubject.setText(note.getSubject() != null ? note.getSubject() : "");
             cmbDifficulty.setValue(note.getDifficulty() != null ? note.getDifficulty() : Difficulty.MEDIUM.name());
+                originalTitle = txtTitle.getText();
+                originalSubject = txtSubject.getText();
+                originalTags = txtTags.getText();
+                originalContent = txtContent.getText();
+                originalDifficulty = cmbDifficulty.getValue();
             txtTags.setText(note.getTagsString());
             txtContent.setText(note.getContent() != null ? note.getContent() : "");
+            originalTitle = txtTitle.getText();
+            originalSubject = txtSubject.getText();
+            originalTags = txtTags.getText();
+            originalContent = txtContent.getText();
+            originalDifficulty = cmbDifficulty.getValue();
         }
     }
 
@@ -183,6 +215,8 @@ public class NoteEditorController {
                 resultNote -> {
                     this.note = resultNote;
                     this.saved = true;
+                    UiUtils.showInfo(currentMode == NoteEditorMode.CREATE ? "Note Created" : "Note Updated",
+                                     currentMode == NoteEditorMode.CREATE ? "Note created successfully." : "Note updated successfully.");
                     if (btnSave != null) {
                         btnSave.setDisable(false);
                         btnSave.setText(currentMode == NoteEditorMode.CREATE ? "Create Note" : "Save Changes");
@@ -209,13 +243,27 @@ public class NoteEditorController {
 
         return future;
     }
-
     @FXML
     private void handleCancel() {
+        if (hasUnsavedChanges()) {
+            boolean discard = UiUtils.showConfirmation("Unsaved Changes", "You have unsaved changes. Leave without saving?");
+            if (!discard) {
+                return;
+            }
+        }
         saved = false;
         if (dialogStage != null) {
             dialogStage.close();
         }
+    }
+
+    private boolean hasUnsavedChanges() {
+        if (!Objects.equals(originalTitle, txtTitle.getText())) return true;
+        if (!Objects.equals(originalSubject, txtSubject.getText())) return true;
+        if (!Objects.equals(originalTags, txtTags.getText())) return true;
+        if (!Objects.equals(originalContent, txtContent.getText())) return true;
+        if (!Objects.equals(originalDifficulty, cmbDifficulty.getValue())) return true;
+        return false;
     }
 
     private void showError(String message) {

@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import com.mindmap.util.UiUtils;
 
 /**
  * Controller for the Revision (Spaced Repetition) screen.
@@ -509,6 +510,7 @@ public class RevisionController {
             loadRevisionData();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to open Review Dialog: " + e.getMessage(), e);
+            UiUtils.showError("Error", "Failed to open Review Dialog: " + e.getMessage());
         }
     }
 
@@ -534,6 +536,7 @@ public class RevisionController {
             loadRevisionData();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to open single Review Dialog: " + e.getMessage(), e);
+            UiUtils.showError("Error", "Failed to open single Review Dialog: " + e.getMessage());
         }
     }
 
@@ -557,6 +560,7 @@ public class RevisionController {
             loadRevisionData();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Could not open note viewer: " + e.getMessage(), e);
+            UiUtils.showError("Error", "Could not open note viewer: " + e.getMessage());
         }
     }
 
@@ -591,6 +595,7 @@ public class RevisionController {
             }
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to open Schedule Note dialog: " + e.getMessage(), e);
+            UiUtils.showError("Error", "Failed to open Schedule Note dialog: " + e.getMessage());
         }
     }
 
@@ -609,20 +614,17 @@ public class RevisionController {
                         btnScheduleAll.setDisable(false);
                         btnScheduleAll.setText("⚡ Schedule All");
                     }
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Schedule Notes");
-                    alert.setHeaderText(null);
                     if (scheduledCount > 0) {
-                        alert.setContentText("Successfully added " + scheduledCount + " " +
+                        UiUtils.showInfo("Schedule Notes", "Successfully added " + scheduledCount + " " +
                                 (scheduledCount == 1 ? "note" : "notes") + " to the Spaced Repetition queue!");
                     } else {
-                        alert.setContentText("All notes are already scheduled in the Spaced Repetition system.");
+                        UiUtils.showInfo("Schedule Notes", "All notes are already scheduled in the Spaced Repetition system.");
                     }
-                    alert.showAndWait();
                     loadRevisionData();
                 },
                 throwable -> {
                     LOGGER.log(Level.SEVERE, "Failed to schedule all notes: " + throwable.getMessage(), throwable);
+                    UiUtils.showError("Error", "Failed to schedule all notes: " + throwable.getMessage());
                     if (btnScheduleAll != null) {
                         btnScheduleAll.setDisable(false);
                         btnScheduleAll.setText("⚡ Schedule All");

@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import com.mindmap.util.UiUtils;
 
 /**
  * Controller for the data-driven Learning Dashboard screen.
@@ -631,6 +632,7 @@ public class DashboardController {
             }
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to open Note Editor dialog: " + e.getMessage(), e);
+            UiUtils.showError("Error", "Failed to open Note Editor dialog: " + e.getMessage());
         }
     }
 
@@ -691,6 +693,7 @@ public class DashboardController {
             loadDashboardData();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Could not open note viewer: " + e.getMessage(), e);
+            UiUtils.showError("Error", "Could not open note viewer: " + e.getMessage());
         }
     }
 
@@ -722,6 +725,7 @@ public class DashboardController {
             }
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Could not open note editor: " + e.getMessage(), e);
+            UiUtils.showError("Error", "Could not open note editor: " + e.getMessage());
         }
     }
 }

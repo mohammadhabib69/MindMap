@@ -38,6 +38,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import com.mindmap.util.UiUtils;
 
 /**
  * Controller for the Advanced Search & Filtering screen.
@@ -302,6 +303,7 @@ public class SearchController {
                 throwable -> {
                     if (reqId == searchRequestId.get()) {
                         LOGGER.log(Level.SEVERE, "Background search error: " + throwable.getMessage(), throwable);
+                        UiUtils.showError("Search Error", "An error occurred during search: " + throwable.getMessage());
                     }
                     future.completeExceptionally(throwable);
                 }
@@ -440,7 +442,7 @@ public class SearchController {
             stage.showAndWait();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to open note viewer: " + e.getMessage(), e);
-            showErrorAlert("Error", "Could not open note viewer: " + e.getMessage());
+            UiUtils.showError("Error", "Could not open note viewer: " + e.getMessage());
         }
     }
 
@@ -487,7 +489,7 @@ public class SearchController {
             }
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to open note editor: " + e.getMessage(), e);
-            showErrorAlert("Error", "Could not open note editor: " + e.getMessage());
+            UiUtils.showError("Error", "Could not open note editor: " + e.getMessage());
         }
     }
 
@@ -530,13 +532,5 @@ public class SearchController {
         } else {
             LOGGER.log(Level.WARNING, "MainController instance is null; cannot navigate to Mind Map.");
         }
-    }
-
-    private void showErrorAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 }

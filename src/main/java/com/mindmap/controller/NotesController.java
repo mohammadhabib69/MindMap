@@ -33,6 +33,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import com.mindmap.util.UiUtils;
 
 /**
  * Controller for the Notes management screen handling real SQLite CRUD, searching, and filtering.
@@ -301,7 +302,7 @@ public class NotesController {
             stage.showAndWait();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to open note view dialog: " + e.getMessage(), e);
-            showErrorAlert("Error", "Could not open note viewer: " + e.getMessage());
+            UiUtils.showError("Error", "Could not open note viewer: " + e.getMessage());
         }
     }
 
@@ -348,7 +349,7 @@ public class NotesController {
             }
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to open note editor dialog: " + e.getMessage(), e);
-            showErrorAlert("Error", "Could not open note editor: " + e.getMessage());
+            UiUtils.showError("Error", "Could not open note editor: " + e.getMessage());
         }
     }
 
@@ -359,13 +360,8 @@ public class NotesController {
             return;
         }
 
-        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmAlert.setTitle("Delete Note");
-        confirmAlert.setHeaderText("Delete \"" + selected.getTitle() + "\"?");
-        confirmAlert.setContentText("Are you sure you want to permanently delete this note? This action cannot be undone.");
-
-        Optional<ButtonType> result = confirmAlert.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
+        boolean proceed = UiUtils.showConfirmation("Delete Note", "Delete this note?\n\nDeleting this note may also remove its associated connections and related data.");
+        if (proceed) {
             if (btnDeleteNote != null) btnDeleteNote.setDisable(true);
             final NoteService service = this.noteService;
             final int noteId = selected.getId();
@@ -378,13 +374,13 @@ public class NotesController {
                             loadTagFilters();
                             applyFilter();
                         } else {
-                            showErrorAlert("Delete Failed", "The note could not be deleted from the database.");
+                            UiUtils.showError("Delete Failed", "The note could not be deleted from the database.");
                         }
                     },
                     throwable -> {
                         if (btnDeleteNote != null) btnDeleteNote.setDisable(false);
                         LOGGER.log(Level.SEVERE, "Error deleting note ID " + noteId, throwable);
-                        showErrorAlert("Database Error", "An error occurred while deleting the note.");
+                        UiUtils.showError("Database Error", "An error occurred while deleting the note.");
                     }
             );
         }
@@ -399,14 +395,6 @@ public class NotesController {
             cmbTagFilter.setValue(ALL_TAGS_LABEL);
         }
         applyFilter();
-    }
-
-    private void showErrorAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 
     @FXML
@@ -432,19 +420,11 @@ public class NotesController {
                     return true;
                 },
                 success -> {
-                    javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
-                    alert.setTitle("Export Successful");
-                    alert.setHeaderText(null);
-                    alert.setContentText("PDF exported successfully.");
-                    alert.showAndWait();
+                    UiUtils.showInfo("Export Successful", "PDF exported successfully.");
                 },
                 error -> {
                     LOGGER.log(java.util.logging.Level.SEVERE, "Failed to export PDF", error);
-                    javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-                    alert.setTitle("Export Failed");
-                    alert.setHeaderText("An error occurred while generating the PDF");
-                    alert.setContentText(error.getMessage());
-                    alert.showAndWait();
+                    UiUtils.showError("Export Failed", "Unable to export the PDF. Please choose another location.\n" + error.getMessage());
                 }
             );
         }

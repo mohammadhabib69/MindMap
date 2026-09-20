@@ -12,6 +12,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
 
 import java.util.logging.Logger;
+import com.mindmap.util.UiUtils;
 
 /**
  * Main application controller managing sidebar navigation and dynamic content loading.

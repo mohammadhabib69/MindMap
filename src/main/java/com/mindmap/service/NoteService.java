@@ -243,16 +243,19 @@ public class NoteService {
     public int getDistinctSubjectCount() {
         return noteRepository.countDistinctSubjects();
     }
-
     private List<String> sanitizeTagNames(List<String> rawTagNames) {
         if (rawTagNames == null || rawTagNames.isEmpty()) {
             return List.of();
         }
+        java.util.Set<String> lowerCaseNames = new java.util.HashSet<>();
         return rawTagNames.stream()
                 .filter(name -> name != null && !name.trim().isEmpty())
                 .map(String::trim)
+                .filter(name -> lowerCaseNames.add(name.toLowerCase())) // Case-insensitive distinct
                 .toList();
     }
+
+
 
     /**
      * Validates note fields according to business rules.

@@ -16,6 +16,7 @@ import java.io.File;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import com.mindmap.util.UiUtils;
 
 /**
  * Controller for the Settings screen.
@@ -62,20 +63,12 @@ public class SettingsController {
                 try {
                     importExportService.exportToFile(file);
                     Platform.runLater(() -> {
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle("Export Successful");
-                        alert.setHeaderText(null);
-                        alert.setContentText("MindMap data exported successfully.");
-                        alert.showAndWait();
+                        UiUtils.showInfo("Export Successful", "MindMap data exported successfully.");
                     });
                 } catch (Exception e) {
                     LOGGER.log(Level.SEVERE, "Export failed", e);
                     Platform.runLater(() -> {
-                        Alert alert = new Alert(Alert.AlertType.ERROR);
-                        alert.setTitle("Export Failed");
-                        alert.setHeaderText("Failed to export data");
-                        alert.setContentText(e.getMessage());
-                        alert.showAndWait();
+                        UiUtils.showError("Export Failed", "Failed to export data: " + e.getMessage());
                     });
                 }
             });
@@ -96,23 +89,10 @@ public class SettingsController {
                     MindMapExport data = importExportService.validateAndPreview(file);
                     
                     Platform.runLater(() -> {
-                        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-                        confirm.setTitle("Import Preview");
-                        confirm.setHeaderText("Ready to import from " + file.getName());
-                        
-                        String previewText = String.format(
-                            "%d Notes\n%d Tags\n%d Connections\n%d Revisions\n%d Learning Events\n\nFormat Version: %d",
-                            data.getNotes().size(),
-                            data.getTags().size(),
-                            data.getConnections().size(),
-                            data.getRevisions().size(),
-                            data.getLearningEvents().size(),
-                            data.getFormatVersion()
-                        );
-                        confirm.setContentText(previewText);
-                        
-                        Optional<ButtonType> result = confirm.showAndWait();
-                        if (result.isPresent() && result.get() == ButtonType.OK) {
+                        String preview = "Found " + (data.getNotes() != null ? data.getNotes().size() : 0) + " notes and " + 
+                                         (data.getConnections() != null ? data.getConnections().size() : 0) + " connections.\n\nDo you want to proceed?";
+                        boolean proceed = UiUtils.showConfirmation("Import Preview", "Ready to import from " + file.getName() + "\n\n" + preview);
+                        if (proceed) {
                             executeImport(data);
                         }
                     });
@@ -182,19 +162,11 @@ public class SettingsController {
                     return true;
                 },
                 success -> {
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Export Successful");
-                    alert.setHeaderText(null);
-                    alert.setContentText("All notes exported to PDF successfully.");
-                    alert.showAndWait();
+                    UiUtils.showInfo("Export Successful", "All notes exported to PDF successfully.");
                 },
                 error -> {
                     LOGGER.log(Level.SEVERE, "Failed to export PDF", error);
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Export Failed");
-                    alert.setHeaderText("An error occurred while generating the PDF");
-                    alert.setContentText(error.getMessage());
-                    alert.showAndWait();
+                    UiUtils.showError("Export Failed", "An error occurred while generating the PDF.\n" + error.getMessage());
                 }
             );
         }
