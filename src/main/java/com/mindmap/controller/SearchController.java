@@ -1,5 +1,6 @@
 package com.mindmap.controller;
 
+import com.mindmap.concurrency.TaskExecutor;
 import com.mindmap.model.ConnectionFilterPreset;
 import com.mindmap.model.DateFilterPreset;
 import com.mindmap.model.Note;
@@ -33,6 +34,8 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -86,6 +89,7 @@ public class SearchController {
     private final SearchService searchService;
     private final NoteService noteService;
     private final ObservableList<Note> resultsObservableList = FXCollections.observableArrayList();
+    private final AtomicLong searchRequestId = new AtomicLong(0);
     private boolean isUpdatingFilters = false;
 
     public SearchController() {
@@ -107,7 +111,7 @@ public class SearchController {
         setupFilterListeners();
 
         // Perform initial search to display all notes
-        handleSearch();
+        handleSearchSync();
     }
 
     private void setupButtonAnimations() {
@@ -272,11 +276,44 @@ public class SearchController {
     }
 
     @FXML
-    public void handleSearch() {
+    public CompletableFuture<List<Note>> handleSearch() {
+        SearchCriteria criteria = buildSearchCriteria();
+        long reqId = searchRequestId.incrementAndGet();
+        final SearchService service = this.searchService;
+        CompletableFuture<List<Note>> future = new CompletableFuture<>();
+
+        TaskExecutor.runAsync(
+                () -> service.searchNotes(criteria),
+                results -> {
+                    if (reqId != searchRequestId.get()) {
+                        // Stale request: a newer search or filter has already been dispatched
+                        future.cancel(true);
+                        return;
+                    }
+                    try {
+                        resultsObservableList.setAll(results);
+                        updateResultCount(results.size(), criteria);
+                        future.complete(results);
+                    } catch (Exception e) {
+                        LOGGER.log(Level.SEVERE, "Error updating search UI: " + e.getMessage(), e);
+                        future.completeExceptionally(e);
+                    }
+                },
+                throwable -> {
+                    if (reqId == searchRequestId.get()) {
+                        LOGGER.log(Level.SEVERE, "Background search error: " + throwable.getMessage(), throwable);
+                    }
+                    future.completeExceptionally(throwable);
+                }
+        );
+
+        return future;
+    }
+
+    public void handleSearchSync() {
         SearchCriteria criteria = buildSearchCriteria();
         List<Note> results = searchService.searchNotes(criteria);
         resultsObservableList.setAll(results);
-
         updateResultCount(results.size(), criteria);
     }
 

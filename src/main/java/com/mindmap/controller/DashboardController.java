@@ -1,5 +1,6 @@
 package com.mindmap.controller;
 
+import com.mindmap.concurrency.TaskExecutor;
 import com.mindmap.model.DashboardStats;
 import com.mindmap.model.Difficulty;
 import com.mindmap.model.Note;
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,12 +42,19 @@ import java.util.logging.Logger;
  * Controller for the data-driven Learning Dashboard screen.
  * Displays key metrics, distribution charts, revision progress, recent activity,
  * and recent notes using real SQLite data via DashboardService.
- * Features responsive FlowPane-based wrapping and lightweight layout adaptation.
+ * Features responsive FlowPane-based wrapping, background multithreaded loading,
+ * and lightweight layout adaptation.
  */
 public class DashboardController {
 
     private static final Logger LOGGER = Logger.getLogger(DashboardController.class.getName());
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MMM dd, yyyy");
+
+    // Header Controls
+    @FXML private Button btnRefresh;
+    @FXML private Button btnNewNote;
+    @FXML private Button btnStartReview;
+    @FXML private Button btnOpenMindMap;
 
     // Layout Containers & Responsive Cards
     @FXML private ScrollPane scrollDashboard;
@@ -249,12 +258,59 @@ public class DashboardController {
 
 
     /**
-     * Loads aggregated dashboard data and populates all UI components.
+     * Loads aggregated dashboard data asynchronously in a background worker thread.
+     * Updates all UI components on the JavaFX Application Thread once retrieved.
+     *
+     * @return CompletableFuture holding the loaded DashboardStats.
      */
-    public void loadDashboardData() {
+    public CompletableFuture<DashboardStats> loadDashboardData() {
+        if (btnRefresh != null) {
+            btnRefresh.setDisable(true);
+            btnRefresh.setText("⏳ Loading...");
+        }
+
+        final DashboardService service = this.dashboardService;
+        CompletableFuture<DashboardStats> future = new CompletableFuture<>();
+        TaskExecutor.runAsync(
+                () -> service.getDashboardStats(),
+                stats -> {
+                    try {
+                        updatePrimaryMetrics(stats);
+                        updateCharts(stats);
+                        updateRevisionOverview(stats);
+                        updateGraphSummary(stats);
+                        updateRecentActivity(stats);
+                        updateRecentNotes(stats);
+                        future.complete(stats);
+                    } catch (Exception e) {
+                        LOGGER.log(Level.SEVERE, "Error rendering dashboard data: " + e.getMessage(), e);
+                        future.completeExceptionally(e);
+                    } finally {
+                        if (btnRefresh != null) {
+                            btnRefresh.setDisable(false);
+                            btnRefresh.setText("🔄 Refresh");
+                        }
+                    }
+                },
+                throwable -> {
+                    LOGGER.log(Level.SEVERE, "Failed to load dashboard data asynchronously: " + throwable.getMessage(), throwable);
+                    if (btnRefresh != null) {
+                        btnRefresh.setDisable(false);
+                        btnRefresh.setText("🔄 Refresh");
+                    }
+                    future.completeExceptionally(throwable);
+                }
+        );
+
+        return future;
+    }
+
+    /**
+     * Synchronous variant for tests or immediate retrieval.
+     */
+    public void loadDashboardDataSync() {
         try {
             DashboardStats stats = dashboardService.getDashboardStats();
-
             updatePrimaryMetrics(stats);
             updateCharts(stats);
             updateRevisionOverview(stats);
@@ -262,7 +318,7 @@ public class DashboardController {
             updateRecentActivity(stats);
             updateRecentNotes(stats);
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Failed to load dashboard data: " + e.getMessage(), e);
+            LOGGER.log(Level.SEVERE, "Failed to load dashboard data synchronously: " + e.getMessage(), e);
         }
     }
 

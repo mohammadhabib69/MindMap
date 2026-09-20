@@ -1,5 +1,6 @@
 package com.mindmap.controller;
 
+import com.mindmap.concurrency.TaskExecutor;
 import com.mindmap.model.Difficulty;
 import com.mindmap.model.Note;
 import com.mindmap.model.ScheduledReview;
@@ -27,6 +28,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -118,21 +120,71 @@ public class RevisionController {
         return listUpcoming;
     }
 
-    /**
-     * Loads due and upcoming reviews from SQLite (single JOIN query each)
-     * and populates the cached ObservableLists. Only called on:
-     * - Initial load
-     * - Explicit Refresh
-     * - After completing a review
-     * - After scheduling note(s)
-     */
-    public void loadRevisionData() {
-        List<ScheduledReview> dueReviews = revisionService.getDueReviews();
-        List<ScheduledReview> upcomingReviews = revisionService.getUpcomingReviews();
+    public record RevisionSnapshot(List<ScheduledReview> due, List<ScheduledReview> upcoming, int totalScheduled) {}
 
-        int dueCount = dueReviews.size();
-        int upcomingCount = upcomingReviews.size();
-        int totalScheduled = revisionService.getTotalScheduledCount();
+    /**
+     * Loads due and upcoming reviews from SQLite in the background
+     * and populates the cached ObservableLists safely on the JavaFX thread.
+     *
+     * @return CompletableFuture holding the loaded snapshot.
+     */
+    public CompletableFuture<RevisionSnapshot> loadRevisionData() {
+        if (btnRefresh != null) {
+            btnRefresh.setDisable(true);
+            btnRefresh.setText("⏳");
+        }
+
+        final RevisionService service = this.revisionService;
+        CompletableFuture<RevisionSnapshot> future = new CompletableFuture<>();
+
+        TaskExecutor.runAsync(
+                () -> {
+                    List<ScheduledReview> due = service.getDueReviews();
+                    List<ScheduledReview> upcoming = service.getUpcomingReviews();
+                    int total = service.getTotalScheduledCount();
+                    return new RevisionSnapshot(due, upcoming, total);
+                },
+                snapshot -> {
+                    try {
+                        applyRevisionSnapshot(snapshot);
+                        future.complete(snapshot);
+                    } catch (Exception e) {
+                        LOGGER.log(Level.SEVERE, "Error updating revision UI: " + e.getMessage(), e);
+                        future.completeExceptionally(e);
+                    } finally {
+                        if (btnRefresh != null) {
+                            btnRefresh.setDisable(false);
+                            btnRefresh.setText("🔄 Refresh");
+                        }
+                    }
+                },
+                throwable -> {
+                    LOGGER.log(Level.SEVERE, "Failed to load revision data: " + throwable.getMessage(), throwable);
+                    if (btnRefresh != null) {
+                        btnRefresh.setDisable(false);
+                        btnRefresh.setText("🔄 Refresh");
+                    }
+                    future.completeExceptionally(throwable);
+                }
+        );
+
+        return future;
+    }
+
+    /**
+     * Synchronous variant for tests or immediate retrieval.
+     */
+    public void loadRevisionDataSync() {
+        List<ScheduledReview> due = revisionService.getDueReviews();
+        List<ScheduledReview> upcoming = revisionService.getUpcomingReviews();
+        int total = revisionService.getTotalScheduledCount();
+        applyRevisionSnapshot(new RevisionSnapshot(due, upcoming, total));
+    }
+
+    private void applyRevisionSnapshot(RevisionSnapshot snapshot) {
+        int dueCount = snapshot.due().size();
+        int upcomingCount = snapshot.upcoming().size();
+        int totalScheduled = snapshot.totalScheduled();
 
         // 1. Update summary metrics
         if (lblStatDueToday != null) lblStatDueToday.setText(String.valueOf(dueCount));
@@ -146,8 +198,8 @@ public class RevisionController {
         }
 
         // 2. Update cached data (triggers ListView refresh via ObservableList)
-        dueData.setAll(dueReviews);
-        upcomingData.setAll(upcomingReviews);
+        dueData.setAll(snapshot.due());
+        upcomingData.setAll(snapshot.upcoming());
 
         // 3. Toggle empty states
         updateEmptyState(boxEmptyDue, listDue, dueCount == 0);
@@ -544,18 +596,39 @@ public class RevisionController {
 
     @FXML
     private void handleScheduleAll() {
-        int scheduledCount = revisionService.scheduleAllUnscheduledNotes();
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Schedule Notes");
-        alert.setHeaderText(null);
-        if (scheduledCount > 0) {
-            alert.setContentText("Successfully added " + scheduledCount + " " +
-                    (scheduledCount == 1 ? "note" : "notes") + " to the Spaced Repetition queue!");
-        } else {
-            alert.setContentText("All notes are already scheduled in the Spaced Repetition system.");
+        if (btnScheduleAll != null) {
+            btnScheduleAll.setDisable(true);
+            btnScheduleAll.setText("⚡ Scheduling...");
         }
-        alert.showAndWait();
-        loadRevisionData();
+
+        final RevisionService service = this.revisionService;
+        TaskExecutor.runAsync(
+                service::scheduleAllUnscheduledNotes,
+                scheduledCount -> {
+                    if (btnScheduleAll != null) {
+                        btnScheduleAll.setDisable(false);
+                        btnScheduleAll.setText("⚡ Schedule All");
+                    }
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Schedule Notes");
+                    alert.setHeaderText(null);
+                    if (scheduledCount > 0) {
+                        alert.setContentText("Successfully added " + scheduledCount + " " +
+                                (scheduledCount == 1 ? "note" : "notes") + " to the Spaced Repetition queue!");
+                    } else {
+                        alert.setContentText("All notes are already scheduled in the Spaced Repetition system.");
+                    }
+                    alert.showAndWait();
+                    loadRevisionData();
+                },
+                throwable -> {
+                    LOGGER.log(Level.SEVERE, "Failed to schedule all notes: " + throwable.getMessage(), throwable);
+                    if (btnScheduleAll != null) {
+                        btnScheduleAll.setDisable(false);
+                        btnScheduleAll.setText("⚡ Schedule All");
+                    }
+                }
+        );
     }
 
     @FXML

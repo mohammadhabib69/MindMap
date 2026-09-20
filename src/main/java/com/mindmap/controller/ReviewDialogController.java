@@ -1,5 +1,6 @@
 package com.mindmap.controller;
 
+import com.mindmap.concurrency.TaskExecutor;
 import com.mindmap.model.Difficulty;
 import com.mindmap.model.Note;
 import com.mindmap.model.ReviewOutcome;
@@ -204,16 +205,34 @@ public class ReviewDialogController {
         }
 
         ScheduledReview current = reviewQueue.get(currentIndex);
-        try {
-            revisionService.completeReview(current.getRevision(), outcome);
-            completedCount++;
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Failed to complete review: " + e.getMessage(), e);
-        }
+        setOutcomeButtonsDisable(true);
+        final RevisionService service = this.revisionService;
 
-        // Advance to next note
-        currentIndex++;
-        loadCurrentReview();
+        TaskExecutor.runAsync(
+                () -> {
+                    service.completeReview(current.getRevision(), outcome);
+                    return true;
+                },
+                success -> {
+                    setOutcomeButtonsDisable(false);
+                    completedCount++;
+                    currentIndex++;
+                    loadCurrentReview();
+                },
+                throwable -> {
+                    setOutcomeButtonsDisable(false);
+                    LOGGER.log(Level.SEVERE, "Failed to complete review: " + throwable.getMessage(), throwable);
+                    currentIndex++;
+                    loadCurrentReview();
+                }
+        );
+    }
+
+    private void setOutcomeButtonsDisable(boolean disable) {
+        if (btnAgain != null) btnAgain.setDisable(disable);
+        if (btnHard != null) btnHard.setDisable(disable);
+        if (btnGood != null) btnGood.setDisable(disable);
+        if (btnEasy != null) btnEasy.setDisable(disable);
     }
 
     private void showCompletedState() {

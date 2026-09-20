@@ -55,11 +55,12 @@ public class DatabaseManager {
     public static Connection getConnection() throws SQLException {
         Connection connection = DriverManager.getConnection(JDBC_URL);
 
-        // Enable foreign key constraints in SQLite
+        // Enable foreign key constraints and busy timeout for concurrent threads in SQLite
         try (Statement stmt = connection.createStatement()) {
             stmt.execute("PRAGMA foreign_keys = ON;");
+            stmt.execute("PRAGMA busy_timeout = 5000;");
         } catch (SQLException e) {
-            LOGGER.log(Level.WARNING, "Failed to enable foreign keys for connection", e);
+            LOGGER.log(Level.WARNING, "Failed to configure pragmas for connection", e);
             connection.close();
             throw e;
         }

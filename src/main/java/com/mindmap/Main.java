@@ -102,6 +102,12 @@ public class Main extends Application {
         stage.show();
     }
 
+    @Override
+    public void stop() {
+        com.mindmap.concurrency.TaskExecutor.shutdown();
+        LOGGER.info("MindMap application stopped cleanly.");
+    }
+
     public static void main(String[] args) {
         launch(args);
     }

@@ -1,5 +1,6 @@
 package com.mindmap.controller;
 
+import com.mindmap.concurrency.TaskExecutor;
 import com.mindmap.model.Difficulty;
 import com.mindmap.model.Note;
 import com.mindmap.service.NoteService;
@@ -16,6 +17,7 @@ import javafx.stage.Stage;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -119,12 +121,12 @@ public class NoteEditorController {
     }
 
     @FXML
-    private void handleSave() {
+    public CompletableFuture<Note> handleSave() {
         String title = txtTitle.getText() != null ? txtTitle.getText().trim() : "";
         if (title.isEmpty()) {
             showError("Note title is required.");
             txtTitle.requestFocus();
-            return;
+            return CompletableFuture.completedFuture(null);
         }
 
         String subject = txtSubject.getText() != null ? txtSubject.getText().trim() : "";
@@ -138,35 +140,66 @@ public class NoteEditorController {
                 .distinct()
                 .toList();
 
-        try {
-            if (mode == NoteEditorMode.CREATE) {
-                Note newNote = new Note(title, content, subject, difficulty);
-                this.note = noteService.createNoteWithTags(newNote, tagNames);
-                if (this.note != null && this.note.getId() > 0) {
-                    try {
-                        new RevisionService().scheduleInitialReview(this.note.getId());
-                    } catch (Exception e) {
-                        LOGGER.log(Level.WARNING, "Could not auto-schedule initial revision: " + e.getMessage());
-                    }
-                }
-            } else if (mode == NoteEditorMode.EDIT && note != null) {
-                note.setTitle(title);
-                note.setContent(content);
-                note.setSubject(subject);
-                note.setDifficulty(difficulty);
-                this.note = noteService.updateNoteWithTags(note, tagNames);
-            }
-
-            saved = true;
-            if (dialogStage != null) {
-                dialogStage.close();
-            }
-        } catch (ValidationException ve) {
-            showError(ve.getMessage());
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Unexpected error saving note: " + e.getMessage(), e);
-            showError("An unexpected error occurred while saving the note.");
+        if (btnSave != null) {
+            btnSave.setDisable(true);
+            btnSave.setText(mode == NoteEditorMode.CREATE ? "Creating..." : "Saving...");
         }
+
+        final NoteService service = this.noteService;
+        final NoteEditorMode currentMode = this.mode;
+        final Note currentNote = this.note;
+        CompletableFuture<Note> future = new CompletableFuture<>();
+
+        TaskExecutor.runAsync(
+                () -> {
+                    if (currentMode == NoteEditorMode.CREATE) {
+                        Note newNote = new Note(title, content, subject, difficulty);
+                        Note created = service.createNoteWithTags(newNote, tagNames);
+                        if (created != null && created.getId() > 0) {
+                            try {
+                                new RevisionService().scheduleInitialReview(created.getId());
+                            } catch (Exception e) {
+                                LOGGER.log(Level.WARNING, "Could not auto-schedule initial revision: " + e.getMessage());
+                            }
+                        }
+                        return created;
+                    } else if (currentMode == NoteEditorMode.EDIT && currentNote != null) {
+                        currentNote.setTitle(title);
+                        currentNote.setContent(content);
+                        currentNote.setSubject(subject);
+                        currentNote.setDifficulty(difficulty);
+                        return service.updateNoteWithTags(currentNote, tagNames);
+                    }
+                    return currentNote;
+                },
+                resultNote -> {
+                    this.note = resultNote;
+                    this.saved = true;
+                    if (btnSave != null) {
+                        btnSave.setDisable(false);
+                        btnSave.setText(currentMode == NoteEditorMode.CREATE ? "Create Note" : "Save Changes");
+                    }
+                    if (dialogStage != null) {
+                        dialogStage.close();
+                    }
+                    future.complete(resultNote);
+                },
+                throwable -> {
+                    if (btnSave != null) {
+                        btnSave.setDisable(false);
+                        btnSave.setText(currentMode == NoteEditorMode.CREATE ? "Create Note" : "Save Changes");
+                    }
+                    if (throwable instanceof ValidationException ve) {
+                        showError(ve.getMessage());
+                    } else {
+                        LOGGER.log(Level.SEVERE, "Unexpected error saving note: " + throwable.getMessage(), throwable);
+                        showError("An unexpected error occurred while saving the note.");
+                    }
+                    future.completeExceptionally(throwable);
+                }
+        );
+
+        return future;
     }
 
     @FXML

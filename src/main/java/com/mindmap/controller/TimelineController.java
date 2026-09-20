@@ -1,5 +1,6 @@
 package com.mindmap.controller;
 
+import com.mindmap.concurrency.TaskExecutor;
 import com.mindmap.model.Difficulty;
 import com.mindmap.model.LearningEventType;
 import com.mindmap.model.Note;
@@ -36,6 +37,8 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -68,6 +71,7 @@ public class TimelineController {
     @FXML private VBox boxEmptyState;
 
     private final ObservableList<TimelineRow> timelineData = FXCollections.observableArrayList();
+    private final AtomicLong currentRequestId = new AtomicLong(0);
     private TimelineService timelineService = new TimelineService();
 
     public void setTimelineService(TimelineService timelineService) {
@@ -84,11 +88,13 @@ public class TimelineController {
         return listTimeline;
     }
 
+    public record TimelineSnapshot(List<TimelineRow> rows, int eventCount, int totalCount, int reviewCount, int noteActivityCount) {}
+
     @FXML
     public void initialize() {
         setupFilterControls();
         setupListView();
-        loadTimelineData();
+        loadTimelineDataSync();
     }
 
     private void setupFilterControls() {
@@ -140,14 +146,73 @@ public class TimelineController {
 
     /**
      * Loads timeline events from database, updates statistics, groups by date,
-     * and refreshes the virtualized ListView.
+     * and refreshes the virtualized ListView asynchronously.
      */
-    public void loadTimelineData() {
-        handleApplyFilters();
+    public CompletableFuture<TimelineSnapshot> loadTimelineData() {
+        return handleApplyFilters();
+    }
+
+    /**
+     * Synchronously loads timeline data for initialization or testing.
+     */
+    public void loadTimelineDataSync() {
+        handleApplyFiltersSync();
     }
 
     @FXML
-    public void handleApplyFilters() {
+    public CompletableFuture<TimelineSnapshot> handleApplyFilters() {
+        String eventTypeFilter = resolveEventTypeFilter();
+        LocalDate[] dates = resolveDateRange();
+        LocalDate fromDate = dates[0];
+        LocalDate toDate = dates[1];
+        String query = (txtSearch != null && txtSearch.getText() != null) ? txtSearch.getText().trim() : null;
+
+        if (lblFilterStatus != null) {
+            lblFilterStatus.setText("⏳ Filtering events...");
+        }
+
+        long reqId = currentRequestId.incrementAndGet();
+        final TimelineService service = this.timelineService;
+        CompletableFuture<TimelineSnapshot> future = new CompletableFuture<>();
+
+        TaskExecutor.runAsync(
+                () -> {
+                    List<TimelineEvent> events = service.getFilteredTimelineEvents(eventTypeFilter, fromDate, toDate, query);
+                    List<TimelineRow> groupedRows = service.buildGroupedTimelineRows(events);
+                    int total = service.getTotalEventCount();
+                    int reviews = service.getReviewedEventCount();
+                    int noteActions = service.getNoteActivityCount();
+                    return new TimelineSnapshot(groupedRows, events.size(), total, reviews, noteActions);
+                },
+                snapshot -> {
+                    // Stale result protection: drop outdated responses if a newer search/filter has been dispatched
+                    if (reqId != currentRequestId.get()) {
+                        future.cancel(true);
+                        return;
+                    }
+                    try {
+                        applyTimelineSnapshot(snapshot);
+                        future.complete(snapshot);
+                    } catch (Exception e) {
+                        LOGGER.log(Level.SEVERE, "Error updating timeline UI: " + e.getMessage(), e);
+                        future.completeExceptionally(e);
+                    }
+                },
+                throwable -> {
+                    if (reqId == currentRequestId.get()) {
+                        LOGGER.log(Level.SEVERE, "Failed to load timeline events: " + throwable.getMessage(), throwable);
+                        if (lblFilterStatus != null) {
+                            lblFilterStatus.setText("Error loading events");
+                        }
+                    }
+                    future.completeExceptionally(throwable);
+                }
+        );
+
+        return future;
+    }
+
+    public void handleApplyFiltersSync() {
         String eventTypeFilter = resolveEventTypeFilter();
         LocalDate[] dates = resolveDateRange();
         LocalDate fromDate = dates[0];
@@ -156,14 +221,20 @@ public class TimelineController {
 
         List<TimelineEvent> events = timelineService.getFilteredTimelineEvents(eventTypeFilter, fromDate, toDate, query);
         List<TimelineRow> groupedRows = timelineService.buildGroupedTimelineRows(events);
+        int total = timelineService.getTotalEventCount();
+        int reviews = timelineService.getReviewedEventCount();
+        int noteActions = timelineService.getNoteActivityCount();
+        applyTimelineSnapshot(new TimelineSnapshot(groupedRows, events.size(), total, reviews, noteActions));
+    }
 
-        timelineData.setAll(groupedRows);
+    private void applyTimelineSnapshot(TimelineSnapshot snapshot) {
+        timelineData.setAll(snapshot.rows());
 
-        // Update statistics metrics
-        updateMetrics();
+        if (lblStatTotal != null) lblStatTotal.setText(String.valueOf(snapshot.totalCount()));
+        if (lblStatReviews != null) lblStatReviews.setText(String.valueOf(snapshot.reviewCount()));
+        if (lblStatNoteActivity != null) lblStatNoteActivity.setText(String.valueOf(snapshot.noteActivityCount()));
 
-        // Update empty state
-        boolean isEmpty = groupedRows.isEmpty();
+        boolean isEmpty = snapshot.rows().isEmpty();
         if (boxEmptyState != null) {
             boxEmptyState.setVisible(isEmpty);
             boxEmptyState.setManaged(isEmpty);
@@ -173,9 +244,8 @@ public class TimelineController {
             listTimeline.setManaged(!isEmpty);
         }
 
-        // Update status label
         if (lblFilterStatus != null) {
-            lblFilterStatus.setText(events.size() + " " + (events.size() == 1 ? "event" : "events") + " found");
+            lblFilterStatus.setText(snapshot.eventCount() + " " + (snapshot.eventCount() == 1 ? "event" : "events") + " found");
         }
     }
 
@@ -196,16 +266,6 @@ public class TimelineController {
     @FXML
     public void handleRefresh() {
         loadTimelineData();
-    }
-
-    private void updateMetrics() {
-        int total = timelineService.getTotalEventCount();
-        int reviews = timelineService.getReviewedEventCount();
-        int noteActions = timelineService.getNoteActivityCount();
-
-        if (lblStatTotal != null) lblStatTotal.setText(String.valueOf(total));
-        if (lblStatReviews != null) lblStatReviews.setText(String.valueOf(reviews));
-        if (lblStatNoteActivity != null) lblStatNoteActivity.setText(String.valueOf(noteActions));
     }
 
     private String resolveEventTypeFilter() {

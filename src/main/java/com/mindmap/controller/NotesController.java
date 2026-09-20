@@ -1,5 +1,6 @@
 package com.mindmap.controller;
 
+import com.mindmap.concurrency.TaskExecutor;
 import com.mindmap.model.Note;
 import com.mindmap.model.Tag;
 import com.mindmap.service.NoteService;
@@ -28,6 +29,8 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,6 +41,7 @@ public class NotesController {
 
     private static final Logger LOGGER = Logger.getLogger(NotesController.class.getName());
     private static final String ALL_TAGS_LABEL = "All Tags";
+    private final AtomicLong notesRequestId = new AtomicLong(0);
 
     @FXML
     private TextField txtSearchNotes;
@@ -107,7 +111,7 @@ public class NotesController {
         setupButtonAnimations();
 
         loadTagFilters();
-        loadNotes();
+        applyFilterSync();
     }
 
     private void setupButtonAnimations() {
@@ -167,8 +171,8 @@ public class NotesController {
         }
     }
 
-    public void loadNotes() {
-        applyFilter();
+    public CompletableFuture<NotesFilterSnapshot> loadNotes() {
+        return applyFilter();
     }
 
     private void loadTagFilters() {
@@ -192,17 +196,56 @@ public class NotesController {
         }
     }
 
-    private void applyFilter() {
+    public record NotesFilterSnapshot(List<Note> results, int totalNoteCount, String query, String selectedTag) {}
+
+    public CompletableFuture<NotesFilterSnapshot> applyFilter() {
         String query = txtSearchNotes != null ? txtSearchNotes.getText() : null;
         String selectedTag = cmbTagFilter != null ? cmbTagFilter.getValue() : null;
+        long reqId = notesRequestId.incrementAndGet();
+        final NoteService service = this.noteService;
+        CompletableFuture<NotesFilterSnapshot> future = new CompletableFuture<>();
 
-        List<Note> results = noteService.searchAndFilterNotes(query, selectedTag);
-        notesObservableList.setAll(results);
+        TaskExecutor.runAsync(
+                () -> {
+                    List<Note> results = service.searchAndFilterNotes(query, selectedTag);
+                    int count = service.getNoteCount();
+                    return new NotesFilterSnapshot(results, count, query, selectedTag);
+                },
+                snapshot -> {
+                    if (reqId != notesRequestId.get()) {
+                        future.cancel(true);
+                        return;
+                    }
+                    try {
+                        notesObservableList.setAll(snapshot.results());
+                        updatePlaceholder(snapshot.query(), snapshot.selectedTag(), snapshot.totalNoteCount());
+                        future.complete(snapshot);
+                    } catch (Exception e) {
+                        LOGGER.log(Level.SEVERE, "Error updating notes UI: " + e.getMessage(), e);
+                        future.completeExceptionally(e);
+                    }
+                },
+                throwable -> {
+                    if (reqId == notesRequestId.get()) {
+                        LOGGER.log(Level.SEVERE, "Background notes filter error: " + throwable.getMessage(), throwable);
+                    }
+                    future.completeExceptionally(throwable);
+                }
+        );
 
-        updatePlaceholder(query, selectedTag);
+        return future;
     }
 
-    private void updatePlaceholder(String query, String selectedTag) {
+    public void applyFilterSync() {
+        String query = txtSearchNotes != null ? txtSearchNotes.getText() : null;
+        String selectedTag = cmbTagFilter != null ? cmbTagFilter.getValue() : null;
+        List<Note> results = noteService.searchAndFilterNotes(query, selectedTag);
+        int count = noteService.getNoteCount();
+        notesObservableList.setAll(results);
+        updatePlaceholder(query, selectedTag, count);
+    }
+
+    private void updatePlaceholder(String query, String selectedTag, int totalNoteCount) {
         if (lblPlaceholderTitle == null || lblPlaceholderSubtitle == null) {
             return;
         }
@@ -210,7 +253,7 @@ public class NotesController {
         boolean hasQuery = (query != null && !query.trim().isEmpty());
         boolean hasTag = (selectedTag != null && !selectedTag.trim().isEmpty() && !ALL_TAGS_LABEL.equalsIgnoreCase(selectedTag.trim()));
 
-        if (noteService.getNoteCount() == 0) {
+        if (totalNoteCount == 0) {
             lblPlaceholderTitle.setText("No notes found");
             lblPlaceholderSubtitle.setText("Click '+ New Note' above to create your first note.");
         } else if (hasQuery || hasTag) {
@@ -321,18 +364,27 @@ public class NotesController {
 
         Optional<ButtonType> result = confirmAlert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            try {
-                boolean deleted = noteService.deleteNote(selected.getId());
-                if (deleted) {
-                    loadTagFilters();
-                    applyFilter();
-                } else {
-                    showErrorAlert("Delete Failed", "The note could not be deleted from the database.");
-                }
-            } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Error deleting note ID " + selected.getId(), e);
-                showErrorAlert("Database Error", "An error occurred while deleting the note.");
-            }
+            if (btnDeleteNote != null) btnDeleteNote.setDisable(true);
+            final NoteService service = this.noteService;
+            final int noteId = selected.getId();
+
+            TaskExecutor.runAsync(
+                    () -> service.deleteNote(noteId),
+                    deleted -> {
+                        if (btnDeleteNote != null) btnDeleteNote.setDisable(false);
+                        if (deleted) {
+                            loadTagFilters();
+                            applyFilter();
+                        } else {
+                            showErrorAlert("Delete Failed", "The note could not be deleted from the database.");
+                        }
+                    },
+                    throwable -> {
+                        if (btnDeleteNote != null) btnDeleteNote.setDisable(false);
+                        LOGGER.log(Level.SEVERE, "Error deleting note ID " + noteId, throwable);
+                        showErrorAlert("Database Error", "An error occurred while deleting the note.");
+                    }
+            );
         }
     }
 
