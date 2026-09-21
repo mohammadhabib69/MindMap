@@ -303,4 +303,105 @@ public class NoteEditorController {
             lblError.setVisible(true);
         }
     }
+
+
+    @FXML
+    private void handleToggleFavorite() {
+        updateFavoriteButtonUI();
+    }
+
+    private void updateFavoriteButtonUI() {
+        if (btnFavorite != null) {
+            if (btnFavorite.isSelected()) {
+                btnFavorite.setText("★ Favorite");
+                btnFavorite.setStyle("-fx-text-fill: #eab308; -fx-font-weight: bold;");
+            } else {
+                btnFavorite.setText("☆ Favorite");
+                btnFavorite.setStyle("");
+            }
+        }
+    }
+
+    private void applyTemplate(String templateName) {
+        if (templateName == null || templateName.equals("Blank Note")) {
+            if (txtContent.getText().trim().isEmpty() || txtContent.getText().contains("Key Concepts:")) {
+                txtContent.setText("");
+            }
+            return;
+        }
+
+        if (!txtContent.getText().trim().isEmpty() && !txtContent.getText().startsWith("Topic:")) {
+            boolean confirm = com.mindmap.util.UiUtils.showConfirmation("Overwrite Content?", "Applying a template will replace current content.");
+            if (!confirm) return;
+        }
+
+        String templateText = "";
+        switch (templateName) {
+            case "Lecture Note":
+                templateText = """
+Topic:
+
+Key Concepts:
+
+Important Points:
+
+Examples:
+
+Questions:
+
+Summary:
+""";
+                break;
+            case "Concept":
+                templateText = """
+Definition:
+
+Core Idea:
+
+Examples:
+
+Related Concepts:
+""";
+                break;
+            case "Programming":
+                templateText = """
+Problem:
+
+Approach:
+
+Code / Pseudocode:
+
+Complexity:
+
+Notes:
+""";
+                break;
+            case "Research":
+                templateText = """
+Source:
+
+Summary:
+
+Key Findings:
+
+References:
+""";
+                break;
+            case "Problem Solving":
+                templateText = """
+Problem:
+
+Given:
+
+Approach:
+
+Solution:
+
+Explanation:
+""";
+                break;
+        }
+        txtContent.setText(templateText);
+    }
+
 }
