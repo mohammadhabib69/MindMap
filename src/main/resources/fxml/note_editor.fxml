@@ -6,6 +6,8 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.Region?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
@@ -66,8 +68,8 @@
 
     <!-- Action Buttons -->
     <HBox spacing="12" alignment="CENTER_LEFT">
-        <javafx.scene.control.ToggleButton fx:id="btnFavorite" text="☆ Favorite" onAction="#handleToggleFavorite" styleClass="btn-secondary"/>
-        <javafx.scene.layout.Region HBox.hgrow="ALWAYS"/>
+        <ToggleButton fx:id="btnFavorite" text="☆ Favorite" onAction="#handleToggleFavorite" styleClass="btn-secondary"/>
+        <Region HBox.hgrow="ALWAYS"/>
         <Button fx:id="btnCancel" text="Cancel" onAction="#handleCancel" cancelButton="true" styleClass="btn-secondary"/>
         <Button fx:id="btnSave" text="Save" onAction="#handleSave" defaultButton="true" styleClass="btn-primary"/>
     </HBox>

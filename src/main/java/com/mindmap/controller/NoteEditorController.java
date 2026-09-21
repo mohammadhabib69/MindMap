@@ -82,6 +82,18 @@ public class NoteEditorController {
                 Difficulty.HARD.name()
         ));
         cmbDifficulty.setValue(Difficulty.MEDIUM.name());
+        if (cmbTemplate != null) {
+            cmbTemplate.setItems(javafx.collections.FXCollections.observableArrayList(
+                "Blank Note",
+                "Lecture Note",
+                "Concept",
+                "Programming",
+                "Research",
+                "Problem Solving"
+            ));
+            cmbTemplate.setValue("Blank Note");
+        }
+
 
         if (lblError != null) {
             lblError.setText("");
@@ -134,53 +146,67 @@ public class NoteEditorController {
         if (mode == NoteEditorMode.CREATE) {
             lblDialogTitle.setText("Create New Note");
             btnSave.setText("Create Note");
+            if (cmbTemplate != null) {
+                cmbTemplate.setVisible(true);
+                cmbTemplate.setManaged(true);
+                // Bind template selection
+                cmbTemplate.setOnAction(e -> applyTemplate(cmbTemplate.getValue()));
+            }
+            if (btnFavorite != null) {
+                btnFavorite.setSelected(false);
+                updateFavoriteButtonUI();
+            }
+            
             if (note != null) {
                 txtTitle.setText(note.getTitle() != null ? note.getTitle() : "");
                 txtSubject.setText(note.getSubject() != null ? note.getSubject() : "");
                 txtTags.setText(note.getTagsString() != null ? note.getTagsString() : "");
                 txtContent.setText(note.getContent() != null ? note.getContent() : "");
-            originalTitle = txtTitle.getText();
-            originalSubject = txtSubject.getText();
-            originalTags = txtTags.getText();
-            originalContent = txtContent.getText();
-            originalDifficulty = cmbDifficulty.getValue();
                 cmbDifficulty.setValue(note.getDifficulty() != null ? note.getDifficulty() : Difficulty.MEDIUM.name());
-                originalTitle = txtTitle.getText();
-                originalSubject = txtSubject.getText();
-                originalTags = txtTags.getText();
-                originalContent = txtContent.getText();
-                originalDifficulty = cmbDifficulty.getValue();
             } else {
                 txtTitle.clear();
-                originalTitle = "";
-                originalSubject = "";
-                originalTags = "";
-                originalContent = "";
-                originalDifficulty = Difficulty.MEDIUM.name();
                 txtSubject.clear();
                 txtTags.clear();
                 txtContent.clear();
                 cmbDifficulty.setValue(Difficulty.MEDIUM.name());
+        if (cmbTemplate != null) {
+            cmbTemplate.setItems(javafx.collections.FXCollections.observableArrayList(
+                "Blank Note",
+                "Lecture Note",
+                "Concept",
+                "Programming",
+                "Research",
+                "Problem Solving"
+            ));
+            cmbTemplate.setValue("Blank Note");
+        }
+
             }
         } else if (mode == NoteEditorMode.EDIT && note != null) {
-            lblDialogTitle.setText("Edit Note");
+            lblDialogTitle.setText("Edit Note: " + (note.getTitle() != null ? note.getTitle() : ""));
             btnSave.setText("Save Changes");
+            
+            if (cmbTemplate != null) {
+                cmbTemplate.setVisible(false);
+                cmbTemplate.setManaged(false);
+            }
+            if (btnFavorite != null) {
+                btnFavorite.setSelected(note.isFavorite());
+                updateFavoriteButtonUI();
+            }
+            
             txtTitle.setText(note.getTitle());
             txtSubject.setText(note.getSubject() != null ? note.getSubject() : "");
-            cmbDifficulty.setValue(note.getDifficulty() != null ? note.getDifficulty() : Difficulty.MEDIUM.name());
-                originalTitle = txtTitle.getText();
-                originalSubject = txtSubject.getText();
-                originalTags = txtTags.getText();
-                originalContent = txtContent.getText();
-                originalDifficulty = cmbDifficulty.getValue();
             txtTags.setText(note.getTagsString());
             txtContent.setText(note.getContent() != null ? note.getContent() : "");
-            originalTitle = txtTitle.getText();
-            originalSubject = txtSubject.getText();
-            originalTags = txtTags.getText();
-            originalContent = txtContent.getText();
-            originalDifficulty = cmbDifficulty.getValue();
+            cmbDifficulty.setValue(note.getDifficulty() != null ? note.getDifficulty() : Difficulty.MEDIUM.name());
         }
+
+        originalTitle = txtTitle.getText();
+        originalSubject = txtSubject.getText();
+        originalTags = txtTags.getText();
+        originalContent = txtContent.getText();
+        originalDifficulty = cmbDifficulty.getValue();
     }
 
     public boolean isSaved() {
@@ -219,12 +245,14 @@ public class NoteEditorController {
         final NoteService service = this.noteService;
         final NoteEditorMode currentMode = this.mode;
         final Note currentNote = this.note;
+        final boolean isFavorite = (btnFavorite != null) && btnFavorite.isSelected();
         CompletableFuture<Note> future = new CompletableFuture<>();
 
         TaskExecutor.runAsync(
                 () -> {
                     if (currentMode == NoteEditorMode.CREATE) {
                         Note newNote = new Note(title, content, subject, difficulty);
+                        newNote.setFavorite(isFavorite);
                         Note created = service.createNoteWithTags(newNote, tagNames);
                         if (created != null && created.getId() > 0) {
                             try {
@@ -239,6 +267,7 @@ public class NoteEditorController {
                         currentNote.setContent(content);
                         currentNote.setSubject(subject);
                         currentNote.setDifficulty(difficulty);
+                        currentNote.setFavorite(isFavorite);
                         return service.updateNoteWithTags(currentNote, tagNames);
                     }
                     return currentNote;
@@ -306,7 +335,7 @@ public class NoteEditorController {
 
 
     @FXML
-    private void handleToggleFavorite() {
+    private void handleToggleFavorite(javafx.event.ActionEvent event) {
         updateFavoriteButtonUI();
     }
 
