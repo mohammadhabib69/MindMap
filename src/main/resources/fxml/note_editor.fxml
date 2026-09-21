@@ -22,11 +22,14 @@
         <Insets top="24" right="28" bottom="24" left="28"/>
     </padding>
 
-    <!-- Dialog Header -->
-    <VBox spacing="4">
-        <Label fx:id="lblDialogTitle" text="Create New Note" styleClass="dialog-title"/>
-        <Label text="Fill in note details below. Fields marked * are required." styleClass="dialog-subtitle"/>
-    </VBox>
+    <!-- Dialog Header & Templates -->
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <VBox spacing="4" HBox.hgrow="ALWAYS">
+            <Label fx:id="lblDialogTitle" text="Create New Note" styleClass="dialog-title"/>
+            <Label text="Fill in note details below. Fields marked * are required." styleClass="dialog-subtitle"/>
+        </VBox>
+        <ComboBox fx:id="cmbTemplate" promptText="Select Template" visible="false" managed="false" styleClass="input-field"/>
+    </HBox>
 
     <!-- Title Field -->
     <VBox spacing="6">
@@ -62,7 +65,9 @@
     <Label fx:id="lblError" text="" styleClass="error-label" wrapText="true"/>
 
     <!-- Action Buttons -->
-    <HBox spacing="12" alignment="CENTER_RIGHT">
+    <HBox spacing="12" alignment="CENTER_LEFT">
+        <javafx.scene.control.ToggleButton fx:id="btnFavorite" text="☆ Favorite" onAction="#handleToggleFavorite" styleClass="btn-secondary"/>
+        <javafx.scene.layout.Region HBox.hgrow="ALWAYS"/>
         <Button fx:id="btnCancel" text="Cancel" onAction="#handleCancel" cancelButton="true" styleClass="btn-secondary"/>
         <Button fx:id="btnSave" text="Save" onAction="#handleSave" defaultButton="true" styleClass="btn-primary"/>
     </HBox>

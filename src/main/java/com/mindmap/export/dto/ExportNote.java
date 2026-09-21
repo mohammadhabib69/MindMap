@@ -12,6 +12,9 @@ public class ExportNote {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<String> tags;
+    private boolean favorite;
+    private LocalDateTime lastViewedAt;
+
 
     // Getters and Setters
     public String getExportId() { return exportId; }
@@ -37,4 +40,11 @@ public class ExportNote {
     
     public List<String> getTags() { return tags; }
     public void setTags(List<String> tags) { this.tags = tags; }
+
+    public boolean isFavorite() { return favorite; }
+    public void setFavorite(boolean favorite) { this.favorite = favorite; }
+
+    public LocalDateTime getLastViewedAt() { return lastViewedAt; }
+    public void setLastViewedAt(LocalDateTime lastViewedAt) { this.lastViewedAt = lastViewedAt; }
+
 }

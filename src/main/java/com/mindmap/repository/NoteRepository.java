@@ -51,8 +51,8 @@ public class NoteRepository {
      */
     public Note create(Note note) {
         String sql = """
-                INSERT INTO notes (title, content, subject, difficulty, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?);
+                INSERT INTO notes (title, content, subject, difficulty, created_at, updated_at, is_favorite, last_viewed_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
                 """;
 
         LocalDateTime now = LocalDateTime.now();
@@ -72,6 +72,8 @@ public class NoteRepository {
             stmt.setString(4, note.getDifficulty());
             stmt.setString(5, DateUtil.formatDateTime(note.getCreatedAt()));
             stmt.setString(6, DateUtil.formatDateTime(note.getUpdatedAt()));
+            stmt.setInt(7, note.isFavorite() ? 1 : 0);
+            stmt.setString(8, note.getLastViewedAt() != null ? DateUtil.formatDateTime(note.getLastViewedAt()) : null);
 
             int affectedRows = stmt.executeUpdate();
             if (affectedRows == 0) {
@@ -151,7 +153,7 @@ public class NoteRepository {
     public boolean update(Note note) {
         String sql = """
                 UPDATE notes
-                SET title = ?, content = ?, subject = ?, difficulty = ?, updated_at = ?
+                SET title = ?, content = ?, subject = ?, difficulty = ?, updated_at = ?, is_favorite = ?, last_viewed_at = ?
                 WHERE id = ?;
                 """;
 
@@ -164,8 +166,10 @@ public class NoteRepository {
             stmt.setString(2, note.getContent());
             stmt.setString(3, note.getSubject());
             stmt.setString(4, note.getDifficulty());
-            stmt.setString(5, DateUtil.formatDateTime(note.getUpdatedAt()));
-            stmt.setInt(6, note.getId());
+                        stmt.setString(5, DateUtil.formatDateTime(note.getUpdatedAt()));
+            stmt.setInt(6, note.isFavorite() ? 1 : 0);
+            stmt.setString(7, note.getLastViewedAt() != null ? DateUtil.formatDateTime(note.getLastViewedAt()) : null);
+            stmt.setInt(8, note.getId());
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -357,8 +361,8 @@ public class NoteRepository {
      */
     public Note createWithTags(Note note, List<String> tagNames) {
         String insertNoteSql = """
-                INSERT INTO notes (title, content, subject, difficulty, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?);
+                INSERT INTO notes (title, content, subject, difficulty, created_at, updated_at, is_favorite, last_viewed_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
                 """;
 
         LocalDateTime now = LocalDateTime.now();
@@ -380,6 +384,8 @@ public class NoteRepository {
                     stmt.setString(4, note.getDifficulty());
                     stmt.setString(5, DateUtil.formatDateTime(note.getCreatedAt()));
                     stmt.setString(6, DateUtil.formatDateTime(note.getUpdatedAt()));
+            stmt.setInt(7, note.isFavorite() ? 1 : 0);
+            stmt.setString(8, note.getLastViewedAt() != null ? DateUtil.formatDateTime(note.getLastViewedAt()) : null);
 
                     int affectedRows = stmt.executeUpdate();
                     if (affectedRows == 0) {
@@ -442,7 +448,7 @@ public class NoteRepository {
     public boolean updateWithTags(Note note, List<String> tagNames) {
         String updateNoteSql = """
                 UPDATE notes
-                SET title = ?, content = ?, subject = ?, difficulty = ?, updated_at = ?
+                SET title = ?, content = ?, subject = ?, difficulty = ?, updated_at = ?, is_favorite = ?, last_viewed_at = ?
                 WHERE id = ?;
                 """;
 
@@ -458,8 +464,10 @@ public class NoteRepository {
                     stmt.setString(2, note.getContent());
                     stmt.setString(3, note.getSubject());
                     stmt.setString(4, note.getDifficulty());
-                    stmt.setString(5, DateUtil.formatDateTime(note.getUpdatedAt()));
-                    stmt.setInt(6, note.getId());
+                                stmt.setString(5, DateUtil.formatDateTime(note.getUpdatedAt()));
+            stmt.setInt(6, note.isFavorite() ? 1 : 0);
+            stmt.setString(7, note.getLastViewedAt() != null ? DateUtil.formatDateTime(note.getLastViewedAt()) : null);
+            stmt.setInt(8, note.getId());
 
                     updated = stmt.executeUpdate() > 0;
                 }

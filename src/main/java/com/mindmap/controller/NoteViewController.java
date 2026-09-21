@@ -57,6 +57,12 @@ public class NoteViewController {
     }
 
     public void setNote(Note note) {
+        if (note != null) {
+            com.mindmap.concurrency.TaskExecutor.execute(() -> {
+                new com.mindmap.service.NoteService().updateLastViewed(note.getId());
+            });
+        }
+
         this.note = note;
         if (note == null) {
             return;

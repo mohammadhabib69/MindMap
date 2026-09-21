@@ -180,6 +180,34 @@ public class NoteService {
     /**
      * Retrieves a note by ID with its tags populated.
      */
+    
+    public void updateLastViewed(int noteId) {
+        if (noteId <= 0) return;
+        Optional<Note> opt = noteRepository.findById(noteId);
+        opt.ifPresent(note -> {
+            note.setLastViewedAt(java.time.LocalDateTime.now());
+            try {
+                noteRepository.update(note);
+            } catch (Exception e) {
+                // Ignore failure on background view update
+            }
+        });
+    }
+
+    public List<Note> getRecentlyViewed(int limit) {
+        return noteRepository.findAll().stream()
+                .filter(n -> n.getLastViewedAt() != null)
+                .sorted((a, b) -> b.getLastViewedAt().compareTo(a.getLastViewedAt()))
+                .limit(limit)
+                .toList();
+    }
+    
+    public List<Note> getFavorites() {
+        return noteRepository.findAll().stream()
+                .filter(Note::isFavorite)
+                .toList();
+    }
+
     public Optional<Note> getNoteWithTags(int id) {
         if (id <= 0) {
             return Optional.empty();

@@ -32,6 +32,12 @@ public class NoteEditorController {
 
     @FXML
     private Label lblDialogTitle;
+    @FXML
+    private javafx.scene.control.ComboBox<String> cmbTemplate;
+
+    @FXML
+    private javafx.scene.control.ToggleButton btnFavorite;
+
 
     @FXML
     private TextField txtTitle;
@@ -83,23 +89,40 @@ public class NoteEditorController {
         }
     }
 
+
     public void setDialogStage(Stage dialogStage) {
         this.dialogStage = dialogStage;
         this.dialogStage.setOnCloseRequest(event -> {
             if (hasUnsavedChanges()) {
-                boolean discard = UiUtils.showConfirmation("Unsaved Changes", "You have unsaved changes. Leave without saving?");
-                if (!discard) {
-                    event.consume(); // Cancel the close request
+                event.consume();
+                boolean confirm = UiUtils.showConfirmation("Discard Changes?", "You have unsaved changes. Are you sure you want to discard them and close?");
+                if (confirm) {
+                    dialogStage.close();
                 }
             }
         });
+        
+        // Add Ctrl+S / Cmd+S shortcut
+        dialogStage.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                javafx.scene.input.KeyCombination saveCombo = new javafx.scene.input.KeyCodeCombination(
+                        javafx.scene.input.KeyCode.S, javafx.scene.input.KeyCombination.SHORTCUT_DOWN);
+                newScene.getAccelerators().put(saveCombo, this::handleSave);
+            }
+        });
     }
+
 
     public void setNoteService(NoteService noteService) {
         this.noteService = noteService;
     }
 
     public void setNote(Note note, NoteEditorMode mode) {
+        if (note != null && mode == NoteEditorMode.EDIT) {
+            com.mindmap.concurrency.TaskExecutor.execute(() -> {
+                new com.mindmap.service.NoteService().updateLastViewed(note.getId());
+            });
+        }
         this.note = note;
         this.mode = mode;
 

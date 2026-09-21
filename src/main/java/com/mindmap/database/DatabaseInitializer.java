@@ -89,9 +89,21 @@ public class DatabaseInitializer {
         try (Connection conn = DatabaseManager.getConnection();
              Statement stmt = conn.createStatement()) {
 
+
             for (String sql : SCHEMA_STATEMENTS) {
                 stmt.execute(sql);
             }
+            
+            // Safe Migrations for Phase 18
+            try {
+                stmt.execute("ALTER TABLE notes ADD COLUMN is_favorite INTEGER DEFAULT 0;");
+                LOGGER.info("Added is_favorite column to notes table.");
+            } catch (SQLException ignored) {}
+            try {
+                stmt.execute("ALTER TABLE notes ADD COLUMN last_viewed_at TEXT;");
+                LOGGER.info("Added last_viewed_at column to notes table.");
+            } catch (SQLException ignored) {}
+
             LOGGER.log(Level.INFO, "Database schema initialized successfully (notes, tags, note_tags, connections, revisions, learning_events).");
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to initialize database schema: " + e.getMessage(), e);

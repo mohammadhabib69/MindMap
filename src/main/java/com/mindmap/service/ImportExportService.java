@@ -64,6 +64,16 @@ public class ImportExportService {
                     en.setDifficulty(rs.getString("difficulty"));
                     en.setCreatedAt(com.mindmap.util.DateUtil.parseDateTime(rs.getString("created_at")));
                     en.setUpdatedAt(com.mindmap.util.DateUtil.parseDateTime(rs.getString("updated_at")));
+                    
+                    try {
+                        en.setFavorite(rs.getInt("is_favorite") == 1);
+                    } catch (Exception ignored) {}
+                    
+                    try {
+                        String lv = rs.getString("last_viewed_at");
+                        if (lv != null) en.setLastViewedAt(com.mindmap.util.DateUtil.parseDateTime(lv));
+                    } catch (Exception ignored) {}
+
 
                     // Fetch tags for this note
                     try (PreparedStatement tagStmt = conn.prepareStatement(

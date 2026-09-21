@@ -16,8 +16,10 @@ public class Note {
     private String content;
     private String subject;
     private String difficulty;
-    private LocalDateTime createdAt;
+        private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private boolean favorite;
+    private LocalDateTime lastViewedAt;
     private List<Tag> tags = new ArrayList<>();
     private int connectionCount;
 
@@ -107,6 +109,22 @@ public class Note {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public boolean isFavorite() {
+        return favorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        this.favorite = favorite;
+    }
+
+    public LocalDateTime getLastViewedAt() {
+        return lastViewedAt;
+    }
+
+    public void setLastViewedAt(LocalDateTime lastViewedAt) {
+        this.lastViewedAt = lastViewedAt;
     }
 
     public List<Tag> getTags() {

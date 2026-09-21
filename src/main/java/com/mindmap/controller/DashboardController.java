@@ -69,6 +69,15 @@ public class DashboardController {
     @FXML private VBox cardUpcomingReviews;
     @FXML private VBox cardTotalTags;
 
+
+    // Phase 18 Features
+    @FXML private VBox boxStudyNext;
+    @FXML private Label lblEmptyStudy;
+    @FXML private VBox boxFavorites;
+    @FXML private Label lblEmptyFavorites;
+    @FXML private VBox boxRecentlyViewed;
+    @FXML private Label lblEmptyRecent;
+
     // Primary Metric Labels
     @FXML private Label lblTotalNotes;
     @FXML private Label lblTotalConnections;

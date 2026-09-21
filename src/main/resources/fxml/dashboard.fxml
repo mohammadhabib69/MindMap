@@ -202,6 +202,39 @@
             </VBox>
         </FlowPane>
 
+        <!-- Phase 18: Productivity Features Section -->
+        <FlowPane fx:id="paneProductivitySection" hgap="14" vgap="14" alignment="TOP_LEFT">
+            <!-- Study Next -->
+            <VBox fx:id="cardStudyNext" spacing="10" styleClass="dashboard-card" minWidth="300" prefWidth="320">
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <Label text="Study Next" styleClass="card-title"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <VBox fx:id="boxStudyNext" spacing="6"/>
+                <Label fx:id="lblEmptyStudy" text="No study recommendations available." visible="false" managed="false" styleClass="placeholder-subtext"/>
+            </VBox>
+
+            <!-- Favorites -->
+            <VBox fx:id="cardFavorites" spacing="10" styleClass="dashboard-card" minWidth="300" prefWidth="320">
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <Label text="★ Favorites" styleClass="card-title" style="-fx-text-fill: #eab308;"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <VBox fx:id="boxFavorites" spacing="6"/>
+                <Label fx:id="lblEmptyFavorites" text="No favorite notes yet." visible="false" managed="false" styleClass="placeholder-subtext"/>
+            </VBox>
+
+            <!-- Recently Viewed -->
+            <VBox fx:id="cardRecentlyViewed" spacing="10" styleClass="dashboard-card" minWidth="300" prefWidth="320">
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <Label text="Recently Viewed" styleClass="card-title"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <VBox fx:id="boxRecentlyViewed" spacing="6"/>
+                <Label fx:id="lblEmptyRecent" text="No recently viewed notes." visible="false" managed="false" styleClass="placeholder-subtext"/>
+            </VBox>
+        </FlowPane>
+
         <!-- Lower Section: Recent Learning Activity & Recently Updated Notes -->
         <FlowPane fx:id="paneLowerSection" hgap="14" vgap="14" alignment="TOP_LEFT">
             <!-- Left: Recent Learning Activity -->

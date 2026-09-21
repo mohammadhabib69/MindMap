@@ -56,6 +56,12 @@ public class MainController {
 
     private static MainController instance;
 
+    private javafx.scene.layout.StackPane quickSearchOverlay;
+    private javafx.scene.control.TextField txtQuickSearch;
+    private javafx.scene.control.ListView<com.mindmap.model.Note> listQuickSearch;
+    private com.mindmap.service.NoteService noteService = new com.mindmap.service.NoteService();
+
+
     public static MainController getInstance() {
         return instance;
     }
@@ -63,12 +69,181 @@ public class MainController {
     private Button currentActiveButton;
 
     @FXML
+
     public void initialize() {
         instance = this;
         setupSidebarAnimations();
         // Load default dashboard screen on startup
         showDashboard();
+        
+        // Delay keyboard shortcut setup until scene is available
+        javafx.application.Platform.runLater(this::setupKeyboardShortcuts);
     }
+    
+    private void setupKeyboardShortcuts() {
+        javafx.scene.Scene scene = contentArea.getScene();
+        if (scene != null) {
+            scene.getAccelerators().put(new javafx.scene.input.KeyCodeCombination(javafx.scene.input.KeyCode.K, javafx.scene.input.KeyCombination.SHORTCUT_DOWN), this::toggleQuickSearch);
+            scene.getAccelerators().put(new javafx.scene.input.KeyCodeCombination(javafx.scene.input.KeyCode.F, javafx.scene.input.KeyCombination.SHORTCUT_DOWN), this::showSearch);
+            scene.getAccelerators().put(new javafx.scene.input.KeyCodeCombination(javafx.scene.input.KeyCode.N, javafx.scene.input.KeyCombination.SHORTCUT_DOWN), () -> {
+                
+                try {
+                    javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/note_editor.fxml"));
+                    javafx.scene.Parent rt = loader.load();
+                    com.mindmap.controller.NoteEditorController controller = loader.getController();
+                    controller.setNoteService(noteService);
+                    javafx.stage.Stage stage = new javafx.stage.Stage();
+                    stage.setTitle("Create Note");
+                    stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+                    stage.setScene(new javafx.scene.Scene(rt));
+                    controller.setDialogStage(stage);
+                    controller.setNote(null, com.mindmap.controller.NoteEditorMode.CREATE);
+                    stage.showAndWait();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
+            });
+            scene.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, e -> {
+                if (e.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                    if (quickSearchOverlay != null && quickSearchOverlay.isVisible()) {
+                        hideQuickSearch();
+                        e.consume();
+                    }
+                }
+            });
+        }
+    }
+    
+    private void toggleQuickSearch() {
+        if (quickSearchOverlay == null) {
+            buildQuickSearchUI();
+            contentArea.getChildren().add(quickSearchOverlay);
+        }
+        if (quickSearchOverlay.isVisible()) {
+            hideQuickSearch();
+        } else {
+            quickSearchOverlay.setVisible(true);
+            txtQuickSearch.clear();
+            listQuickSearch.getItems().clear();
+            txtQuickSearch.requestFocus();
+        }
+    }
+    
+    private void hideQuickSearch() {
+        if (quickSearchOverlay != null) {
+            quickSearchOverlay.setVisible(false);
+            contentArea.requestFocus();
+        }
+    }
+    
+    private void buildQuickSearchUI() {
+        quickSearchOverlay = new javafx.scene.layout.StackPane();
+        quickSearchOverlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.4);");
+        quickSearchOverlay.setVisible(false);
+        
+        javafx.scene.layout.VBox dialog = new javafx.scene.layout.VBox(10);
+        dialog.setMaxWidth(600);
+        dialog.setMaxHeight(400);
+        dialog.setStyle("-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 20, 0, 0, 10);");
+        
+        javafx.scene.control.Label lbl = new javafx.scene.control.Label("🔎 Global Quick Search");
+        lbl.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #475569;");
+        
+        txtQuickSearch = new javafx.scene.control.TextField();
+        txtQuickSearch.setPromptText("Search notes, subjects, tags... (Press ESC to close)");
+        txtQuickSearch.setStyle("-fx-font-size: 16px; -fx-padding: 10;");
+        
+        listQuickSearch = new javafx.scene.control.ListView<>();
+        listQuickSearch.setStyle("-fx-background-color: transparent;");
+        listQuickSearch.setCellFactory(lv -> new javafx.scene.control.ListCell<>() {
+            @Override
+            protected void updateItem(com.mindmap.model.Note item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    javafx.scene.layout.VBox box = new javafx.scene.layout.VBox(4);
+                    javafx.scene.control.Label title = new javafx.scene.control.Label(item.getTitle());
+                    title.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+                    javafx.scene.control.Label subj = new javafx.scene.control.Label(item.getSubject() + " | Tags: " + item.getTagsString());
+                    subj.setStyle("-fx-font-size: 11px; -fx-text-fill: #64748b;");
+                    box.getChildren().addAll(title, subj);
+                    setGraphic(box);
+                }
+            }
+        });
+        
+        txtQuickSearch.textProperty().addListener((obs, old, val) -> {
+            if (val != null && val.length() >= 2) {
+                com.mindmap.concurrency.TaskExecutor.execute(() -> {
+                    java.util.List<com.mindmap.model.Note> results = noteService.searchNotes(val);
+                    javafx.application.Platform.runLater(() -> listQuickSearch.getItems().setAll(results));
+                });
+            } else {
+                listQuickSearch.getItems().clear();
+            }
+        });
+        
+        listQuickSearch.setOnKeyPressed(e -> {
+            if (e.getCode() == javafx.scene.input.KeyCode.ENTER) {
+                com.mindmap.model.Note selected = listQuickSearch.getSelectionModel().getSelectedItem();
+                if (selected != null) {
+                    hideQuickSearch();
+                    
+                    try {
+                        javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/note_view.fxml"));
+                        javafx.scene.Parent rt = loader.load();
+                        com.mindmap.controller.NoteViewController controller = loader.getController();
+                        javafx.stage.Stage stage = new javafx.stage.Stage();
+                        stage.setTitle("Note Details");
+                        stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+                        stage.setScene(new javafx.scene.Scene(rt));
+                        controller.setNote(selected);
+                        stage.showAndWait();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+
+                }
+            }
+        });
+        
+        listQuickSearch.setOnMouseClicked(e -> {
+            if (e.getClickCount() == 2) {
+                com.mindmap.model.Note selected = listQuickSearch.getSelectionModel().getSelectedItem();
+                if (selected != null) {
+                    hideQuickSearch();
+                    
+                    try {
+                        javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/note_view.fxml"));
+                        javafx.scene.Parent rt = loader.load();
+                        com.mindmap.controller.NoteViewController controller = loader.getController();
+                        javafx.stage.Stage stage = new javafx.stage.Stage();
+                        stage.setTitle("Note Details");
+                        stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+                        stage.setScene(new javafx.scene.Scene(rt));
+                        controller.setNote(selected);
+                        stage.showAndWait();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+
+                }
+            }
+        });
+        
+        dialog.getChildren().addAll(lbl, txtQuickSearch, listQuickSearch);
+        quickSearchOverlay.getChildren().add(dialog);
+        
+        quickSearchOverlay.setOnMouseClicked(e -> {
+            if (e.getTarget() == quickSearchOverlay) {
+                hideQuickSearch();
+            }
+        });
+    }
+
 
     private void setupSidebarAnimations() {
         AnimationUtil.addSidebarNavHoverEffect(btnDashboard);
