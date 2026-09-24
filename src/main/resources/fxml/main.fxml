@@ -41,8 +41,6 @@
                 <Button fx:id="btnMindMap" text="🧠  Mind Map" maxWidth="Infinity" alignment="BASELINE_LEFT"
                         onAction="#showMindMap" styleClass="nav-button"/>
 
-                <Button fx:id="btnSearch" text="🔍  Search" maxWidth="Infinity" alignment="BASELINE_LEFT"
-                        onAction="#showSearch" styleClass="nav-button"/>
 
                 <Button fx:id="btnRevision" text="🔄  Revision" maxWidth="Infinity" alignment="BASELINE_LEFT"
                         onAction="#showRevision" styleClass="nav-button"/>

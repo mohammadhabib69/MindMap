@@ -31,9 +31,6 @@ public class MainController {
     private Button btnMindMap;
 
     @FXML
-    private Button btnSearch;
-
-    @FXML
     private Button btnRevision;
 
     @FXML
@@ -84,7 +81,7 @@ public class MainController {
         javafx.scene.Scene scene = contentArea.getScene();
         if (scene != null) {
             scene.getAccelerators().put(new javafx.scene.input.KeyCodeCombination(javafx.scene.input.KeyCode.K, javafx.scene.input.KeyCombination.SHORTCUT_DOWN), this::toggleQuickSearch);
-            scene.getAccelerators().put(new javafx.scene.input.KeyCodeCombination(javafx.scene.input.KeyCode.F, javafx.scene.input.KeyCombination.SHORTCUT_DOWN), this::showSearch);
+            scene.getAccelerators().put(new javafx.scene.input.KeyCodeCombination(javafx.scene.input.KeyCode.F, javafx.scene.input.KeyCombination.SHORTCUT_DOWN), this::showNotesAndFocusSearch);
             scene.getAccelerators().put(new javafx.scene.input.KeyCodeCombination(javafx.scene.input.KeyCode.N, javafx.scene.input.KeyCombination.SHORTCUT_DOWN), () -> {
                 
                 try {
@@ -249,7 +246,6 @@ public class MainController {
         AnimationUtil.addSidebarNavHoverEffect(btnDashboard);
         AnimationUtil.addSidebarNavHoverEffect(btnNotes);
         AnimationUtil.addSidebarNavHoverEffect(btnMindMap);
-        AnimationUtil.addSidebarNavHoverEffect(btnSearch);
         AnimationUtil.addSidebarNavHoverEffect(btnRevision);
         AnimationUtil.addSidebarNavHoverEffect(btnTimeline);
         AnimationUtil.addSidebarNavHoverEffect(btnResearch);
@@ -273,11 +269,21 @@ public class MainController {
     public void showMindMap() {
         navigateTo("/fxml/mindmap.fxml", btnMindMap);
     }
-
-    @FXML
-    public void showSearch() {
-        navigateTo("/fxml/search.fxml", btnSearch);
+    public void showNotesAndFocusSearch() {
+        showNotes();
+        javafx.application.Platform.runLater(() -> {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {}
+            javafx.application.Platform.runLater(() -> {
+                javafx.scene.Node searchBox = contentArea.lookup("#txtSearchQuery");
+                if (searchBox != null) {
+                    searchBox.requestFocus();
+                }
+            });
+        });
     }
+
 
     @FXML
     public void showRevision() {
@@ -298,62 +304,47 @@ public class MainController {
     public void showSettings() {
         navigateTo("/fxml/settings.fxml", btnSettings);
     }
-
     @FXML
-        private void handleAbout() {
+    private void handleAbout() {
         javafx.scene.control.Dialog<Void> dialog = new javafx.scene.control.Dialog<>();
         dialog.setTitle("About MindMap");
         
         dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
         dialog.getDialogPane().getStyleClass().add("card");
         
-        javafx.scene.layout.VBox content = new javafx.scene.layout.VBox(20);
-        content.setPadding(new javafx.geometry.Insets(24, 32, 24, 32));
+        javafx.scene.layout.VBox content = new javafx.scene.layout.VBox(24);
+        content.setPadding(new javafx.geometry.Insets(32, 48, 24, 48));
         content.setAlignment(javafx.geometry.Pos.CENTER);
         
-        javafx.scene.layout.VBox header = new javafx.scene.layout.VBox(4);
+        javafx.scene.layout.VBox header = new javafx.scene.layout.VBox(8);
         header.setAlignment(javafx.geometry.Pos.CENTER);
         javafx.scene.control.Label title = new javafx.scene.control.Label("MindMap");
-        title.setStyle("-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
-        javafx.scene.control.Label subtitle = new javafx.scene.control.Label("Personal Knowledge Base\n& Study Organizer");
-        subtitle.setStyle("-fx-font-size: 16px; -fx-text-fill: #475569; -fx-alignment: center; -fx-text-alignment: center;");
-        javafx.scene.control.Label version = new javafx.scene.control.Label("1.0-SNAPSHOT");
-        version.setStyle("-fx-font-size: 12px; -fx-text-fill: #94a3b8; -fx-padding: 8 0 0 0;");
-        header.getChildren().addAll(title, subtitle, version);
+        title.setStyle("-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
+        javafx.scene.control.Label subtitle = new javafx.scene.control.Label("Personal Knowledge Base & Study Organizer");
+        subtitle.setStyle("-fx-font-size: 14px; -fx-text-fill: #475569;");
+        header.getChildren().addAll(title, subtitle);
         
-        javafx.scene.control.Separator sep1 = new javafx.scene.control.Separator();
+        javafx.scene.control.Label version = new javafx.scene.control.Label("Version 1.0.0");
+        version.setStyle("-fx-font-size: 13px; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-padding: 8px 16px; -fx-background-color: #f1f5f9; -fx-background-radius: 20px;");
         
         javafx.scene.control.Label desc = new javafx.scene.control.Label(
-            "MindMap helps you take notes, organize subjects,\n" +
-            "discover connections with interactive 2D and 3D\n" +
-            "knowledge spaces, and retain information through\n" +
-            "spaced repetition."
+            "An integrated platform for capturing thoughts,\n" +
+            "connecting ideas visually, and retaining\n" +
+            "knowledge through spaced repetition."
         );
-        desc.setStyle("-fx-font-size: 14px; -fx-text-fill: #334155; -fx-text-alignment: center; -fx-alignment: center;");
+        desc.setStyle("-fx-font-size: 14px; -fx-text-fill: #334155; -fx-text-alignment: center; -fx-alignment: center; -fx-line-spacing: 4px;");
         
-        javafx.scene.layout.VBox tech = new javafx.scene.layout.VBox(8);
-        tech.setAlignment(javafx.geometry.Pos.CENTER);
-        javafx.scene.control.Label techHeader = new javafx.scene.control.Label("TECHNOLOGY");
-        techHeader.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #64748b;");
-        javafx.scene.control.Label techList = new javafx.scene.control.Label("JavaFX 21\nSQLite\nJackson\nOpenPDF");
-        techList.setStyle("-fx-font-size: 13px; -fx-text-fill: #1e293b; -fx-text-alignment: center; -fx-alignment: center;");
-        tech.getChildren().addAll(techHeader, techList);
+        javafx.scene.control.Label copyright = new javafx.scene.control.Label("© 2026 MindMap");
+        copyright.setStyle("-fx-font-size: 12px; -fx-text-fill: #94a3b8;");
         
-        javafx.scene.layout.VBox proj = new javafx.scene.layout.VBox(8);
-        proj.setAlignment(javafx.geometry.Pos.CENTER);
-        javafx.scene.control.Label projHeader = new javafx.scene.control.Label("PROJECT");
-        projHeader.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #64748b;");
-        javafx.scene.control.Label projList = new javafx.scene.control.Label("Phase 18 - Final Release QA\nDatabase: SQLite");
-        projList.setStyle("-fx-font-size: 13px; -fx-text-fill: #1e293b; -fx-text-alignment: center; -fx-alignment: center;");
-        proj.getChildren().addAll(projHeader, projList);
-        
-        content.getChildren().addAll(header, sep1, desc, tech, proj);
+        content.getChildren().addAll(header, version, desc, copyright);
         
         dialog.getDialogPane().setContent(content);
         dialog.getDialogPane().getButtonTypes().add(javafx.scene.control.ButtonType.CLOSE);
         
         dialog.showAndWait();
     }
+
 
     @FXML
     private void handleExit() {

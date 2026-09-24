@@ -62,7 +62,7 @@ public class ResponsiveWindowTest {
                 "/fxml/dashboard.fxml",
                 "/fxml/notes.fxml",
                 "/fxml/mindmap.fxml",
-                "/fxml/search.fxml",
+                
                 "/fxml/revision.fxml",
                 "/fxml/timeline.fxml",
                 "/fxml/settings.fxml"

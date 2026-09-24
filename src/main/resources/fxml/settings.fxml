@@ -38,10 +38,10 @@
                     <ColumnConstraints hgrow="ALWAYS"/>
                 </columnConstraints>
                 <Label text="Theme" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                <Label text="Default Light (Clean Slate)" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                <Label text="Default Light" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
 
-                <Label text="Font Family" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                <Label text="System UI (BlinkMacSystemFont / Segoe UI / Roboto)" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                <Label text="Font" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                <Label text="System UI" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
             </GridPane>
         </VBox>
 
@@ -53,14 +53,14 @@
                     <ColumnConstraints prefWidth="200" minWidth="150"/>
                     <ColumnConstraints hgrow="ALWAYS"/>
                 </columnConstraints>
-                <Label text="Database Driver" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                <Label text="Storage" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
                 <Label text="SQLite JDBC" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
 
-                <Label text="Database Location / JDBC URL" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                <Label fx:id="lblDatabaseUrl" text="jdbc:sqlite:mindmap.sqlite" styleClass="setting-value, code-badge" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                <Label text="Database File" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                <Label fx:id="lblDatabaseUrl" text="mindmap.sqlite" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 
                 <Label text="Foreign Keys" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                <Label text="Enabled (PRAGMA foreign_keys = ON)" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                <Label text="Enabled" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
             </GridPane>
         </VBox>
 
@@ -73,13 +73,13 @@
                     <ColumnConstraints hgrow="ALWAYS"/>
                 </columnConstraints>
                 
-                <Label text="Export MindMap Data" styleClass="setting-label" style="-fx-alignment: center-left;" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.valignment="CENTER"/>
+                <Label text="Export Data" styleClass="setting-label" style="-fx-alignment: center-left;" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.valignment="CENTER"/>
                 <Button text="Export to JSON..." onAction="#handleExport" styleClass="btn-secondary" style="-fx-padding: 6 16;" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
 
-                <Label text="Import MindMap Data" styleClass="setting-label" style="-fx-alignment: center-left;" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.valignment="CENTER"/>
+                <Label text="Import Data" styleClass="setting-label" style="-fx-alignment: center-left;" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.valignment="CENTER"/>
                 <Button text="Import from JSON..." onAction="#handleImport" styleClass="btn-secondary" style="-fx-padding: 6 16;" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 
-                <Label text="Export All Notes to PDF" styleClass="setting-label" style="-fx-alignment: center-left;" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.valignment="CENTER"/>
+                <Label text="Export Notes" styleClass="setting-label" style="-fx-alignment: center-left;" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.valignment="CENTER"/>
                 <Button text="Export to PDF..." onAction="#handleExportPdfAll" styleClass="btn-secondary" style="-fx-padding: 6 16;" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
             </GridPane>
         </VBox>
@@ -93,13 +93,10 @@
                     <ColumnConstraints hgrow="ALWAYS"/>
                 </columnConstraints>
                 <Label text="Application Name" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                <Label text="MindMap: Personal Knowledge Base &amp; Study Organizer" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="0" wrapText="true"/>
+                <Label text="MindMap" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="0" wrapText="true"/>
 
                 <Label text="Version" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                <Label fx:id="lblAppVersion" text="1.0-SNAPSHOT" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-
-                <Label text="Phase" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                <Label fx:id="lblAppPhase" text="Phase 18 - Final Release QA" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                <Label fx:id="lblAppVersion" text="1.0.0" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
             </GridPane>
         </VBox>
 

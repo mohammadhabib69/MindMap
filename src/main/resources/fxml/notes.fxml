@@ -3,62 +3,159 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.mindmap.controller.NotesController"
-      spacing="16"
+      spacing="14"
       styleClass="screen-container">
 
     <padding>
-        <Insets top="24" right="24" bottom="24" left="24"/>
+        <Insets top="18" right="20" bottom="18" left="20"/>
     </padding>
 
     <!-- Header Section -->
     <HBox alignment="CENTER_LEFT" spacing="12">
         <VBox spacing="4" HBox.hgrow="ALWAYS">
             <Label text="Notes" styleClass="view-header"/>
-            <Label text="Manage and organize your study material" styleClass="view-subtitle"/>
+            <Label text="Manage, search, and organize your study material" styleClass="view-subtitle"/>
         </VBox>
         <Button fx:id="btnNewNote" text="+ New Note" onAction="#handleNewNote" styleClass="btn-primary"/>
     </HBox>
 
-    <!-- Search, Filter & Actions Toolbar -->
+    <!-- Primary Search Bar -->
     <HBox spacing="10" alignment="CENTER_LEFT">
-        <TextField fx:id="txtSearchNotes" promptText="Search notes by title, content, or subject..." HBox.hgrow="ALWAYS" minWidth="100" styleClass="input-field"/>
-        <ComboBox fx:id="cmbTagFilter" promptText="All Tags" prefWidth="140" minWidth="90" styleClass="input-field"/>
-        <Button fx:id="btnClearFilter" text="Reset" onAction="#handleClearFilter" styleClass="btn-secondary"/>
-        <HBox spacing="6" alignment="CENTER_RIGHT">
-            <Button fx:id="btnExportPdf" text="Export PDF" onAction="#handleExportPdf" disable="true" styleClass="btn-secondary"/>
-            <Button fx:id="btnViewNote" text="View" onAction="#handleViewNote" disable="true" styleClass="btn-secondary"/>
-            <Button fx:id="btnEditNote" text="Edit" onAction="#handleEditNote" disable="true" styleClass="btn-secondary"/>
-            <Button fx:id="btnDeleteNote" text="Delete" onAction="#handleDeleteNote" disable="true" styleClass="btn-danger"/>
-        </HBox>
+        <TextField fx:id="txtSearchQuery"
+                   promptText="Search notes by keywords, title, content, subject, or tags... (Press Enter to search)"
+                   HBox.hgrow="ALWAYS"
+                   styleClass="input-field"
+                   onAction="#handleSearch"/>
+        <Button fx:id="btnExecuteSearch"
+                text="🔍 Search"
+                onAction="#handleSearch"
+                styleClass="btn-primary"
+                minWidth="-Infinity"/>
+        <Button fx:id="btnClearFilters"
+                text="✕ Reset Filters"
+                onAction="#handleResetFilters"
+                styleClass="btn-secondary"
+                minWidth="-Infinity"/>
     </HBox>
 
-    <!-- Notes TableView -->
-    <TableView fx:id="tableNotes" VBox.vgrow="ALWAYS" minWidth="0" styleClass="data-table">
+    <!-- Multi-Criteria Filter Card -->
+    <VBox spacing="10" styleClass="card">
+        <HBox spacing="14" alignment="CENTER_LEFT">
+            <!-- Subject Filter -->
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Subject" styleClass="stat-label"/>
+                <ComboBox fx:id="cmbSubjectFilter" promptText="All Subjects" maxWidth="Infinity"/>
+            </VBox>
+
+            <!-- Difficulty Filter -->
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Difficulty" styleClass="stat-label"/>
+                <ComboBox fx:id="cmbDifficultyFilter" promptText="All Difficulties" maxWidth="Infinity"/>
+            </VBox>
+
+            <!-- Tag Filter -->
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Tag" styleClass="stat-label"/>
+                <ComboBox fx:id="cmbTagFilter" promptText="All Tags" maxWidth="Infinity"/>
+            </VBox>
+
+            <!-- Date Range Filter -->
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Date Range" styleClass="stat-label"/>
+                <ComboBox fx:id="cmbDateFilter" promptText="All Dates" maxWidth="Infinity"/>
+            </VBox>
+
+            <!-- Connection Filter -->
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Connections" styleClass="stat-label"/>
+                <ComboBox fx:id="cmbConnectionFilter" promptText="All Notes" maxWidth="Infinity"/>
+            </VBox>
+        </HBox>
+
+        <!-- Contextual Custom Date Range Pickers -->
+        <HBox fx:id="boxCustomDateRange" spacing="14" alignment="CENTER_LEFT" managed="false" visible="false">
+            <VBox spacing="4">
+                <Label text="From Date" styleClass="stat-label"/>
+                <DatePicker fx:id="dpStartDate" promptText="YYYY-MM-DD" prefWidth="160"/>
+            </VBox>
+            <VBox spacing="4">
+                <Label text="To Date" styleClass="stat-label"/>
+                <DatePicker fx:id="dpEndDate" promptText="YYYY-MM-DD" prefWidth="160"/>
+            </VBox>
+            <VBox spacing="4" alignment="BOTTOM_LEFT">
+                <Region prefHeight="16"/>
+                <Button fx:id="btnApplyCustomDate" text="Apply Range" onAction="#handleSearch" styleClass="btn-secondary"/>
+            </VBox>
+        </HBox>
+    </VBox>
+
+    <!-- Results Header & Actions Bar -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label fx:id="lblResultCount" text="Showing 0 notes" styleClass="card-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="btnViewNote"
+                text="👁 View"
+                onAction="#handleViewNote"
+                disable="true"
+                styleClass="btn-secondary"
+                minWidth="-Infinity"/>
+        <Button fx:id="btnEditNote"
+                text="✏ Edit"
+                onAction="#handleEditNote"
+                disable="true"
+                styleClass="btn-secondary"
+                minWidth="-Infinity"/>
+        <Button fx:id="btnExportPdf"
+                text="📄 Export PDF"
+                onAction="#handleExportPdf"
+                disable="true"
+                styleClass="btn-secondary"
+                minWidth="-Infinity"/>
+        <Button fx:id="btnOpenInMindMap"
+                text="🌐 Open in Mind Map"
+                onAction="#handleOpenInMindMap"
+                disable="true"
+                styleClass="btn-secondary"
+                minWidth="-Infinity"/>
+        <Button fx:id="btnDeleteNote"
+                text="🗑 Delete"
+                onAction="#handleDeleteNote"
+                disable="true"
+                styleClass="btn-danger"
+                minWidth="-Infinity"/>
+    </HBox>
+
+    <!-- Search Results Table -->
+    <TableView fx:id="tableResults" VBox.vgrow="ALWAYS" styleClass="data-table">
         <columns>
-            <TableColumn fx:id="colTitle" text="Title" prefWidth="200" minWidth="80"/>
-            <TableColumn fx:id="colSubject" text="Subject" prefWidth="120" minWidth="60"/>
-            <TableColumn fx:id="colDifficulty" text="Difficulty" prefWidth="85" minWidth="55"/>
-            <TableColumn fx:id="colTags" text="Tags" prefWidth="140" minWidth="60"/>
-            <TableColumn fx:id="colUpdated" text="Updated" prefWidth="110" minWidth="70"/>
+            <TableColumn fx:id="colFavorite" text="★" prefWidth="35" minWidth="35" maxWidth="35" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="colTitle" text="Title" prefWidth="220" minWidth="120"/>
+            <TableColumn fx:id="colSubject" text="Subject" prefWidth="130" minWidth="80"/>
+            <TableColumn fx:id="colDifficulty" text="Difficulty" prefWidth="95" minWidth="75"/>
+            <TableColumn fx:id="colTags" text="Tags" prefWidth="160" minWidth="80"/>
+            <TableColumn fx:id="colConnections" text="Connections" prefWidth="100" minWidth="75"/>
+            <TableColumn fx:id="colUpdated" text="Updated" prefWidth="130" minWidth="85"/>
         </columns>
         <columnResizePolicy>
             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
         </columnResizePolicy>
         <placeholder>
             <VBox alignment="CENTER" spacing="8" styleClass="table-placeholder">
-                <Label fx:id="lblPlaceholderTitle" text="No notes found" styleClass="placeholder-heading"/>
-                <Label fx:id="lblPlaceholderSubtitle" text="Click '+ New Note' above to create your first note." styleClass="placeholder-subtext"/>
+                <Label text="🔍" styleClass="placeholder-icon"/>
+                <Label fx:id="lblPlaceholderTitle" text="No matching notes found" styleClass="placeholder-heading"/>
+                <Label fx:id="lblPlaceholderSubtitle" text="Try adjusting your search query or clearing active filters." styleClass="placeholder-subtext"/>
             </VBox>
         </placeholder>
     </TableView>

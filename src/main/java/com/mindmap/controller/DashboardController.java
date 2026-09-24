@@ -6,6 +6,10 @@ import com.mindmap.model.Difficulty;
 import com.mindmap.model.Note;
 import com.mindmap.model.TimelineEvent;
 import com.mindmap.service.DashboardService;
+
+import com.mindmap.service.StudyRecommendationService;
+import com.mindmap.service.StudyRecommendationService.Recommendation;
+
 import com.mindmap.service.NoteService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -290,7 +294,10 @@ public class DashboardController {
                         updateRevisionOverview(stats);
                         updateGraphSummary(stats);
                         updateRecentActivity(stats);
-                        updateRecentNotes(stats);
+            
+            updateRecentNotes(stats);
+            populateProductivitySection();
+
                         future.complete(stats);
                     } catch (Exception e) {
                         LOGGER.log(Level.SEVERE, "Error rendering dashboard data: " + e.getMessage(), e);
@@ -326,7 +333,10 @@ public class DashboardController {
             updateRevisionOverview(stats);
             updateGraphSummary(stats);
             updateRecentActivity(stats);
+
             updateRecentNotes(stats);
+            populateProductivitySection();
+
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to load dashboard data synchronously: " + e.getMessage(), e);
         }
@@ -527,6 +537,107 @@ public class DashboardController {
     /**
      * Populates recently updated notes items.
      */
+
+    private void populateProductivitySection() {
+        javafx.application.Platform.runLater(() -> {
+            try {
+                // 1. Study Next
+                StudyRecommendationService recService = new StudyRecommendationService();
+                List<Recommendation> recs = recService.getStudyNextRecommendations(3);
+                
+                if (boxStudyNext != null) boxStudyNext.getChildren().clear();
+                if (recs.isEmpty()) {
+                    if (lblEmptyStudy != null) {
+                        lblEmptyStudy.setVisible(true);
+                        lblEmptyStudy.setManaged(true);
+                    }
+                } else {
+                    if (lblEmptyStudy != null) {
+                        lblEmptyStudy.setVisible(false);
+                        lblEmptyStudy.setManaged(false);
+                    }
+                    if (boxStudyNext != null) {
+                        for (Recommendation r : recs) {
+                            boxStudyNext.getChildren().add(createMiniNoteCard(r.getNote(), r.getReason()));
+                        }
+                    }
+                }
+
+                // 2. Favorites
+                com.mindmap.service.NoteService noteService = new com.mindmap.service.NoteService();
+                List<Note> favs = noteService.getFavorites();
+                
+                if (boxFavorites != null) boxFavorites.getChildren().clear();
+                if (favs.isEmpty()) {
+                    if (lblEmptyFavorites != null) {
+                        lblEmptyFavorites.setVisible(true);
+                        lblEmptyFavorites.setManaged(true);
+                    }
+                } else {
+                    if (lblEmptyFavorites != null) {
+                        lblEmptyFavorites.setVisible(false);
+                        lblEmptyFavorites.setManaged(false);
+                    }
+                    if (boxFavorites != null) {
+                        for (Note f : favs) {
+                            boxFavorites.getChildren().add(createMiniNoteCard(f, f.getSubject()));
+                        }
+                    }
+                }
+
+                // 3. Recently Viewed
+                List<Note> recentViews = noteService.getRecentlyViewed(3);
+                
+                if (boxRecentlyViewed != null) boxRecentlyViewed.getChildren().clear();
+                if (recentViews.isEmpty()) {
+                    if (lblEmptyRecent != null) {
+                        lblEmptyRecent.setVisible(true);
+                        lblEmptyRecent.setManaged(true);
+                    }
+                } else {
+                    if (lblEmptyRecent != null) {
+                        lblEmptyRecent.setVisible(false);
+                        lblEmptyRecent.setManaged(false);
+                    }
+                    if (boxRecentlyViewed != null) {
+                        for (Note rv : recentViews) {
+                            boxRecentlyViewed.getChildren().add(createMiniNoteCard(rv, "Recently viewed"));
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Failed to populate productivity section", e);
+            }
+        });
+    }
+
+    private javafx.scene.layout.HBox createMiniNoteCard(Note note, String subtext) {
+        javafx.scene.layout.HBox box = new javafx.scene.layout.HBox();
+        box.setSpacing(8);
+        box.setAlignment(Pos.CENTER_LEFT);
+        box.setStyle("-fx-padding: 8px 12px; -fx-background-color: #f8fafc; -fx-background-radius: 6px; -fx-cursor: hand;");
+        
+        javafx.scene.layout.VBox v = new javafx.scene.layout.VBox();
+        v.setSpacing(2);
+        
+        Label title = new Label(note.getTitle());
+        title.setStyle("-fx-font-weight: bold; -fx-text-fill: #1e293b;");
+        
+        Label sub = new Label(subtext != null ? subtext : "Note");
+        sub.setStyle("-fx-font-size: 11px; -fx-text-fill: #64748b;");
+        
+        v.getChildren().addAll(title, sub);
+        box.getChildren().add(v);
+        
+        box.setOnMouseClicked(e -> handleViewNote(note));
+        
+        // Hover effect
+        box.setOnMouseEntered(e -> box.setStyle("-fx-padding: 8px 12px; -fx-background-color: #f1f5f9; -fx-background-radius: 6px; -fx-cursor: hand;"));
+        box.setOnMouseExited(e -> box.setStyle("-fx-padding: 8px 12px; -fx-background-color: #f8fafc; -fx-background-radius: 6px; -fx-cursor: hand;"));
+        
+        return box;
+    }
+
     private void updateRecentNotes(DashboardStats stats) {
         if (boxRecentNotes == null) return;
         boxRecentNotes.getChildren().clear();

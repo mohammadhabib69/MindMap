@@ -102,7 +102,7 @@ public class NoteRepository {
      * @return Optional containing the Note if found.
      */
     public Optional<Note> findById(int id) {
-        String sql = "SELECT id, title, content, subject, difficulty, created_at, updated_at FROM notes WHERE id = ?;";
+        String sql = "SELECT id, title, content, subject, difficulty, created_at, updated_at, is_favorite, last_viewed_at FROM notes WHERE id = ?;";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -127,7 +127,7 @@ public class NoteRepository {
      * @return List of all notes.
      */
     public List<Note> findAll() {
-        String sql = "SELECT id, title, content, subject, difficulty, created_at, updated_at FROM notes ORDER BY updated_at DESC;";
+        String sql = "SELECT id, title, content, subject, difficulty, created_at, updated_at, is_favorite, last_viewed_at FROM notes ORDER BY updated_at DESC;";
         List<Note> notes = new ArrayList<>();
 
         try (Connection conn = DatabaseManager.getConnection();
@@ -577,7 +577,7 @@ public class NoteRepository {
         boolean hasTag = (tagName != null && !tagName.trim().isEmpty() && !"All Tags".equalsIgnoreCase(tagName.trim()));
 
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT n.id, n.title, n.content, n.subject, n.difficulty, n.created_at, n.updated_at, ");
+        sql.append("SELECT n.id, n.title, n.content, n.subject, n.difficulty, n.created_at, n.updated_at, n.is_favorite, n.last_viewed_at, ");
         sql.append("(SELECT COUNT(*) FROM connections c WHERE c.from_note_id = n.id OR c.to_note_id = n.id) AS connection_count, ");
         sql.append("t.id AS tag_id, t.name AS tag_name ");
         sql.append("FROM notes n ");
@@ -628,7 +628,7 @@ public class NoteRepository {
      */
     public List<Note> searchByCriteria(SearchCriteria criteria) {
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT n.id, n.title, n.content, n.subject, n.difficulty, n.created_at, n.updated_at, ");
+        sql.append("SELECT n.id, n.title, n.content, n.subject, n.difficulty, n.created_at, n.updated_at, n.is_favorite, n.last_viewed_at, ");
         sql.append("(SELECT COUNT(*) FROM connections c WHERE c.from_note_id = n.id OR c.to_note_id = n.id) AS connection_count, ");
         sql.append("t.id AS tag_id, t.name AS tag_name ");
         sql.append("FROM notes n ");
@@ -769,6 +769,15 @@ public class NoteRepository {
                 note.setCreatedAt(DateUtil.parseDateTime(rs.getString("created_at")));
                 note.setUpdatedAt(DateUtil.parseDateTime(rs.getString("updated_at")));
                 try {
+                    note.setFavorite(rs.getInt("is_favorite") == 1);
+                } catch (SQLException ignored) {}
+                try {
+                    String lastViewedStr = rs.getString("last_viewed_at");
+                    if (lastViewedStr != null && !lastViewedStr.trim().isEmpty()) {
+                        note.setLastViewedAt(DateUtil.parseDateTime(lastViewedStr));
+                    }
+                } catch (SQLException ignored) {}
+                try {
                     note.setConnectionCount(rs.getInt("connection_count"));
                 } catch (SQLException ignored) {
                     // Column might not exist in older queries
@@ -796,6 +805,27 @@ public class NoteRepository {
         note.setDifficulty(rs.getString("difficulty"));
         note.setCreatedAt(DateUtil.parseDateTime(rs.getString("created_at")));
         note.setUpdatedAt(DateUtil.parseDateTime(rs.getString("updated_at")));
+                try {
+                    note.setFavorite(rs.getInt("is_favorite") == 1);
+                } catch (SQLException ignored) {}
+                try {
+                    String lastViewedStr = rs.getString("last_viewed_at");
+                    if (lastViewedStr != null && !lastViewedStr.trim().isEmpty()) {
+                        note.setLastViewedAt(DateUtil.parseDateTime(lastViewedStr));
+                    }
+                } catch (SQLException ignored) {}
+        
+        // Handle new columns gracefully
+        try {
+            note.setFavorite(rs.getInt("is_favorite") == 1);
+        } catch (SQLException ignored) {}
+        try {
+            String lastViewedStr = rs.getString("last_viewed_at");
+            if (lastViewedStr != null && !lastViewedStr.trim().isEmpty()) {
+                note.setLastViewedAt(DateUtil.parseDateTime(lastViewedStr));
+            }
+        } catch (SQLException ignored) {}
+        
         return note;
     }
 }

@@ -169,18 +169,18 @@ public class NoteEditorController {
                 txtTags.clear();
                 txtContent.clear();
                 cmbDifficulty.setValue(Difficulty.MEDIUM.name());
-        if (cmbTemplate != null) {
-            cmbTemplate.setItems(javafx.collections.FXCollections.observableArrayList(
-                "Blank Note",
-                "Lecture Note",
-                "Concept",
-                "Programming",
-                "Research",
-                "Problem Solving"
-            ));
-            cmbTemplate.setValue("Blank Note");
-        }
-
+            }
+            
+            if (cmbTemplate != null) {
+                cmbTemplate.setItems(javafx.collections.FXCollections.observableArrayList(
+                    "Blank Note",
+                    "Lecture Note",
+                    "Concept",
+                    "Programming",
+                    "Research",
+                    "Problem Solving"
+                ));
+                cmbTemplate.setValue("Blank Note");
             }
         } else if (mode == NoteEditorMode.EDIT && note != null) {
             lblDialogTitle.setText("Edit Note: " + (note.getTitle() != null ? note.getTitle() : ""));

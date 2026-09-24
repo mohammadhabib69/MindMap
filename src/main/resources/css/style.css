@@ -319,6 +319,21 @@
     -fx-background-color: #f8fafc;
 }
 
+.data-table .table-row-cell:selected {
+    -fx-background-color: #eff6ff; /* Soft blue */
+    -fx-table-cell-border-color: transparent;
+}
+
+.data-table .table-row-cell:selected .text {
+    -fx-fill: #1e293b; /* Keep text dark and readable */
+}
+
+/* Ensure badges remain exactly as they are in selected rows */
+.data-table .table-row-cell:selected .badge-difficulty {
+    -fx-opacity: 1.0;
+}
+
+
 .table-placeholder {
     -fx-padding: 40px;
 }

@@ -3,7 +3,7 @@ package com.mindmap.concurrency;
 import com.mindmap.controller.DashboardController;
 import com.mindmap.controller.NotesController;
 import com.mindmap.controller.RevisionController;
-import com.mindmap.controller.SearchController;
+
 import com.mindmap.controller.TimelineController;
 import com.mindmap.database.DatabaseInitializer;
 import com.mindmap.model.DashboardStats;
@@ -196,10 +196,10 @@ public class AsyncScreensIntegrationTest {
         CountDownLatch latch = new CountDownLatch(1);
         Platform.runLater(() -> {
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/search.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/notes.fxml"));
                 Parent root = loader.load();
                 assertNotNull(root);
-                SearchController controller = loader.getController();
+                NotesController controller = loader.getController();
 
                 // Rapid successive searches
                 CompletableFuture<List<Note>> f1 = controller.handleSearch();
@@ -236,7 +236,7 @@ public class AsyncScreensIntegrationTest {
                 assertNotNull(root);
                 NotesController controller = loader.getController();
 
-                CompletableFuture<NotesController.NotesFilterSnapshot> future = controller.applyFilter();
+                CompletableFuture<java.util.List<Note>> future = controller.handleSearch();
                 assertNotNull(future);
 
                 future.whenComplete((snapshot, ex) -> {
@@ -244,7 +244,7 @@ public class AsyncScreensIntegrationTest {
                         assertTrue(Platform.isFxApplicationThread(), "Notes UI update must run on JavaFX thread");
                         assertNull(ex);
                         assertNotNull(snapshot);
-                        assertNotNull(snapshot.results());
+                        assertNotNull(snapshot);
                     } finally {
                         latch.countDown();
                     }
