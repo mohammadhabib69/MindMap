@@ -332,7 +332,9 @@ public class MainController {
             "connecting ideas visually, and retaining\n" +
             "knowledge through spaced repetition."
         );
-        desc.setStyle("-fx-font-size: 14px; -fx-text-fill: #334155; -fx-text-alignment: center; -fx-alignment: center; -fx-line-spacing: 4px;");
+        desc.setWrapText(true);
+        desc.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+        desc.setStyle("-fx-font-size: 14px; -fx-text-fill: #334155; -fx-text-alignment: center; -fx-alignment: center; -fx-padding: 10 0 10 0;");
         
         javafx.scene.control.Label copyright = new javafx.scene.control.Label("© 2026 MindMap");
         copyright.setStyle("-fx-font-size: 12px; -fx-text-fill: #94a3b8;");
