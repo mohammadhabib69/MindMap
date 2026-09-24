@@ -270,7 +270,7 @@ public class NoteRepository {
      */
     public List<Note> findRecentNotes(int limit) {
         String sql = """
-                SELECT id, title, content, subject, difficulty, created_at, updated_at
+                SELECT id, title, content, subject, difficulty, created_at, updated_at, is_favorite, last_viewed_at
                 FROM notes
                 ORDER BY updated_at DESC, id DESC
                 LIMIT ?;
@@ -522,7 +522,7 @@ public class NoteRepository {
      */
     public Optional<Note> findByIdWithTags(int id) {
         String sql = """
-                SELECT n.id, n.title, n.content, n.subject, n.difficulty, n.created_at, n.updated_at,
+                SELECT n.id, n.title, n.content, n.subject, n.difficulty, n.created_at, n.updated_at, n.is_favorite, n.last_viewed_at,
                        t.id AS tag_id, t.name AS tag_name
                 FROM notes n
                 LEFT JOIN note_tags nt ON n.id = nt.note_id

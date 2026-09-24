@@ -190,6 +190,8 @@ public class NotesController {
             if (btnViewNote != null) btnViewNote.setDisable(!hasSelection);
             if (btnEditNote != null) btnEditNote.setDisable(!hasSelection);
             if (btnOpenInMindMap != null) btnOpenInMindMap.setDisable(!hasSelection);
+            if (btnDeleteNote != null) btnDeleteNote.setDisable(!hasSelection);
+            if (btnExportPdf != null) btnExportPdf.setDisable(!hasSelection);
         });
     }
 
