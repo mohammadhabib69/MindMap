@@ -84,6 +84,20 @@ public class NoteEditorController {
 
     @FXML
     public void initialize() {
+        if (chkPrivate != null && boxPinFields != null) {
+            chkPrivate.selectedProperty().addListener((obs, oldVal, newVal) -> {
+                boxPinFields.setVisible(newVal);
+                boxPinFields.setManaged(newVal);
+                if (!newVal) {
+                    if (txtPin != null) txtPin.clear();
+                    if (txtConfirmPin != null) txtConfirmPin.clear();
+                }
+            });
+            // trigger once manually to setup initial state
+            boxPinFields.setVisible(chkPrivate.isSelected());
+            boxPinFields.setManaged(chkPrivate.isSelected());
+        }
+
         cmbDifficulty.setItems(FXCollections.observableArrayList(
                 Difficulty.EASY.name(),
                 Difficulty.MEDIUM.name(),
@@ -239,6 +253,7 @@ public class NoteEditorController {
         if (title.isEmpty()) {
             showError("Note title is required.");
             txtTitle.requestFocus();
+            if (btnSave != null) { btnSave.setDisable(false); btnSave.setText(mode == NoteEditorMode.CREATE ? "Create Note" : "Save"); }
             return CompletableFuture.completedFuture(null);
         }
 
@@ -270,15 +285,21 @@ public class NoteEditorController {
         if (isPrivate) {
             if (mode == NoteEditorMode.CREATE || (mode == NoteEditorMode.EDIT && !pin.isEmpty())) {
                 if (pin.isEmpty()) {
-                    showError("A PIN is required for private notes.");
+                    showError("Please enter a PIN.");
                     if (txtPin != null) txtPin.requestFocus();
-                    if (btnSave != null) btnSave.setDisable(false);
+                    if (btnSave != null) { btnSave.setDisable(false); btnSave.setText(mode == NoteEditorMode.CREATE ? "Create Note" : "Save"); }
+                    return CompletableFuture.completedFuture(null);
+                }
+                if (confirmPin.isEmpty()) {
+                    showError("Please confirm your PIN.");
+                    if (txtConfirmPin != null) txtConfirmPin.requestFocus();
+                    if (btnSave != null) { btnSave.setDisable(false); btnSave.setText(mode == NoteEditorMode.CREATE ? "Create Note" : "Save"); }
                     return CompletableFuture.completedFuture(null);
                 }
                 if (!pin.equals(confirmPin)) {
                     showError("PINs do not match.");
                     if (txtConfirmPin != null) txtConfirmPin.requestFocus();
-                    if (btnSave != null) btnSave.setDisable(false);
+                    if (btnSave != null) { btnSave.setDisable(false); btnSave.setText(mode == NoteEditorMode.CREATE ? "Create Note" : "Save"); }
                     return CompletableFuture.completedFuture(null);
                 }
             }

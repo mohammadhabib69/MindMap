@@ -57,14 +57,6 @@
                     <Label text="notes saved" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
                 </HBox>
             </VBox>
-            <!-- Private Notes -->
-            <VBox fx:id="cardPrivateNotes" spacing="4" styleClass="dashboard-metric-card" minWidth="130" prefWidth="155">
-                <Label text="PRIVATE NOTES" styleClass="inspector-section-header" style="-fx-text-fill: #ef4444;"/>
-                <HBox alignment="BASELINE_LEFT" spacing="8">
-                    <Label fx:id="lblPrivateNotes" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
-                    <Label text="secured notes" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
-                </HBox>
-            </VBox>
 
             <!-- Total Connections -->
             <VBox fx:id="cardTotalConnections" spacing="4" styleClass="dashboard-metric-card" minWidth="130" prefWidth="155">
@@ -74,14 +66,7 @@
                     <Label text="relationships" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
                 </HBox>
             </VBox>
-            <!-- Private Notes -->
-            <VBox fx:id="cardPrivateNotes" spacing="4" styleClass="dashboard-metric-card" minWidth="130" prefWidth="155">
-                <Label text="PRIVATE NOTES" styleClass="inspector-section-header" style="-fx-text-fill: #ef4444;"/>
-                <HBox alignment="BASELINE_LEFT" spacing="8">
-                    <Label fx:id="lblPrivateNotes" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
-                    <Label text="secured notes" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
-                </HBox>
-            </VBox>
+
             <!-- Private Notes -->
             <VBox fx:id="cardPrivateNotes" spacing="4" styleClass="dashboard-metric-card" minWidth="130" prefWidth="155">
                 <Label text="PRIVATE NOTES" styleClass="inspector-section-header" style="-fx-text-fill: #ef4444;"/>
@@ -95,16 +80,16 @@
             <VBox fx:id="cardReviewsDue" spacing="4" styleClass="dashboard-metric-card" minWidth="130" prefWidth="155">
                 <Label text="DUE TODAY" styleClass="inspector-section-header" style="-fx-text-fill: #dc2626;"/>
                 <HBox alignment="BASELINE_LEFT" spacing="8">
-                    <Label fx:id="lblDueToday" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #dc2626;"/>
+                    <Label fx:id="lblReviewsDue" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
                     <Label text="need review" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
                 </HBox>
             </VBox>
 
             <!-- Upcoming Reviews -->
-            <VBox fx:id="cardUpcomingReviews" spacing="4" styleClass="dashboard-metric-card" minWidth="130" prefWidth="155">
-                <Label text="UPCOMING" styleClass="inspector-section-header" style="-fx-text-fill: #0284c7;"/>
+            <VBox fx:id="cardUpcoming" spacing="4" styleClass="dashboard-metric-card" minWidth="130" prefWidth="155">
+                <Label text="UPCOMING" styleClass="inspector-section-header" style="-fx-text-fill: #0ea5e9;"/>
                 <HBox alignment="BASELINE_LEFT" spacing="8">
-                    <Label fx:id="lblUpcomingReviews" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                    <Label fx:id="lblUpcoming" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
                     <Label text="scheduled" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
                 </HBox>
             </VBox>
