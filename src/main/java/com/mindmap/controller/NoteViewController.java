@@ -105,7 +105,7 @@ public class NoteViewController {
             dialogStage.close();
         }
         if (editHandler != null && note != null) {
-            editHandler.accept(note);
+            javafx.application.Platform.runLater(() -> editHandler.accept(note));
         }
     }
 
