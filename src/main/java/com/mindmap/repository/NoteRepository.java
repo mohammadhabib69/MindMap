@@ -51,8 +51,8 @@ public class NoteRepository {
      */
     public Note create(Note note) {
         String sql = """
-                INSERT INTO notes (title, content, subject, difficulty, created_at, updated_at, is_favorite, last_viewed_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO notes (title, content, subject, difficulty, created_at, updated_at, is_favorite, last_viewed_at, is_private, pin)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                 """;
 
         LocalDateTime now = LocalDateTime.now();
@@ -74,6 +74,8 @@ public class NoteRepository {
             stmt.setString(6, DateUtil.formatDateTime(note.getUpdatedAt()));
             stmt.setInt(7, note.isFavorite() ? 1 : 0);
             stmt.setString(8, note.getLastViewedAt() != null ? DateUtil.formatDateTime(note.getLastViewedAt()) : null);
+            stmt.setInt(9, note.isPrivate() ? 1 : 0);
+            stmt.setString(10, note.getPin());
 
             int affectedRows = stmt.executeUpdate();
             if (affectedRows == 0) {
@@ -102,7 +104,7 @@ public class NoteRepository {
      * @return Optional containing the Note if found.
      */
     public Optional<Note> findById(int id) {
-        String sql = "SELECT id, title, content, subject, difficulty, created_at, updated_at, is_favorite, last_viewed_at FROM notes WHERE id = ?;";
+        String sql = "SELECT id, title, content, subject, difficulty, created_at, updated_at, is_favorite, last_viewed_at, is_private, pin FROM notes WHERE id = ?;";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -127,7 +129,7 @@ public class NoteRepository {
      * @return List of all notes.
      */
     public List<Note> findAll() {
-        String sql = "SELECT id, title, content, subject, difficulty, created_at, updated_at, is_favorite, last_viewed_at FROM notes ORDER BY updated_at DESC;";
+        String sql = "SELECT id, title, content, subject, difficulty, created_at, updated_at, is_favorite, last_viewed_at, is_private, pin FROM notes ORDER BY updated_at DESC;";
         List<Note> notes = new ArrayList<>();
 
         try (Connection conn = DatabaseManager.getConnection();
@@ -153,7 +155,7 @@ public class NoteRepository {
     public boolean update(Note note) {
         String sql = """
                 UPDATE notes
-                SET title = ?, content = ?, subject = ?, difficulty = ?, updated_at = ?, is_favorite = ?, last_viewed_at = ?
+                SET title = ?, content = ?, subject = ?, difficulty = ?, updated_at = ?, is_favorite = ?, last_viewed_at = ?, is_private = ?, pin = ?
                 WHERE id = ?;
                 """;
 
@@ -169,7 +171,9 @@ public class NoteRepository {
                         stmt.setString(5, DateUtil.formatDateTime(note.getUpdatedAt()));
             stmt.setInt(6, note.isFavorite() ? 1 : 0);
             stmt.setString(7, note.getLastViewedAt() != null ? DateUtil.formatDateTime(note.getLastViewedAt()) : null);
-            stmt.setInt(8, note.getId());
+            stmt.setInt(8, note.isPrivate() ? 1 : 0);
+                    stmt.setString(9, note.getPin());
+                    stmt.setInt(10, note.getId());
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -361,8 +365,8 @@ public class NoteRepository {
      */
     public Note createWithTags(Note note, List<String> tagNames) {
         String insertNoteSql = """
-                INSERT INTO notes (title, content, subject, difficulty, created_at, updated_at, is_favorite, last_viewed_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO notes (title, content, subject, difficulty, created_at, updated_at, is_favorite, last_viewed_at, is_private, pin)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                 """;
 
         LocalDateTime now = LocalDateTime.now();
@@ -386,6 +390,8 @@ public class NoteRepository {
                     stmt.setString(6, DateUtil.formatDateTime(note.getUpdatedAt()));
             stmt.setInt(7, note.isFavorite() ? 1 : 0);
             stmt.setString(8, note.getLastViewedAt() != null ? DateUtil.formatDateTime(note.getLastViewedAt()) : null);
+            stmt.setInt(9, note.isPrivate() ? 1 : 0);
+            stmt.setString(10, note.getPin());
 
                     int affectedRows = stmt.executeUpdate();
                     if (affectedRows == 0) {
@@ -448,7 +454,7 @@ public class NoteRepository {
     public boolean updateWithTags(Note note, List<String> tagNames) {
         String updateNoteSql = """
                 UPDATE notes
-                SET title = ?, content = ?, subject = ?, difficulty = ?, updated_at = ?, is_favorite = ?, last_viewed_at = ?
+                SET title = ?, content = ?, subject = ?, difficulty = ?, updated_at = ?, is_favorite = ?, last_viewed_at = ?, is_private = ?, pin = ?
                 WHERE id = ?;
                 """;
 
@@ -467,7 +473,9 @@ public class NoteRepository {
                                 stmt.setString(5, DateUtil.formatDateTime(note.getUpdatedAt()));
             stmt.setInt(6, note.isFavorite() ? 1 : 0);
             stmt.setString(7, note.getLastViewedAt() != null ? DateUtil.formatDateTime(note.getLastViewedAt()) : null);
-            stmt.setInt(8, note.getId());
+            stmt.setInt(8, note.isPrivate() ? 1 : 0);
+                    stmt.setString(9, note.getPin());
+                    stmt.setInt(10, note.getId());
 
                     updated = stmt.executeUpdate() > 0;
                 }
@@ -522,7 +530,7 @@ public class NoteRepository {
      */
     public Optional<Note> findByIdWithTags(int id) {
         String sql = """
-                SELECT n.id, n.title, n.content, n.subject, n.difficulty, n.created_at, n.updated_at, n.is_favorite, n.last_viewed_at,
+                SELECT n.id, n.title, n.content, n.subject, n.difficulty, n.created_at, n.updated_at, n.is_favorite, n.last_viewed_at, n.is_private, n.pin,
                        t.id AS tag_id, t.name AS tag_name
                 FROM notes n
                 LEFT JOIN note_tags nt ON n.id = nt.note_id
@@ -577,7 +585,7 @@ public class NoteRepository {
         boolean hasTag = (tagName != null && !tagName.trim().isEmpty() && !"All Tags".equalsIgnoreCase(tagName.trim()));
 
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT n.id, n.title, n.content, n.subject, n.difficulty, n.created_at, n.updated_at, n.is_favorite, n.last_viewed_at, ");
+        sql.append("SELECT n.id, n.title, n.content, n.subject, n.difficulty, n.created_at, n.updated_at, n.is_favorite, n.last_viewed_at, n.is_private, n.pin, ");
         sql.append("(SELECT COUNT(*) FROM connections c WHERE c.from_note_id = n.id OR c.to_note_id = n.id) AS connection_count, ");
         sql.append("t.id AS tag_id, t.name AS tag_name ");
         sql.append("FROM notes n ");
@@ -628,7 +636,7 @@ public class NoteRepository {
      */
     public List<Note> searchByCriteria(SearchCriteria criteria) {
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT n.id, n.title, n.content, n.subject, n.difficulty, n.created_at, n.updated_at, n.is_favorite, n.last_viewed_at, ");
+        sql.append("SELECT n.id, n.title, n.content, n.subject, n.difficulty, n.created_at, n.updated_at, n.is_favorite, n.last_viewed_at, n.is_private, n.pin, ");
         sql.append("(SELECT COUNT(*) FROM connections c WHERE c.from_note_id = n.id OR c.to_note_id = n.id) AS connection_count, ");
         sql.append("t.id AS tag_id, t.name AS tag_name ");
         sql.append("FROM notes n ");

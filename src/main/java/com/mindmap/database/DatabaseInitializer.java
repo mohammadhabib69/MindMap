@@ -22,7 +22,9 @@ public class DatabaseInitializer {
                 subject TEXT,
                 difficulty TEXT,
                 created_at TEXT NOT NULL,
-                updated_at TEXT NOT NULL
+                updated_at TEXT NOT NULL,
+    is_private INTEGER DEFAULT 0,
+    pin TEXT
             );
             """,
             """
@@ -102,6 +104,12 @@ public class DatabaseInitializer {
             try {
                 stmt.execute("ALTER TABLE notes ADD COLUMN last_viewed_at TEXT;");
                 LOGGER.info("Added last_viewed_at column to notes table.");
+            } catch (SQLException ignored) {}
+            try {
+                stmt.execute("ALTER TABLE notes ADD COLUMN is_private INTEGER DEFAULT 0;");
+            } catch (SQLException ignored) {}
+            try {
+                stmt.execute("ALTER TABLE notes ADD COLUMN pin TEXT;");
             } catch (SQLException ignored) {}
 
             LOGGER.log(Level.INFO, "Database schema initialized successfully (notes, tags, note_tags, connections, revisions, learning_events).");

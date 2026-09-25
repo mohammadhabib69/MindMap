@@ -37,6 +37,10 @@ public class NoteEditorController {
 
     @FXML
     private javafx.scene.control.ToggleButton btnFavorite;
+    @FXML
+    private javafx.scene.control.CheckBox chkPrivate;
+    @FXML
+    private javafx.scene.control.PasswordField txtPin;
 
 
     @FXML
@@ -194,6 +198,14 @@ public class NoteEditorController {
                 btnFavorite.setSelected(note.isFavorite());
                 updateFavoriteButtonUI();
             }
+
+            if (chkPrivate != null) {
+                chkPrivate.setSelected(note.isPrivate());
+                if (txtPin != null && note.isPrivate()) {
+                    txtPin.setText(note.getPin());
+                }
+            }
+
             
             txtTitle.setText(note.getTitle());
             txtSubject.setText(note.getSubject() != null ? note.getSubject() : "");
@@ -246,6 +258,16 @@ public class NoteEditorController {
         final NoteEditorMode currentMode = this.mode;
         final Note currentNote = this.note;
         final boolean isFavorite = (btnFavorite != null) && btnFavorite.isSelected();
+
+        final boolean isPrivate = (chkPrivate != null) && chkPrivate.isSelected();
+        final String pin = (txtPin != null) ? txtPin.getText().trim() : "";
+        if (isPrivate && pin.isEmpty()) {
+            showError("A PIN is required for private notes.");
+            if (txtPin != null) txtPin.requestFocus();
+            if (btnSave != null) btnSave.setDisable(false);
+            return CompletableFuture.completedFuture(null);
+        }
+
         CompletableFuture<Note> future = new CompletableFuture<>();
 
         TaskExecutor.runAsync(
@@ -253,6 +275,8 @@ public class NoteEditorController {
                     if (currentMode == NoteEditorMode.CREATE) {
                         Note newNote = new Note(title, content, subject, difficulty);
                         newNote.setFavorite(isFavorite);
+                        newNote.setPrivate(isPrivate);
+                        newNote.setPin(pin);
                         Note created = service.createNoteWithTags(newNote, tagNames);
                         if (created != null && created.getId() > 0) {
                             try {
@@ -268,6 +292,8 @@ public class NoteEditorController {
                         currentNote.setSubject(subject);
                         currentNote.setDifficulty(difficulty);
                         currentNote.setFavorite(isFavorite);
+                        currentNote.setPrivate(isPrivate);
+                        currentNote.setPin(pin);
                         return service.updateNoteWithTags(currentNote, tagNames);
                     }
                     return currentNote;

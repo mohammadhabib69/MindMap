@@ -766,6 +766,8 @@ public class MindMapController {
         if (selectedNote == null) return;
         Note fresh = noteService.getNoteWithTags(selectedNote.getId()).orElse(selectedNote);
 
+
+        if (!com.mindmap.util.SecurityHelper.verifyPin(fresh)) return;
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/note_view.fxml"));
             Parent root = loader.load();

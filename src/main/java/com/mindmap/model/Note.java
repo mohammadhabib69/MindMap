@@ -20,6 +20,8 @@ public class Note {
     private LocalDateTime updatedAt;
     private boolean favorite;
     private LocalDateTime lastViewedAt;
+    private boolean isPrivate;
+    private String pin;
     private List<Tag> tags = new ArrayList<>();
     private int connectionCount;
 
@@ -121,6 +123,22 @@ public class Note {
 
     public LocalDateTime getLastViewedAt() {
         return lastViewedAt;
+    }
+
+    public boolean isPrivate() {
+        return isPrivate;
+    }
+
+    public void setPrivate(boolean isPrivate) {
+        this.isPrivate = isPrivate;
+    }
+
+    public String getPin() {
+        return pin;
+    }
+
+    public void setPin(String pin) {
+        this.pin = pin;
     }
 
     public void setLastViewedAt(LocalDateTime lastViewedAt) {
