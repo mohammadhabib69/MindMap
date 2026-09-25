@@ -60,6 +60,8 @@ public class NotesController {
 
     // Filter Controls
     @FXML private ComboBox<String> cmbSubjectFilter;
+    @FXML
+    private ComboBox<String> cmbViewFilter;
     @FXML private ComboBox<String> cmbDifficultyFilter;
     @FXML private ComboBox<String> cmbTagFilter;
     @FXML private ComboBox<DateFilterPreset> cmbDateFilter;
@@ -404,6 +406,7 @@ public class NotesController {
     private void handleExportPdf() {
         Note selected = tableResults.getSelectionModel().getSelectedItem();
         if (selected == null) return;
+        if (!com.mindmap.util.SecurityHelper.verifyPin(selected)) return;
         
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Export Note as PDF");

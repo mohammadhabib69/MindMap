@@ -85,6 +85,10 @@ public class DashboardController {
     // Primary Metric Labels
     @FXML private Label lblTotalNotes;
     @FXML private Label lblTotalConnections;
+    @FXML
+    private Label lblPrivateNotes;
+    @FXML
+    private javafx.scene.layout.VBox cardPrivateNotes;
     @FXML private Label lblDueToday;
     @FXML private Label lblUpcomingReviews;
     @FXML private Label lblTotalTags;

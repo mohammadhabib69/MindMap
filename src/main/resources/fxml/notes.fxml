@@ -103,7 +103,13 @@
 
     <!-- Results Header & Actions Bar -->
     <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label fx:id="lblResultCount" text="Showing 0 notes" styleClass="card-title"/>
+        <Label text="View:" styleClass="stat-label"/>
+        <ComboBox fx:id="cmbViewFilter" promptText="All Notes" prefWidth="150" styleClass="input-field"/>
+        <Label fx:id="lblResultCount" text="Showing 0 notes" styleClass="card-title">
+            <padding>
+                <Insets left="8"/>
+            </padding>
+        </Label>
         <Region HBox.hgrow="ALWAYS"/>
         <Button fx:id="btnViewNote"
                 text="👁 View"

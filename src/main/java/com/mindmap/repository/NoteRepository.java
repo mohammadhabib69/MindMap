@@ -599,7 +599,7 @@ public class NoteRepository {
         sql.append("LEFT JOIN tags t ON nt.tag_id = t.id ");
 
         if (hasQuery) {
-            sql.append("WHERE (n.title LIKE ? OR n.content LIKE ? OR n.subject LIKE ?) ");
+            sql.append("WHERE (n.title LIKE ? OR n.subject LIKE ? OR (n.is_private = 0 AND n.content LIKE ?)) ");
         }
 
         sql.append("ORDER BY n.updated_at DESC, t.name COLLATE NOCASE ASC;");

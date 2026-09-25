@@ -52,6 +52,11 @@ public class ImportExportService {
             try (Statement stmt = conn.createStatement();
                  ResultSet rs = stmt.executeQuery("SELECT * FROM notes")) {
                 while (rs.next()) {
+                    try {
+                        if (rs.getInt("is_private") == 1) {
+                            continue; // Skip private notes to prevent data leaks
+                        }
+                    } catch (Exception ignored) {}
                     ExportNote en = new ExportNote();
                     int sqliteId = rs.getInt("id");
                     String exportId = "note-" + sqliteId;

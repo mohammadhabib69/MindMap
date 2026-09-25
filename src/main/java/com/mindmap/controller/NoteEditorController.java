@@ -41,6 +41,10 @@ public class NoteEditorController {
     private javafx.scene.control.CheckBox chkPrivate;
     @FXML
     private javafx.scene.control.PasswordField txtPin;
+    @FXML
+    private javafx.scene.control.PasswordField txtConfirmPin;
+    @FXML
+    private javafx.scene.layout.VBox boxPinFields;
 
 
     @FXML
@@ -202,7 +206,7 @@ public class NoteEditorController {
             if (chkPrivate != null) {
                 chkPrivate.setSelected(note.isPrivate());
                 if (txtPin != null && note.isPrivate()) {
-                    txtPin.setText(note.getPin());
+                    txtPin.setPromptText("Leave blank to keep existing PIN");
                 }
             }
 
@@ -260,13 +264,35 @@ public class NoteEditorController {
         final boolean isFavorite = (btnFavorite != null) && btnFavorite.isSelected();
 
         final boolean isPrivate = (chkPrivate != null) && chkPrivate.isSelected();
-        final String pin = (txtPin != null) ? txtPin.getText().trim() : "";
-        if (isPrivate && pin.isEmpty()) {
-            showError("A PIN is required for private notes.");
-            if (txtPin != null) txtPin.requestFocus();
-            if (btnSave != null) btnSave.setDisable(false);
-            return CompletableFuture.completedFuture(null);
+        String pin = (txtPin != null) ? txtPin.getText().trim() : "";
+        String confirmPin = (txtConfirmPin != null) ? txtConfirmPin.getText().trim() : "";
+        
+        if (isPrivate) {
+            if (mode == NoteEditorMode.CREATE || (mode == NoteEditorMode.EDIT && !pin.isEmpty())) {
+                if (pin.isEmpty()) {
+                    showError("A PIN is required for private notes.");
+                    if (txtPin != null) txtPin.requestFocus();
+                    if (btnSave != null) btnSave.setDisable(false);
+                    return CompletableFuture.completedFuture(null);
+                }
+                if (!pin.equals(confirmPin)) {
+                    showError("PINs do not match.");
+                    if (txtConfirmPin != null) txtConfirmPin.requestFocus();
+                    if (btnSave != null) btnSave.setDisable(false);
+                    return CompletableFuture.completedFuture(null);
+                }
+            }
         }
+        
+        String tempPinToSave = null;
+        if (isPrivate) {
+            if (mode == NoteEditorMode.CREATE || (mode == NoteEditorMode.EDIT && !pin.isEmpty())) {
+                tempPinToSave = com.mindmap.util.SecurityHelper.hashPin(pin);
+            } else if (mode == NoteEditorMode.EDIT && note != null) {
+                tempPinToSave = note.getPin(); // Keep old hash
+            }
+        }
+        final String finalPinToSave = tempPinToSave;
 
         CompletableFuture<Note> future = new CompletableFuture<>();
 
@@ -276,7 +302,7 @@ public class NoteEditorController {
                         Note newNote = new Note(title, content, subject, difficulty);
                         newNote.setFavorite(isFavorite);
                         newNote.setPrivate(isPrivate);
-                        newNote.setPin(pin);
+                        newNote.setPin(finalPinToSave);
                         Note created = service.createNoteWithTags(newNote, tagNames);
                         if (created != null && created.getId() > 0) {
                             try {
@@ -293,7 +319,7 @@ public class NoteEditorController {
                         currentNote.setDifficulty(difficulty);
                         currentNote.setFavorite(isFavorite);
                         currentNote.setPrivate(isPrivate);
-                        currentNote.setPin(pin);
+                        currentNote.setPin(finalPinToSave);
                         return service.updateNoteWithTags(currentNote, tagNames);
                     }
                     return currentNote;
