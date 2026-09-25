@@ -67,14 +67,7 @@
                 </HBox>
             </VBox>
 
-            <!-- Private Notes -->
-            <VBox fx:id="cardPrivateNotes" spacing="4" styleClass="dashboard-metric-card" minWidth="130" prefWidth="155">
-                <Label text="PRIVATE NOTES" styleClass="inspector-section-header" style="-fx-text-fill: #ef4444;"/>
-                <HBox alignment="BASELINE_LEFT" spacing="8">
-                    <Label fx:id="lblPrivateNotes" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
-                    <Label text="secured notes" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
-                </HBox>
-            </VBox>
+
 
             <!-- Reviews Due Today -->
             <VBox fx:id="cardReviewsDue" spacing="4" styleClass="dashboard-metric-card" minWidth="130" prefWidth="155">

@@ -406,7 +406,6 @@ public class NotesController {
     private void handleExportPdf() {
         Note selected = tableResults.getSelectionModel().getSelectedItem();
         if (selected == null) return;
-        if (!com.mindmap.util.SecurityHelper.verifyPin(selected)) return;
         
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Export Note as PDF");
@@ -508,9 +507,6 @@ public class NotesController {
         Note noteToView = fresh.orElse(selected);
 
 
-        if (!com.mindmap.util.SecurityHelper.verifyPin(noteToView)) {
-            return;
-        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/note_view.fxml"));
             Parent root = loader.load();
@@ -545,9 +541,6 @@ public class NotesController {
 
     private void openEditorForNote(Note note, NoteEditorMode mode) {
 
-        if (mode == NoteEditorMode.EDIT && note != null && !com.mindmap.util.SecurityHelper.verifyPin(note)) {
-            return;
-        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/note_editor.fxml"));
             Parent root = loader.load();

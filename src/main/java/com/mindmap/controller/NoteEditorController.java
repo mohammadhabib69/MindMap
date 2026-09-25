@@ -37,13 +37,9 @@ public class NoteEditorController {
 
     @FXML
     private javafx.scene.control.ToggleButton btnFavorite;
-    @FXML
-    private javafx.scene.control.CheckBox chkPrivate;
-    @FXML
+@FXML
     private javafx.scene.control.PasswordField txtPin;
-    @FXML
-    private javafx.scene.control.PasswordField txtConfirmPin;
-    @FXML
+@FXML
     private javafx.scene.layout.VBox boxPinFields;
 
 
@@ -84,21 +80,7 @@ public class NoteEditorController {
 
     @FXML
     public void initialize() {
-        if (chkPrivate != null && boxPinFields != null) {
-            chkPrivate.selectedProperty().addListener((obs, oldVal, newVal) -> {
-                boxPinFields.setVisible(newVal);
-                boxPinFields.setManaged(newVal);
-                if (!newVal) {
-                    if (txtPin != null) txtPin.clear();
-                    if (txtConfirmPin != null) txtConfirmPin.clear();
-                }
-            });
-            // trigger once manually to setup initial state
-            boxPinFields.setVisible(chkPrivate.isSelected());
-            boxPinFields.setManaged(chkPrivate.isSelected());
-        }
-
-        cmbDifficulty.setItems(FXCollections.observableArrayList(
+cmbDifficulty.setItems(FXCollections.observableArrayList(
                 Difficulty.EASY.name(),
                 Difficulty.MEDIUM.name(),
                 Difficulty.HARD.name()
@@ -217,15 +199,7 @@ public class NoteEditorController {
                 updateFavoriteButtonUI();
             }
 
-            if (chkPrivate != null) {
-                chkPrivate.setSelected(note.isPrivate());
-                if (txtPin != null && note.isPrivate()) {
-                    txtPin.setPromptText("Leave blank to keep existing PIN");
-                }
-            }
-
-            
-            txtTitle.setText(note.getTitle());
+txtTitle.setText(note.getTitle());
             txtSubject.setText(note.getSubject() != null ? note.getSubject() : "");
             txtTags.setText(note.getTagsString());
             txtContent.setText(note.getContent() != null ? note.getContent() : "");
@@ -276,55 +250,14 @@ public class NoteEditorController {
         final NoteService service = this.noteService;
         final NoteEditorMode currentMode = this.mode;
         final Note currentNote = this.note;
-        final boolean isFavorite = (btnFavorite != null) && btnFavorite.isSelected();
-
-        final boolean isPrivate = (chkPrivate != null) && chkPrivate.isSelected();
-        String pin = (txtPin != null) ? txtPin.getText().trim() : "";
-        String confirmPin = (txtConfirmPin != null) ? txtConfirmPin.getText().trim() : "";
-        
-        if (isPrivate) {
-            if (mode == NoteEditorMode.CREATE || (mode == NoteEditorMode.EDIT && !pin.isEmpty())) {
-                if (pin.isEmpty()) {
-                    showError("Please enter a PIN.");
-                    if (txtPin != null) txtPin.requestFocus();
-                    if (btnSave != null) { btnSave.setDisable(false); btnSave.setText(mode == NoteEditorMode.CREATE ? "Create Note" : "Save"); }
-                    return CompletableFuture.completedFuture(null);
-                }
-                if (confirmPin.isEmpty()) {
-                    showError("Please confirm your PIN.");
-                    if (txtConfirmPin != null) txtConfirmPin.requestFocus();
-                    if (btnSave != null) { btnSave.setDisable(false); btnSave.setText(mode == NoteEditorMode.CREATE ? "Create Note" : "Save"); }
-                    return CompletableFuture.completedFuture(null);
-                }
-                if (!pin.equals(confirmPin)) {
-                    showError("PINs do not match.");
-                    if (txtConfirmPin != null) txtConfirmPin.requestFocus();
-                    if (btnSave != null) { btnSave.setDisable(false); btnSave.setText(mode == NoteEditorMode.CREATE ? "Create Note" : "Save"); }
-                    return CompletableFuture.completedFuture(null);
-                }
-            }
-        }
-        
-        String tempPinToSave = null;
-        if (isPrivate) {
-            if (mode == NoteEditorMode.CREATE || (mode == NoteEditorMode.EDIT && !pin.isEmpty())) {
-                tempPinToSave = com.mindmap.util.SecurityHelper.hashPin(pin);
-            } else if (mode == NoteEditorMode.EDIT && note != null) {
-                tempPinToSave = note.getPin(); // Keep old hash
-            }
-        }
-        final String finalPinToSave = tempPinToSave;
-
-        CompletableFuture<Note> future = new CompletableFuture<>();
+        final boolean isFavorite = (btnFavorite != null) && btnFavorite.isSelected();CompletableFuture<Note> future = new CompletableFuture<>();
 
         TaskExecutor.runAsync(
                 () -> {
                     if (currentMode == NoteEditorMode.CREATE) {
                         Note newNote = new Note(title, content, subject, difficulty);
                         newNote.setFavorite(isFavorite);
-                        newNote.setPrivate(isPrivate);
-                        newNote.setPin(finalPinToSave);
-                        Note created = service.createNoteWithTags(newNote, tagNames);
+                                                Note created = service.createNoteWithTags(newNote, tagNames);
                         if (created != null && created.getId() > 0) {
                             try {
                                 new RevisionService().scheduleInitialReview(created.getId());
@@ -339,8 +272,6 @@ public class NoteEditorController {
                         currentNote.setSubject(subject);
                         currentNote.setDifficulty(difficulty);
                         currentNote.setFavorite(isFavorite);
-                        currentNote.setPrivate(isPrivate);
-                        currentNote.setPin(finalPinToSave);
                         return service.updateNoteWithTags(currentNote, tagNames);
                     }
                     return currentNote;

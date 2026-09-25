@@ -85,9 +85,7 @@ public class DashboardController {
     // Primary Metric Labels
     @FXML private Label lblTotalNotes;
     @FXML private Label lblTotalConnections;
-    @FXML
-    private Label lblPrivateNotes;
-    @FXML
+@FXML
     private javafx.scene.layout.VBox cardPrivateNotes;
     @FXML private Label lblDueToday;
     @FXML private Label lblUpcomingReviews;
@@ -801,7 +799,6 @@ public class DashboardController {
     private void handleViewNote(Note note) {
         if (note == null) return;
 
-        if (!com.mindmap.util.SecurityHelper.verifyPin(note)) return;
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/note_view.fxml"));
             Parent root = loader.load();
@@ -827,7 +824,6 @@ public class DashboardController {
     private void handleEditNote(Note note) {
         if (note == null) return;
 
-        if (!com.mindmap.util.SecurityHelper.verifyPin(note)) return;
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/note_editor.fxml"));
             Parent root = loader.load();

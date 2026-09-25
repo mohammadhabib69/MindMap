@@ -306,7 +306,6 @@ public class TimelineController {
     private void handleViewNote(Note note) {
         if (note == null) return;
 
-        if (!com.mindmap.util.SecurityHelper.verifyPin(note)) return;
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/note_view.fxml"));
             Parent root = loader.load();

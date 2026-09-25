@@ -189,7 +189,6 @@ public class MainController {
                 if (selected != null) {
                     hideQuickSearch();
                     
-                    if (!com.mindmap.util.SecurityHelper.verifyPin(selected)) return;
                     try {
                         javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/note_view.fxml"));
                         javafx.scene.Parent rt = loader.load();
@@ -214,7 +213,6 @@ public class MainController {
                 if (selected != null) {
                     hideQuickSearch();
                     
-                    if (!com.mindmap.util.SecurityHelper.verifyPin(selected)) return;
                     try {
                         javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/note_view.fxml"));
                         javafx.scene.Parent rt = loader.load();

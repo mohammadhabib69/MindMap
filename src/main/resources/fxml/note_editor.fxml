@@ -63,25 +63,6 @@
         <TextArea fx:id="txtContent" promptText="Enter study notes, key definitions, formulas, and explanations..." wrapText="true" VBox.vgrow="ALWAYS" styleClass="text-area-editor"/>
     </VBox>
 
-    <!-- Private Note Section -->
-    <VBox spacing="8" style="-fx-background-color: #f8fafc; -fx-padding: 12; -fx-background-radius: 6; -fx-border-color: #e2e8f0; -fx-border-radius: 6;">
-        <javafx.scene.control.CheckBox fx:id="chkPrivate" text="🔒 Private Note (Requires PIN to view/edit)" style="-fx-font-weight: bold;"/>
-        
-        <VBox fx:id="boxPinFields" spacing="8" visible="false" managed="false">
-            <Label text="Your PIN protects this note's private content." style="-fx-text-fill: #64748b; -fx-font-size: 11px;"/>
-            <HBox spacing="12">
-                <VBox spacing="4" HBox.hgrow="ALWAYS">
-                    <Label text="PIN" styleClass="form-label"/>
-                    <javafx.scene.control.PasswordField fx:id="txtPin" promptText="Enter PIN" styleClass="input-field"/>
-                </VBox>
-                <VBox spacing="4" HBox.hgrow="ALWAYS">
-                    <Label text="Confirm PIN" styleClass="form-label"/>
-                    <javafx.scene.control.PasswordField fx:id="txtConfirmPin" promptText="Confirm PIN" styleClass="input-field"/>
-                </VBox>
-            </HBox>
-        </VBox>
-    </VBox>
-
     <!-- Error Message -->
     <Label fx:id="lblError" text="" styleClass="error-label" wrapText="true"/>
 
