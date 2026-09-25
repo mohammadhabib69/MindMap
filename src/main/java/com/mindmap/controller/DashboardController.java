@@ -813,6 +813,7 @@ public class DashboardController {
             stage.setScene(new Scene(root));
             controller.setDialogStage(stage);
             controller.setNote(note);
+            controller.setEditHandler(this::handleEditNote);
             stage.showAndWait();
             loadDashboardData();
         } catch (IOException e) {

@@ -198,6 +198,7 @@ public class MainController {
                         stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
                         stage.setScene(new javafx.scene.Scene(rt));
                         controller.setNote(selected);
+            controller.setEditHandler(this::handleEditNote);
                         stage.showAndWait();
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -222,6 +223,7 @@ public class MainController {
                         stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
                         stage.setScene(new javafx.scene.Scene(rt));
                         controller.setNote(selected);
+            controller.setEditHandler(this::handleEditNote);
                         stage.showAndWait();
                     } catch (Exception ex) {
                         ex.printStackTrace();
@@ -404,6 +406,34 @@ public class MainController {
             button.setScaleX(1.0);
             button.setScaleY(1.0);
             currentActiveButton = button;
+        }
+    }
+
+    private void handleEditNote(com.mindmap.model.Note note) {
+        if (note == null) return;
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/note_editor.fxml"));
+            javafx.scene.Parent root = loader.load();
+            com.mindmap.controller.NoteEditorController controller = loader.getController();
+            controller.setNoteService(new com.mindmap.service.NoteService());
+
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.setTitle("Edit Note - " + note.getTitle());
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            // Just use a new stage without owner if we can't easily get it
+            stage.setScene(new javafx.scene.Scene(root));
+            controller.setDialogStage(stage);
+
+            com.mindmap.model.Note targetNote = new com.mindmap.service.NoteService().getNoteWithTags(note.getId()).orElse(note);
+            controller.setNote(targetNote, com.mindmap.controller.NoteEditorMode.EDIT);
+
+            stage.showAndWait();
+
+            if (controller.isSaved()) {
+                
+            }
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
         }
     }
 }

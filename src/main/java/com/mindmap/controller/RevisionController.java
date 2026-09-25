@@ -557,6 +557,7 @@ public class RevisionController {
             stage.setScene(new Scene(root));
             controller.setDialogStage(stage);
             controller.setNote(note);
+            controller.setEditHandler(this::handleEditNote);
             stage.showAndWait();
             loadRevisionData();
         } catch (IOException e) {
@@ -637,5 +638,33 @@ public class RevisionController {
     @FXML
     private void handleRefresh() {
         loadRevisionData();
+    }
+
+    private void handleEditNote(com.mindmap.model.Note note) {
+        if (note == null) return;
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/note_editor.fxml"));
+            javafx.scene.Parent root = loader.load();
+            com.mindmap.controller.NoteEditorController controller = loader.getController();
+            controller.setNoteService(new com.mindmap.service.NoteService());
+
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.setTitle("Edit Note - " + note.getTitle());
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            // Just use a new stage without owner if we can't easily get it
+            stage.setScene(new javafx.scene.Scene(root));
+            controller.setDialogStage(stage);
+
+            com.mindmap.model.Note targetNote = new com.mindmap.service.NoteService().getNoteWithTags(note.getId()).orElse(note);
+            controller.setNote(targetNote, com.mindmap.controller.NoteEditorMode.EDIT);
+
+            stage.showAndWait();
+
+            if (controller.isSaved()) {
+                loadRevisionData();
+            }
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
     }
 }
