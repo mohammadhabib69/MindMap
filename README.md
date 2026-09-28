@@ -152,3 +152,6 @@ The project possesses a comprehensive automated test suite validating the databa
 - **Advanced Graph Algorithms:** Implementing shortest-path or clustering algorithms to suggest undiscovered connections between notes.
 - **Cloud Synchronization:** Replacing the local SQLite database with a cloud-hosted PostgreSQL instance for cross-device syncing.
 - **Richer Media:** Allowing image attachments and rich markdown rendering inside the Note editor.
+## Quiz & Exam System
+Generate quizzes directly from your notes using offline deterministic generation. Practice without time limits or challenge yourself in a timed Exam mode. Includes detailed post-exam review and scoring.
+

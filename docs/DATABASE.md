@@ -56,3 +56,7 @@ An append-only audit trail logging learning milestones for the Timeline view.
 - **`description`** `TEXT`
 - **`FOREIGN KEY (note_id)`** `REFERENCES notes(id) ON DELETE SET NULL`
 - *Note:* `ON DELETE SET NULL` is used here instead of `CASCADE` so that historical timeline data is preserved even if the original note is deleted.
+### Quiz Schema
+- `quiz_sessions`: Tracks attempt metadata, mode (PRACTICE/EXAM), timer limit, and scores.
+- `quiz_questions`: Links directly to `notes.id` (source_note_id) and stores randomized distractors, correct answers, and the user's selected answers in JSON arrays.
+

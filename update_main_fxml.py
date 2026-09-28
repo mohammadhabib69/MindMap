@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+fxml_content = """<?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
@@ -46,7 +46,6 @@
             <Label text="STUDY" styleClass="nav-section-label"/>
             <Button fx:id="btnRevision" text="  Revision" maxWidth="Infinity" alignment="BASELINE_LEFT"
                     onAction="#showRevision" styleClass="nav-button"/>
-            <Button fx:id="btnQuiz" text="  Quiz" maxWidth="Infinity" alignment="BASELINE_LEFT" onAction="#handleNavQuiz" styleClass="nav-button"/>
             <Button fx:id="btnTimeline" text="  Timeline" maxWidth="Infinity" alignment="BASELINE_LEFT"
                     onAction="#showTimeline" styleClass="nav-button"/>
 
@@ -77,3 +76,6 @@
     </StackPane>
 
 </SplitPane>
+"""
+with open('src/main/resources/fxml/main.fxml', 'w') as f:
+    f.write(fxml_content)

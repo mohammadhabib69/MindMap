@@ -27,3 +27,8 @@ This guide outlines a structured, 5-minute live demonstration flow, perfect for 
 
 ### Technical Architecture Explanation (1–2 minutes)
 *"Technically, MindMap is built in Java using a strict MVC-style layered architecture. The front-end uses JavaFX for hardware-accelerated UI and 3D rendering. When a user interacts with the UI, the Controller offloads the work to a custom background `TaskExecutor` thread pool to prevent the application from freezing. The request is routed through a Service layer for business validation, down to a Repository layer, which executes raw SQL queries against a local, embedded SQLite database. The database enforces strict foreign-key relationships. Once the data is fetched, it is safely marshaled back to the JavaFX Application Thread. We also integrate the live Wikipedia REST API using Java's HttpClient, and utilize Jackson and OpenPDF for our import and export pipelines."*
+### Slide: Quiz & Exam Engine
+- Emphasize **Offline capability**: No API keys required.
+- Show **Exam Mode**: Demonstrate the real-time countdown timer and the automatic submission feature.
+- Show **Source Tracking**: Show how reviewing a wrong answer lets you immediately open the source note to re-study.
+

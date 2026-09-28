@@ -78,3 +78,6 @@ A: 156 automated tests.
 
 **Q: How are regression bugs handled?**
 A: If a bug is found (like the PDF resource leak in Phase 16), we fix the root cause and ensure the test suite still passes without breaking existing features. 
+### Q: How does the Quiz system generate questions without an API?
+**A:** It uses deterministic extraction. For example, it identifies the first sentence of a note as a core definition and pulls sentences from other random notes of the same subject as distractors. It also generates True/False statements by randomly deciding whether to present a true sentence from the current note or a false sentence from another note.
+

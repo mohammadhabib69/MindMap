@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.mindmap.controller.QuizResultController"
+      styleClass="screen-container" spacing="24">
+    <padding>
+        <Insets top="24" right="32" bottom="24" left="32"/>
+    </padding>
+
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="16">
+        <VBox spacing="4" HBox.hgrow="ALWAYS">
+            <Label text="Quiz Results" styleClass="view-header"/>
+            <Label fx:id="lblMessage" text="Excellent work!" styleClass="view-subtitle"/>
+        </VBox>
+        <Button fx:id="btnBack" text="Back to Quiz Setup" styleClass="btn-secondary" onAction="#handleBack"/>
+    </HBox>
+
+    <!-- Metrics HBox -->
+    <HBox spacing="16" alignment="CENTER">
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" alignment="CENTER">
+            <Label text="Score" styleClass="stat-label"/>
+            <Label fx:id="lblScore" text="0" styleClass="stat-value"/>
+        </VBox>
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" alignment="CENTER">
+            <Label text="Percentage" styleClass="stat-label"/>
+            <Label fx:id="lblPercentage" text="0%" styleClass="stat-value stat-value-highlight"/>
+        </VBox>
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" alignment="CENTER">
+            <Label text="Correct" styleClass="stat-label"/>
+            <Label fx:id="lblCorrect" text="0" styleClass="stat-value" style="-fx-text-fill: #10b981;"/>
+        </VBox>
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" alignment="CENTER">
+            <Label text="Incorrect" styleClass="stat-label"/>
+            <Label fx:id="lblIncorrect" text="0" styleClass="stat-value" style="-fx-text-fill: #ef4444;"/>
+        </VBox>
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" alignment="CENTER">
+            <Label text="Unanswered" styleClass="stat-label"/>
+            <Label fx:id="lblUnanswered" text="0" styleClass="stat-value" style="-fx-text-fill: #f59e0b;"/>
+        </VBox>
+        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" alignment="CENTER">
+            <Label text="Time Used" styleClass="stat-label"/>
+            <Label fx:id="lblTimeUsed" text="00:00" styleClass="stat-value"/>
+        </VBox>
+    </HBox>
+
+    <!-- Review Section -->
+    <VBox spacing="12" VBox.vgrow="ALWAYS">
+        <Label text="Question Review" styleClass="card-title"/>
+        <ListView fx:id="listReview" VBox.vgrow="ALWAYS" styleClass="data-table"/>
+    </VBox>
+</VBox>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.mindmap.controller.QuizController"
+      styleClass="screen-container" spacing="20">
+    <padding>
+        <Insets top="24" right="32" bottom="24" left="32"/>
+    </padding>
+
+    <VBox spacing="4">
+        <Label text="Quiz" styleClass="view-header"/>
+        <Label text="Test your knowledge using your saved notes." styleClass="view-subtitle"/>
+    </VBox>
+
+    <HBox spacing="24" VBox.vgrow="ALWAYS">
+        <!-- Left Column: Setup Card -->
+        <VBox spacing="16" styleClass="card" HBox.hgrow="SOMETIMES" minWidth="300" prefWidth="350">
+            <Label text="Quiz Setup" styleClass="card-title"/>
+            
+            <VBox spacing="8">
+                <Label text="Subject" styleClass="form-label"/>
+                <ComboBox fx:id="comboSubject" maxWidth="Infinity" promptText="Select Subject"/>
+            </VBox>
+            
+            <VBox spacing="8">
+                <Label text="Topic" styleClass="form-label"/>
+                <ComboBox fx:id="comboTopic" maxWidth="Infinity" promptText="Select Topic"/>
+            </VBox>
+            
+            <VBox spacing="8">
+                <Label text="Difficulty" styleClass="form-label"/>
+                <ComboBox fx:id="comboDifficulty" maxWidth="Infinity" promptText="Select Difficulty"/>
+            </VBox>
+            
+            <HBox spacing="16">
+                <VBox spacing="8" HBox.hgrow="ALWAYS">
+                    <Label text="Questions" styleClass="form-label"/>
+                    <ComboBox fx:id="comboQuestionCount" maxWidth="Infinity">
+                        <items>
+                            <FXCollections fx:factory="observableArrayList">
+                                <String fx:value="5"/>
+                                <String fx:value="10"/>
+                                <String fx:value="15"/>
+                                <String fx:value="20"/>
+                            </FXCollections>
+                        </items>
+                    </ComboBox>
+                </VBox>
+                <VBox spacing="8" HBox.hgrow="ALWAYS">
+                    <Label text="Mode" styleClass="form-label"/>
+                    <ComboBox fx:id="comboMode" maxWidth="Infinity">
+                        <items>
+                            <FXCollections fx:factory="observableArrayList">
+                                <String fx:value="Practice"/>
+                                <String fx:value="Exam"/>
+                            </FXCollections>
+                        </items>
+                    </ComboBox>
+                </VBox>
+            </HBox>
+            
+            <VBox spacing="8">
+                <Label text="Time Limit" styleClass="form-label"/>
+                <ComboBox fx:id="comboTimeLimit" maxWidth="Infinity" promptText="No Limit"/>
+            </VBox>
+            
+            <Region VBox.vgrow="ALWAYS" minHeight="10"/>
+            
+            <Label fx:id="lblAvailableNotes" text="0 notes available" styleClass="setting-label"/>
+            <Button fx:id="btnGenerate" text="Generate &amp; Start Quiz" styleClass="btn-primary" maxWidth="Infinity" onAction="#handleGenerate"/>
+        </VBox>
+
+        <!-- Right Column: History -->
+        <VBox spacing="12" HBox.hgrow="ALWAYS">
+            <Label text="Recent Quiz Attempts" styleClass="card-title"/>
+            <ListView fx:id="listRecentQuizzes" VBox.vgrow="ALWAYS" styleClass="data-table"/>
+        </VBox>
+    </HBox>
+</VBox>

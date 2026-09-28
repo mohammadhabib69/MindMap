@@ -32,6 +32,8 @@ public class MainController {
 
     @FXML
     private Button btnRevision;
+    @FXML
+    private Button btnQuiz;
 
     @FXML
     private Button btnTimeline;
@@ -449,4 +451,12 @@ public class MainController {
             e.printStackTrace();
         }
     }
+
+    public void loadViewInContentArea(String fxmlPath) {
+        Parent view = ViewManager.loadView(fxmlPath);
+        if (contentArea != null && view != null) {
+            contentArea.getChildren().setAll(view);
+        }
+    }
+
 }

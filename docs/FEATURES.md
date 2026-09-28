@@ -71,3 +71,9 @@ MindMap consists of several interconnected modules. This document outlines the p
 - **Purpose:** Ensuring data integrity and user clarity.
 - **How it works:** `UiUtils` centrally manages dialogs.
 - **Implementation Idea:** Raw Java stack traces (like `SQLException`) are caught at the controller layer and translated into user-friendly alerts, preventing application crashes.
+### Quiz & Exam System
+- **Offline Generation**: Deterministically generates True/False, Multiple Choice, and Single Choice questions from your notes without any external API.
+- **Practice Mode**: Test your knowledge at your own pace.
+- **Exam Mode**: Timed exam conditions with auto-submit.
+- **Review**: Review missed questions and instantly jump back to the source note.
+

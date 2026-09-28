@@ -53,3 +53,7 @@ The data and control flow follows a top-down approach:
 ### 7. External (`com.mindmap.external`)
 - Encapsulates interactions with the Wikipedia REST API using `java.net.http.HttpClient`.
 - Parses incoming JSON responses into application-friendly models (`WikipediaPageSummary`).
+### Quiz Module
+- **QuizGenerationService**: A deterministic, rule-based text processor that extracts sentences from `Note` content to construct valid MCQs, True/False, and Multi-select questions. Does NOT use LLMs or APIs, ensuring fast, offline privacy.
+- **QuizControllers**: Manages timer states (via `Timeline`) and dynamic `ToggleGroup` or `CheckBox` rendering for options.
+

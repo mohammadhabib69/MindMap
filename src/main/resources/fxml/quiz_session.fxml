@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.mindmap.controller.QuizSessionController"
+      styleClass="screen-container" spacing="24">
+    <padding>
+        <Insets top="24" right="32" bottom="24" left="32"/>
+    </padding>
+
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="16">
+        <Label fx:id="lblTitle" text="Quiz Session" styleClass="view-header"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="lblTimer" text="00:00" style="-fx-font-weight: bold; -fx-font-size: 18px;"/>
+    </HBox>
+
+    <!-- Progress -->
+    <HBox alignment="CENTER_LEFT" spacing="16">
+        <Label fx:id="lblProgress" text="Question 1 of 10" styleClass="view-subtitle"/>
+        <ProgressBar fx:id="progressQuiz" progress="0.0" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+    </HBox>
+
+    <!-- Center Card: Question -->
+    <VBox styleClass="card" spacing="20" VBox.vgrow="ALWAYS">
+        <Label fx:id="lblQuestionText" text="Question text goes here..." wrapText="true" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+        <VBox fx:id="boxOptions" spacing="10" VBox.vgrow="ALWAYS">
+            <!-- Options injected here -->
+        </VBox>
+    </VBox>
+
+    <!-- Bottom Actions -->
+    <HBox alignment="CENTER" spacing="16">
+        <Button fx:id="btnPrev" text="Previous" styleClass="btn-secondary" onAction="#handlePrev"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <FlowPane fx:id="boxNavigator" hgap="8" vgap="8" alignment="CENTER">
+            <!-- Navigator buttons injected here -->
+        </FlowPane>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="btnNext" text="Next" styleClass="btn-secondary" onAction="#handleNext"/>
+        <Button fx:id="btnSubmit" text="Submit Quiz" styleClass="btn-primary" onAction="#handleSubmit"/>
+    </HBox>
+</VBox>
