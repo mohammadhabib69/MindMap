@@ -295,6 +295,12 @@ public class MainController {
     }
 
     @FXML
+    public void handleNavQuiz() {
+        navigateTo("/fxml/quiz.fxml", btnQuiz);
+    }
+
+
+    @FXML
     public void showTimeline() {
         navigateTo("/fxml/timeline.fxml", btnTimeline);
     }
