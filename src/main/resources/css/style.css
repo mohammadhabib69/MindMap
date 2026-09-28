@@ -1325,3 +1325,35 @@
 .btn-danger:hover {
     -fx-background-color: #fee2e2;
 }
+
+/* Quiz Modern Styles */
+.segment-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #64748b;
+}
+.segment-btn:hover {
+    -fx-background-color: #cbd5e1;
+    -fx-text-fill: #334155;
+}
+.segment-active {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #0f172a;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 4, 0, 0, 1);
+}
+.segment-active:hover {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #0f172a;
+}
+.modern-combo {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-padding: 2px 4px;
+}
+.modern-combo .list-cell {
+    -fx-text-fill: #334155;
+}
+.modern-combo:focused {
+    -fx-border-color: #4f46e5;
+}
