@@ -1,8 +1,7 @@
 package com.mindmap;
 
 import com.mindmap.model.Note;
-import com.mindmap.model.QuizConfiguration;
-import com.mindmap.model.QuizQuestion;
+import com.mindmap.model.BankQuestion;
 import com.mindmap.service.QuizGenerationService;
 import org.junit.jupiter.api.Test;
 
@@ -24,19 +23,17 @@ public class QuizGenerationTest {
             notes.add(n);
         }
         
-        QuizConfiguration config = new QuizConfiguration("SubjectA", "All Topics", "EASY", 5, "Mixed");
-        
-        List<QuizQuestion> qs = service.generateQuiz(notes, config);
+        List<BankQuestion> qs = service.generateQuestions(notes, notes, 5, "Mixed");
         
         assertEquals(5, qs.size(), "Should generate 5 questions");
         
-        for (QuizQuestion q : qs) {
+        for (BankQuestion q : qs) {
             assertNotNull(q.getQuestionText());
             assertNotNull(q.getOptionsJson());
             assertNotNull(q.getCorrectAnswerJson());
             assertNotNull(q.getQuestionType());
-            assertEquals(0, q.getQuizSessionId(), "We haven't set session ID yet, so it defaults to 0 but wait we didn't check that.");
-            // Actually it defaults to 0 before DB.
+            assertNotNull(q.getExplanation());
+            assertTrue(q.getSourceNoteId() > 0);
         }
     }
 }

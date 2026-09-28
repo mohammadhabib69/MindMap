@@ -1,11 +1,9 @@
 package com.mindmap.model;
-
 import java.time.LocalDateTime;
 
-public class QuizSession {
+public class QuizAttempt {
     private int id;
-    private String title;
-    private String mode; // "PRACTICE", "EXAM"
+    private String mode;
     private int questionCount;
     private int timeLimitSeconds;
     private LocalDateTime startedAt;
@@ -15,12 +13,10 @@ public class QuizSession {
     private int incorrectCount;
     private int unansweredCount;
 
-    public QuizSession() {}
+    public QuizAttempt() {}
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
     public String getMode() { return mode; }
     public void setMode(String mode) { this.mode = mode; }
     public int getQuestionCount() { return questionCount; }

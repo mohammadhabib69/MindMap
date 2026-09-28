@@ -1,47 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.text.Font?>
 
-<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.mindmap.controller.QuizSessionController"
-      styleClass="screen-container" spacing="24">
-    <padding>
-        <Insets top="24" right="32" bottom="24" left="32"/>
-    </padding>
+      spacing="15" styleClass="screen-container" style="-fx-background-color: #f8fafc; -fx-padding: 20;">
 
-    <!-- Header -->
-    <HBox alignment="CENTER_LEFT" spacing="16">
-        <Label fx:id="lblTitle" text="Quiz Session" styleClass="view-header"/>
+    <HBox alignment="CENTER_LEFT">
+        <Label fx:id="lblSessionTitle" text="Quiz Session" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Label fx:id="lblTimer" text="00:00" style="-fx-font-weight: bold; -fx-font-size: 18px;"/>
+        <Label fx:id="lblTimer" text="00:00" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #ef4444;"/>
     </HBox>
 
-    <!-- Progress -->
-    <HBox alignment="CENTER_LEFT" spacing="16">
-        <Label fx:id="lblProgress" text="Question 1 of 10" styleClass="view-subtitle"/>
-        <ProgressBar fx:id="progressQuiz" progress="0.0" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+    <HBox alignment="CENTER_LEFT" spacing="10">
+        <Label fx:id="lblProgress" text="Question 1 of 10" style="-fx-text-fill: #64748b;"/>
+        <ProgressBar fx:id="progressSession" progress="0.0" HBox.hgrow="ALWAYS" maxWidth="Infinity" style="-fx-accent: #4f46e5;"/>
     </HBox>
 
-    <!-- Center Card: Question -->
-    <VBox styleClass="card" spacing="20" VBox.vgrow="ALWAYS">
-        <Label fx:id="lblQuestionText" text="Question text goes here..." wrapText="true" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
-        <VBox fx:id="boxOptions" spacing="10" VBox.vgrow="ALWAYS">
-            <!-- Options injected here -->
+    <VBox fx:id="cardQuestion" styleClass="card" VBox.vgrow="ALWAYS" spacing="20" style="-fx-background-color: #ffffff; -fx-padding: 30; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 2); -fx-background-radius: 8;">
+        <Label fx:id="lblQuestionText" wrapText="true" style="-fx-font-size: 18px; -fx-text-fill: #1e293b; -fx-font-weight: bold;"/>
+        
+        <VBox fx:id="boxOptions" spacing="12">
+            <!-- RadioButtons or CheckBoxes injected dynamically -->
+        </VBox>
+        
+        <VBox fx:id="boxExplanation" spacing="8" managed="false" visible="false" style="-fx-background-color: #f1f5f9; -fx-padding: 15; -fx-background-radius: 6; -fx-border-color: #e2e8f0; -fx-border-radius: 6;">
+            <Label text="Correct Answer:" style="-fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+            <Label fx:id="lblCorrectAnswer" wrapText="true" style="-fx-text-fill: #15803d; -fx-font-weight: bold;"/>
+            <Label fx:id="lblExplanation" wrapText="true" style="-fx-text-fill: #475569; -fx-padding: 5 0 0 0;"/>
+            <Button fx:id="btnViewSourceNote" text="View Source Note" onAction="#handleViewSourceNote" style="-fx-background-color: transparent; -fx-text-fill: #4f46e5; -fx-underline: true; -fx-padding: 5 0 0 0; -fx-cursor: hand;"/>
         </VBox>
     </VBox>
 
-    <!-- Bottom Actions -->
-    <HBox alignment="CENTER" spacing="16">
-        <Button fx:id="btnPrev" text="Previous" styleClass="btn-secondary" onAction="#handlePrev"/>
+    <HBox alignment="CENTER" spacing="15">
+        <Button fx:id="btnShowAnswer" text="Show Answer" onAction="#handleShowAnswer" style="-fx-background-color: #f1f5f9; -fx-text-fill: #475569; -fx-padding: 8 16; -fx-background-radius: 4; -fx-border-color: #e2e8f0; -fx-border-radius: 4;"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <FlowPane fx:id="boxNavigator" hgap="8" vgap="8" alignment="CENTER">
-            <!-- Navigator buttons injected here -->
-        </FlowPane>
+        
+        <Button fx:id="btnPrev" text="Previous" onAction="#handlePrev" style="-fx-background-color: #f1f5f9; -fx-text-fill: #475569; -fx-padding: 8 16; -fx-background-radius: 4; -fx-border-color: #e2e8f0; -fx-border-radius: 4;"/>
+        <FlowPane fx:id="boxNavigator" hgap="5" vgap="5" alignment="CENTER" prefWrapLength="200"/>
+        <Button fx:id="btnNext" text="Next" onAction="#handleNext" style="-fx-background-color: #f1f5f9; -fx-text-fill: #475569; -fx-padding: 8 16; -fx-background-radius: 4; -fx-border-color: #e2e8f0; -fx-border-radius: 4;"/>
+        
         <Region HBox.hgrow="ALWAYS"/>
-        <Button fx:id="btnNext" text="Next" styleClass="btn-secondary" onAction="#handleNext"/>
-        <Button fx:id="btnSubmit" text="Submit Quiz" styleClass="btn-primary" onAction="#handleSubmit"/>
+        <Button fx:id="btnSubmit" text="Submit Exam" onAction="#handleSubmit" styleClass="btn-primary" style="-fx-background-color: #4f46e5; -fx-text-fill: white; -fx-padding: 8 16; -fx-font-weight: bold; -fx-background-radius: 4;"/>
     </HBox>
+
 </VBox>

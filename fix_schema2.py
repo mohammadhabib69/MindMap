@@ -1,20 +1,14 @@
-package com.mindmap.database;
+with open('src/main/java/com/mindmap/database/DatabaseInitializer.java', 'r') as f:
+    text = f.read()
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+target = "    private static final String[] SCHEMA_STATEMENTS = {"
+end_target = "    };"
 
-/**
- * Handles database schema initialization for Phase 1.
- */
-public class DatabaseInitializer {
+start_idx = text.find(target)
+end_idx = text.find(end_target, start_idx)
 
-    private static final Logger LOGGER = Logger.getLogger(DatabaseInitializer.class.getName());
-
-    private static final String[] SCHEMA_STATEMENTS = {
-            """
+schema = """    private static final String[] SCHEMA_STATEMENTS = {
+            \"\"\"
             CREATE TABLE IF NOT EXISTS notes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL,
@@ -26,14 +20,14 @@ public class DatabaseInitializer {
                 is_private INTEGER DEFAULT 0,
                 pin TEXT
             );
-            """,
-            """
+            \"\"\",
+            \"\"\"
             CREATE TABLE IF NOT EXISTS tags (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL UNIQUE
             );
-            """,
-            """
+            \"\"\",
+            \"\"\"
             CREATE TABLE IF NOT EXISTS note_tags (
                 note_id INTEGER NOT NULL,
                 tag_id INTEGER NOT NULL,
@@ -41,8 +35,8 @@ public class DatabaseInitializer {
                 FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE,
                 FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
             );
-            """,
-            """
+            \"\"\",
+            \"\"\"
             CREATE TABLE IF NOT EXISTS connections (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 source_note_id INTEGER NOT NULL,
@@ -51,8 +45,8 @@ public class DatabaseInitializer {
                 FOREIGN KEY (source_note_id) REFERENCES notes(id) ON DELETE CASCADE,
                 FOREIGN KEY (target_note_id) REFERENCES notes(id) ON DELETE CASCADE
             );
-            """,
-            """
+            \"\"\",
+            \"\"\"
             CREATE TABLE IF NOT EXISTS revisions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 note_id INTEGER NOT NULL UNIQUE,
@@ -62,8 +56,8 @@ public class DatabaseInitializer {
                 review_count INTEGER DEFAULT 0,
                 FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE
             );
-            """,
-            """
+            \"\"\",
+            \"\"\"
             CREATE TABLE IF NOT EXISTS learning_events (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 note_id INTEGER NOT NULL,
@@ -71,8 +65,8 @@ public class DatabaseInitializer {
                 outcome TEXT NOT NULL,
                 FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE
             );
-            """,
-            """
+            \"\"\",
+            \"\"\"
             CREATE TABLE IF NOT EXISTS question_bank (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 source_note_id INTEGER NOT NULL,
@@ -89,8 +83,8 @@ public class DatabaseInitializer {
                 times_asked INTEGER DEFAULT 0,
                 FOREIGN KEY (source_note_id) REFERENCES notes(id) ON DELETE CASCADE
             );
-            """,
-            """
+            \"\"\",
+            \"\"\"
             CREATE TABLE IF NOT EXISTS quiz_attempts (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 mode TEXT,
@@ -103,8 +97,8 @@ public class DatabaseInitializer {
                 incorrect_count INTEGER,
                 unanswered_count INTEGER
             );
-            """,
-            """
+            \"\"\",
+            \"\"\"
             CREATE TABLE IF NOT EXISTS quiz_attempt_questions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 attempt_id INTEGER NOT NULL,
@@ -115,59 +109,11 @@ public class DatabaseInitializer {
                 FOREIGN KEY (attempt_id) REFERENCES quiz_attempts(id) ON DELETE CASCADE,
                 FOREIGN KEY (question_id) REFERENCES question_bank(id) ON DELETE CASCADE
             );
-            """
-    };
+            \"\"\"
+"""
+new_text = text[:start_idx] + schema + text[end_idx:]
 
-    private DatabaseInitializer() {
-        // Private constructor to prevent instantiation
-    }
+with open('src/main/java/com/mindmap/database/DatabaseInitializer.java', 'w') as f:
+    f.write(new_text)
 
-    /**
-     * Initializes the database by opening a connection and creating all required schema tables if needed.
-     *
-     * @throws SQLException If database initialization fails.
-     */
-    public static void initialize() throws SQLException {
-        LOGGER.log(Level.INFO, "Initializing database at: {0}", DatabaseManager.getDatabasePath());
-
-        try (Connection conn = DatabaseManager.getConnection();
-             Statement stmt = conn.createStatement()) {
-
-
-            for (String sql : SCHEMA_STATEMENTS) {
-                stmt.execute(sql);
-            }
-            
-            // Safe Migrations for Phase 18
-            try {
-                stmt.execute("ALTER TABLE notes ADD COLUMN is_favorite INTEGER DEFAULT 0;");
-                LOGGER.info("Added is_favorite column to notes table.");
-            } catch (SQLException ignored) {}
-            try {
-                stmt.execute("ALTER TABLE notes ADD COLUMN last_viewed_at TEXT;");
-                LOGGER.info("Added last_viewed_at column to notes table.");
-            } catch (SQLException ignored) {}
-            try {
-                stmt.execute("ALTER TABLE notes ADD COLUMN is_private INTEGER DEFAULT 0;");
-            } catch (SQLException ignored) {}
-            try {
-                stmt.execute("ALTER TABLE notes ADD COLUMN pin TEXT;");
-            } catch (SQLException ignored) {}
-
-            LOGGER.log(Level.INFO, "Database schema initialized successfully (notes, tags, note_tags, connections, revisions, learning_events).");
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Failed to initialize database schema: " + e.getMessage(), e);
-            throw e;
-        }
-    }
-
-    public static void main(String[] args) {
-        try {
-            initialize();
-            System.out.println("Database initialization verification succeeded.");
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Initialization failed in main: " + e.getMessage(), e);
-            System.exit(1);
-        }
-    }
-}
+print("Schema updated successfully.")

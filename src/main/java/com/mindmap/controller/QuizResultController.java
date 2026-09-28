@@ -2,12 +2,15 @@ package com.mindmap.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mindmap.model.QuizQuestion;
-import com.mindmap.model.QuizSession;
+import com.mindmap.model.Note;
+import com.mindmap.model.QuizAttempt;
+import com.mindmap.model.QuizAttemptQuestion;
 import com.mindmap.util.UiUtils;
 import com.mindmap.util.ViewManager;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -15,11 +18,8 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.fxml.FXMLLoader;
-import javafx.stage.Stage;
-import javafx.scene.Scene;
 import javafx.stage.Modality;
-import com.mindmap.model.Note;
+import javafx.stage.Stage;
 
 import java.time.Duration;
 import java.util.List;
@@ -33,23 +33,23 @@ public class QuizResultController {
     @FXML private Label lblUnanswered;
     @FXML private Label lblTimeUsed;
     @FXML private Label lblMessage;
-    @FXML private ListView<QuizQuestion> listReview;
+    @FXML private ListView<QuizAttemptQuestion> listReview;
     @FXML private Button btnBack;
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public void initResult(QuizSession session, List<QuizQuestion> questions) {
-        lblScore.setText(session.getScore() + " / " + session.getQuestionCount());
+    public void initResult(QuizAttempt attempt, List<QuizAttemptQuestion> attemptQuestions) {
+        lblScore.setText(attempt.getScore() + " / " + attempt.getQuestionCount());
         
-        int pct = (int) Math.round(((double) session.getScore() / session.getQuestionCount()) * 100);
+        int pct = attempt.getQuestionCount() > 0 ? (int) Math.round(((double) attempt.getScore() / attempt.getQuestionCount()) * 100) : 0;
         lblPercentage.setText(pct + "%");
         
-        lblCorrect.setText(String.valueOf(session.getCorrectCount()));
-        lblIncorrect.setText(String.valueOf(session.getIncorrectCount()));
-        lblUnanswered.setText(String.valueOf(session.getUnansweredCount()));
+        lblCorrect.setText(String.valueOf(attempt.getCorrectCount()));
+        lblIncorrect.setText(String.valueOf(attempt.getIncorrectCount()));
+        lblUnanswered.setText(String.valueOf(attempt.getUnansweredCount()));
         
-        if (session.getCompletedAt() != null && session.getStartedAt() != null) {
-            long secs = Duration.between(session.getStartedAt(), session.getCompletedAt()).getSeconds();
+        if (attempt.getCompletedAt() != null && attempt.getStartedAt() != null) {
+            long secs = Duration.between(attempt.getStartedAt(), attempt.getCompletedAt()).getSeconds();
             lblTimeUsed.setText(String.format("%02d:%02d", secs / 60, secs % 60));
         } else {
             lblTimeUsed.setText("--:--");
@@ -60,12 +60,12 @@ public class QuizResultController {
         else if (pct >= 50) lblMessage.setText("Good effort. Keep reviewing to improve.");
         else lblMessage.setText("Don't give up! More practice will help.");
         
-        listReview.getItems().setAll(questions);
+        listReview.getItems().setAll(attemptQuestions);
         listReview.setCellFactory(lv -> new ListCell<>() {
             @Override
-            protected void updateItem(QuizQuestion item, boolean empty) {
+            protected void updateItem(QuizAttemptQuestion item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || item == null) {
+                if (empty || item == null || item.getBankQuestion() == null) {
                     setGraphic(null);
                 } else {
                     VBox card = new VBox(8);
@@ -76,13 +76,13 @@ public class QuizResultController {
                     qLabel.setStyle(item.isCorrect() ? "-fx-text-fill: #16a34a; -fx-font-weight: bold;" : "-fx-text-fill: #dc2626; -fx-font-weight: bold;");
                     header.getChildren().add(qLabel);
                     
-                    Label text = new Label(item.getQuestionText());
+                    Label text = new Label(item.getBankQuestion().getQuestionText());
                     text.setWrapText(true);
                     text.setStyle("-fx-font-size: 14px;");
                     
                     try {
                         List<String> uAns = mapper.readValue(item.getUserAnswerJson(), new TypeReference<>() {});
-                        List<String> cAns = mapper.readValue(item.getCorrectAnswerJson(), new TypeReference<>() {});
+                        List<String> cAns = mapper.readValue(item.getBankQuestion().getCorrectAnswerJson(), new TypeReference<>() {});
                         
                         Label userL = new Label("Your answer: " + (uAns.isEmpty() ? "None" : String.join(", ", uAns)));
                         userL.setStyle("-fx-text-fill: #64748b;");
@@ -90,15 +90,19 @@ public class QuizResultController {
                         Label correctL = new Label("Correct answer: " + String.join(", ", cAns));
                         correctL.setStyle("-fx-text-fill: #0f172a; -fx-font-weight: bold;");
                         
-                        card.getChildren().addAll(header, text, userL, correctL);
+                        Label expL = new Label("Explanation: " + item.getBankQuestion().getExplanation());
+                        expL.setStyle("-fx-text-fill: #334155; -fx-font-style: italic;");
+                        expL.setWrapText(true);
+                        
+                        card.getChildren().addAll(header, text, userL, correctL, expL);
                     } catch (Exception e) {}
                     
-                    if (item.getSourceNote() != null) {
-                        Button sourceBtn = new Button("View Source Note: " + item.getSourceNote().getTitle());
+                    if (item.getBankQuestion().getSourceNote() != null) {
+                        Button sourceBtn = new Button("View Source Note");
                         sourceBtn.setStyle("-fx-font-size: 11px; -fx-background-color: #f1f5f9; -fx-text-fill: #475569;");
                         sourceBtn.setOnAction(e -> {
                             try {
-                                Note note = item.getSourceNote();
+                                Note note = item.getBankQuestion().getSourceNote();
                                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/note_view.fxml"));
                                 Parent root = loader.load();
                                 NoteViewController controller = loader.getController();

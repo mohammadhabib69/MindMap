@@ -2,50 +2,41 @@ package com.mindmap.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mindmap.model.BankQuestion;
 import com.mindmap.model.Note;
-import com.mindmap.model.QuizConfiguration;
-import com.mindmap.model.QuizQuestion;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 
 public class QuizGenerationService {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public List<QuizQuestion> generateQuiz(List<Note> allNotes, QuizConfiguration config) {
-        List<Note> filtered = filterNotes(allNotes, config);
-        
-        int requestedCount = config.getQuestionCount();
-        List<QuizQuestion> questions = new ArrayList<>();
-        
-        if (filtered.isEmpty()) {
-            return questions; // Return empty, controller handles UI
-        }
-        
+    public List<BankQuestion> generateQuestions(List<Note> sourceNotes, List<Note> allNotes, int count, String targetType) {
+        List<BankQuestion> questions = new ArrayList<>();
+        if (sourceNotes.isEmpty()) return questions;
+
         Random random = new Random();
-        Set<Integer> usedNoteIds = new HashSet<>();
-        
-        // Ensure we try to hit different notes if possible
-        Collections.shuffle(filtered, random);
-        
+        List<Note> shuffledSources = new ArrayList<>(sourceNotes);
+        Collections.shuffle(shuffledSources, random);
+
         int index = 0;
         int attempts = 0;
-        while (questions.size() < requestedCount && attempts < requestedCount * 3) {
-            Note note = filtered.get(index % filtered.size());
+        
+        while (questions.size() < count && attempts < count * 3) {
+            Note note = shuffledSources.get(index % shuffledSources.size());
             
-            // Randomly select type if mixed
-            String type = config.getType();
-            if ("Mixed".equalsIgnoreCase(type) || "All Types".equalsIgnoreCase(type) || type == null) {
+            String typeToGenerate = targetType;
+            if (typeToGenerate == null || typeToGenerate.equals("Mixed") || typeToGenerate.equals("All Types")) {
                 String[] types = {"SINGLE_CHOICE", "MULTIPLE_CHOICE", "TRUE_FALSE"};
-                type = types[random.nextInt(3)];
+                typeToGenerate = types[random.nextInt(3)];
             }
             
-            QuizQuestion q = generateQuestionFromNote(note, filtered, type, random);
+            BankQuestion q = generateQuestionFromNote(note, allNotes, typeToGenerate, random);
+            
             if (q != null && isUnique(q, questions)) {
-                q.setQuestionOrder(questions.size() + 1);
                 questions.add(q);
-                usedNoteIds.add(note.getId());
             }
             
             index++;
@@ -55,28 +46,16 @@ public class QuizGenerationService {
         return questions;
     }
     
-    private boolean isUnique(QuizQuestion q, List<QuizQuestion> existing) {
-        for (QuizQuestion e : existing) {
+    private boolean isUnique(BankQuestion q, List<BankQuestion> existing) {
+        for (BankQuestion e : existing) {
             if (e.getQuestionText().equals(q.getQuestionText())) {
                 return false;
             }
         }
         return true;
     }
-    
-    private List<Note> filterNotes(List<Note> allNotes, QuizConfiguration config) {
-        return allNotes.stream().filter(n -> {
-            boolean subjectMatch = config.getSubject() == null || config.getSubject().equalsIgnoreCase("All Subjects") 
-                                   || n.getSubject().equalsIgnoreCase(config.getSubject());
-            boolean diffMatch = config.getDifficulty() == null || config.getDifficulty().equalsIgnoreCase("All Difficulties")
-                                || n.getDifficulty().equalsIgnoreCase(config.getDifficulty());
-            // Topic filtering would require joining tags, but we'll approximate with content/title for now if tags are complex,
-            // or assume topic is handled externally. For MVP offline, subject + diff is great.
-            return subjectMatch && diffMatch;
-        }).collect(Collectors.toList());
-    }
-    
-    private QuizQuestion generateQuestionFromNote(Note note, List<Note> allNotes, String type, Random random) {
+
+    private BankQuestion generateQuestionFromNote(Note note, List<Note> allNotes, String type, Random random) {
         try {
             if ("SINGLE_CHOICE".equalsIgnoreCase(type) || "Single Choice".equalsIgnoreCase(type)) {
                 return generateSingleChoice(note, allNotes, random);
@@ -90,22 +69,32 @@ public class QuizGenerationService {
         }
     }
     
-    private QuizQuestion generateSingleChoice(Note note, List<Note> allNotes, Random random) throws JsonProcessingException {
+    private BankQuestion createBaseQuestion(Note note, String type) {
+        BankQuestion q = new BankQuestion();
+        q.setSourceNoteId(note.getId());
+        q.setSourceNote(note);
+        q.setQuestionType(type);
+        q.setSubject(note.getSubject() == null ? "Uncategorized" : note.getSubject());
+        q.setTopic("Generated"); // Could extract tags if needed
+        q.setDifficulty(note.getDifficulty() == null ? "EASY" : note.getDifficulty());
+        q.setCreatedAt(LocalDateTime.now().toString());
+        return q;
+    }
+
+    private BankQuestion generateSingleChoice(Note note, List<Note> allNotes, Random random) throws JsonProcessingException {
         String firstSentence = getFirstSentence(note.getContent());
         if (firstSentence == null || firstSentence.length() < 10) return null;
         
-        QuizQuestion q = new QuizQuestion();
-        q.setSourceNoteId(note.getId());
-        q.setSourceNote(note);
-        q.setQuestionType("SINGLE_CHOICE");
+        BankQuestion q = createBaseQuestion(note, "SINGLE_CHOICE");
         q.setQuestionText("What is the primary definition or concept of: " + note.getTitle() + "?");
+        q.setExplanation("The core concept of " + note.getTitle() + " is defined as: " + firstSentence);
         
         List<String> options = new ArrayList<>();
-        options.add(firstSentence); // Correct
+        options.add(firstSentence);
         
         List<String> distractors = getDistractors(allNotes, note.getId(), 3, random);
         while (distractors.size() < 3) {
-            distractors.add("It is a concept related to " + (random.nextInt(100) + 1));
+            distractors.add("It relates to a general concept #" + random.nextInt(1000));
         }
         options.addAll(distractors);
         
@@ -116,24 +105,22 @@ public class QuizGenerationService {
         q.setCorrectAnswerJson(mapper.writeValueAsString(correct));
         return q;
     }
-    
-    private QuizQuestion generateMultipleChoice(Note note, List<Note> allNotes, Random random) throws JsonProcessingException {
+
+    private BankQuestion generateMultipleChoice(Note note, List<Note> allNotes, Random random) throws JsonProcessingException {
         List<String> sentences = getSentences(note.getContent());
         if (sentences.size() < 2) return null;
         
         Collections.shuffle(sentences, random);
         List<String> correctOpts = sentences.subList(0, Math.min(2, sentences.size()));
         
-        QuizQuestion q = new QuizQuestion();
-        q.setSourceNoteId(note.getId());
-        q.setSourceNote(note);
-        q.setQuestionType("MULTIPLE_CHOICE");
+        BankQuestion q = createBaseQuestion(note, "MULTIPLE_CHOICE");
         q.setQuestionText("Which of the following statements apply to " + note.getTitle() + "? (Select all that apply)");
+        q.setExplanation("According to the source note, the valid statements are: " + String.join(" ", correctOpts));
         
         List<String> options = new ArrayList<>(correctOpts);
         List<String> distractors = getDistractors(allNotes, note.getId(), 2, random);
         while (distractors.size() < 2) {
-            distractors.add("It does not involve any significant structure.");
+            distractors.add("It is not typically associated with standard usage.");
         }
         options.addAll(distractors);
         Collections.shuffle(options, random);
@@ -142,8 +129,8 @@ public class QuizGenerationService {
         q.setCorrectAnswerJson(mapper.writeValueAsString(correctOpts));
         return q;
     }
-    
-    private QuizQuestion generateTrueFalse(Note note, List<Note> allNotes, Random random) throws JsonProcessingException {
+
+    private BankQuestion generateTrueFalse(Note note, List<Note> allNotes, Random random) throws JsonProcessingException {
         boolean isTrue = random.nextBoolean();
         String statement;
         
@@ -151,20 +138,19 @@ public class QuizGenerationService {
             statement = getFirstSentence(note.getContent());
         } else {
             List<String> distractors = getDistractors(allNotes, note.getId(), 1, random);
-            if (!distractors.isEmpty()) {
-                statement = distractors.get(0);
-            } else {
-                statement = "It has no relationship to any other subject.";
-            }
+            statement = !distractors.isEmpty() ? distractors.get(0) : "It functions independently of all other variables.";
         }
         
         if (statement == null || statement.length() < 10) return null;
         
-        QuizQuestion q = new QuizQuestion();
-        q.setSourceNoteId(note.getId());
-        q.setSourceNote(note);
-        q.setQuestionType("TRUE_FALSE");
+        BankQuestion q = createBaseQuestion(note, "TRUE_FALSE");
         q.setQuestionText("True or False regarding " + note.getTitle() + ":\n\n\"" + statement + "\"");
+        
+        if (isTrue) {
+            q.setExplanation("True. This statement accurately reflects the content of " + note.getTitle() + ".");
+        } else {
+            q.setExplanation("False. This statement does not apply to " + note.getTitle() + ".");
+        }
         
         List<String> options = List.of("True", "False");
         List<String> correct = List.of(isTrue ? "True" : "False");
@@ -173,7 +159,7 @@ public class QuizGenerationService {
         q.setCorrectAnswerJson(mapper.writeValueAsString(correct));
         return q;
     }
-    
+
     private String getFirstSentence(String content) {
         List<String> sentences = getSentences(content);
         return sentences.isEmpty() ? null : sentences.get(0);
@@ -181,14 +167,11 @@ public class QuizGenerationService {
     
     private List<String> getSentences(String content) {
         if (content == null || content.trim().isEmpty()) return new ArrayList<>();
-        // Simple sentence split
         String[] parts = content.split("(?<=\\.)\\s+");
         List<String> valid = new ArrayList<>();
         for (String p : parts) {
             String clean = p.replaceAll("\\n", " ").trim();
-            if (clean.length() > 15) {
-                valid.add(clean);
-            }
+            if (clean.length() > 15) valid.add(clean);
         }
         return valid;
     }

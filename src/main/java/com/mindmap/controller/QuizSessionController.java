@@ -2,22 +2,23 @@ package com.mindmap.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mindmap.model.QuizQuestion;
-import com.mindmap.model.QuizSession;
-import com.mindmap.repository.QuizQuestionRepository;
-import com.mindmap.repository.QuizSessionRepository;
+import com.mindmap.model.BankQuestion;
+import com.mindmap.model.QuizAttempt;
+import com.mindmap.model.QuizAttemptQuestion;
+import com.mindmap.repository.QuizAttemptRepository;
 import com.mindmap.util.UiUtils;
 import com.mindmap.util.ViewManager;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.util.Duration;
 
 import java.time.LocalDateTime;
@@ -29,43 +30,49 @@ import java.util.logging.Logger;
 public class QuizSessionController {
     private static final Logger LOGGER = Logger.getLogger(QuizSessionController.class.getName());
 
-    @FXML private Label lblTitle;
+    @FXML private Label lblSessionTitle;
     @FXML private Label lblProgress;
     @FXML private Label lblTimer;
-    @FXML private ProgressBar progressQuiz;
+    @FXML private ProgressBar progressSession;
     @FXML private Label lblQuestionText;
     @FXML private VBox boxOptions;
-    @FXML private FlowPane boxNavigator;
+    @FXML private VBox boxExplanation;
+    @FXML private Label lblCorrectAnswer;
+    @FXML private Label lblExplanation;
+    @FXML private Button btnViewSourceNote;
+    
+    @FXML private Button btnShowAnswer;
     @FXML private Button btnPrev;
     @FXML private Button btnNext;
     @FXML private Button btnSubmit;
+    @FXML private FlowPane boxNavigator;
 
-    private QuizSession session;
-    private List<QuizQuestion> questions;
+    private QuizAttempt attempt;
+    private List<BankQuestion> questions;
+    private boolean studyMode;
     private int currentIndex = 0;
     
-    private final QuizSessionRepository sessionRepo = new QuizSessionRepository();
-    private final QuizQuestionRepository questionRepo = new QuizQuestionRepository();
+    private final QuizAttemptRepository attemptRepo = new QuizAttemptRepository();
     private final ObjectMapper mapper = new ObjectMapper();
     
     private Timeline timeline;
     private int secondsRemaining;
 
-    // Stores currently selected answers in memory before submission
     private final List<List<String>> userAnswers = new ArrayList<>();
 
-    public void initSession(QuizSession session, List<QuizQuestion> questions) {
-        this.session = session;
+    public void initSession(QuizAttempt attempt, List<BankQuestion> questions, boolean studyMode) {
+        this.attempt = attempt;
         this.questions = questions;
+        this.studyMode = studyMode;
         
         for (int i = 0; i < questions.size(); i++) {
             userAnswers.add(new ArrayList<>());
         }
         
-        lblTitle.setText(session.getTitle() + " - " + session.getMode());
+        lblSessionTitle.setText(studyMode ? "Study Mode" : attempt.getMode());
         
-        if ("EXAM".equalsIgnoreCase(session.getMode())) {
-            secondsRemaining = session.getTimeLimitSeconds();
+        if (!studyMode && "Timed Exam".equalsIgnoreCase(attempt.getMode())) {
+            secondsRemaining = attempt.getTimeLimitSeconds();
             updateTimerLabel();
             timeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
                 secondsRemaining--;
@@ -78,9 +85,19 @@ public class QuizSessionController {
             }));
             timeline.setCycleCount(Timeline.INDEFINITE);
             timeline.play();
+            lblTimer.setVisible(true);
         } else {
-            lblTimer.setText("No time limit");
+            lblTimer.setVisible(false);
         }
+        
+        btnShowAnswer.setVisible(studyMode);
+        btnShowAnswer.setManaged(studyMode);
+        
+        btnSubmit.setVisible(!studyMode);
+        btnSubmit.setManaged(!studyMode);
+        
+        boxExplanation.setVisible(false);
+        boxExplanation.setManaged(false);
         
         buildNavigator();
         loadQuestion(0);
@@ -126,22 +143,23 @@ public class QuizSessionController {
         if (index < 0 || index >= questions.size()) return;
         currentIndex = index;
         
-        QuizQuestion q = questions.get(index);
+        BankQuestion q = questions.get(index);
         lblQuestionText.setText(q.getQuestionText());
         lblProgress.setText("Question " + (index + 1) + " of " + questions.size());
-        progressQuiz.setProgress((double)(index + 1) / questions.size());
+        progressSession.setProgress((double)(index + 1) / questions.size());
         
         btnPrev.setDisable(index == 0);
         btnNext.setDisable(index == questions.size() - 1);
         
         boxOptions.getChildren().clear();
+        boxExplanation.setVisible(false);
+        boxExplanation.setManaged(false);
         
         try {
             List<String> options = mapper.readValue(q.getOptionsJson(), new TypeReference<List<String>>() {});
             List<String> selected = userAnswers.get(index);
             
             boolean isMulti = "MULTIPLE_CHOICE".equals(q.getQuestionType());
-            
             ToggleGroup group = new ToggleGroup();
             
             for (String opt : options) {
@@ -171,13 +189,48 @@ public class QuizSessionController {
                     boxOptions.getChildren().add(rb);
                 }
             }
-            
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to parse options", e);
             lblQuestionText.setText("Error loading options.");
         }
         
         updateNavigatorVisuals();
+    }
+    
+    @FXML
+    private void handleShowAnswer() {
+        BankQuestion q = questions.get(currentIndex);
+        try {
+            List<String> correct = mapper.readValue(q.getCorrectAnswerJson(), new TypeReference<List<String>>() {});
+            lblCorrectAnswer.setText("Correct Answer: " + String.join(", ", correct));
+            lblExplanation.setText("Explanation: " + q.getExplanation());
+            
+            btnViewSourceNote.setOnAction(e -> {
+                if (q.getSourceNote() != null) {
+                    try {
+                        javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/note_view.fxml"));
+                        Parent root = loader.load();
+                        NoteViewController controller = loader.getController();
+                        javafx.stage.Stage stage = new javafx.stage.Stage();
+                        stage.setTitle("View Note - " + q.getSourceNote().getTitle());
+                        stage.initModality(Modality.APPLICATION_MODAL);
+                        if (btnViewSourceNote.getScene() != null && btnViewSourceNote.getScene().getWindow() != null) {
+                            stage.initOwner(btnViewSourceNote.getScene().getWindow());
+                        }
+                        stage.setScene(new Scene(root));
+                        controller.setNote(q.getSourceNote());
+                        stage.show();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            });
+            
+            boxExplanation.setVisible(true);
+            boxExplanation.setManaged(true);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error showing answer", e);
+        }
     }
 
     @FXML
@@ -189,15 +242,35 @@ public class QuizSessionController {
     private void handleNext() {
         loadQuestion(currentIndex + 1);
     }
+    
+    @FXML
+    private void handleExitStudy() {
+        // Just go back to quiz screen
+        if (!studyMode) return;
+        try {
+            Parent view = ViewManager.loadView("/fxml/quiz.fxml");
+            Parent current = btnPrev.getParent();
+            while (current != null && !"contentArea".equals(current.getId())) {
+                current = current.getParent();
+            }
+            if (current != null && current instanceof StackPane contentArea) {
+                contentArea.getChildren().setAll(view);
+            }
+        } catch (Exception e) {}
+    }
 
     @FXML
     private void handleSubmit() {
+        if (studyMode) {
+            handleExitStudy();
+            return;
+        }
         long answeredCount = userAnswers.stream().filter(l -> !l.isEmpty()).count();
         if (answeredCount < questions.size()) {
-            boolean confirm = UiUtils.showConfirmation("Submit Quiz", "You have answered " + answeredCount + " of " + questions.size() + " questions. Submit anyway?");
+            boolean confirm = UiUtils.showConfirmation("Submit Exam", "You have answered " + answeredCount + " of " + questions.size() + " questions. Submit anyway?");
             if (!confirm) return;
         } else {
-            boolean confirm = UiUtils.showConfirmation("Submit Quiz", "Ready to submit your quiz?");
+            boolean confirm = UiUtils.showConfirmation("Submit Exam", "Ready to submit your exam?");
             if (!confirm) return;
         }
         finishQuiz();
@@ -214,49 +287,55 @@ public class QuizSessionController {
         int incorrect = 0;
         int unanswered = 0;
         
+        List<QuizAttemptQuestion> attemptQuestions = new ArrayList<>();
+        
         for (int i = 0; i < questions.size(); i++) {
-            QuizQuestion q = questions.get(i);
+            BankQuestion bq = questions.get(i);
             List<String> userAns = userAnswers.get(i);
+            QuizAttemptQuestion qaq = new QuizAttemptQuestion();
+            qaq.setAttemptId(attempt.getId());
+            qaq.setQuestionId(bq.getId());
+            qaq.setQuestionOrder(i + 1);
+            qaq.setBankQuestion(bq);
             
             try {
-                List<String> correctAns = mapper.readValue(q.getCorrectAnswerJson(), new TypeReference<List<String>>() {});
-                q.setUserAnswerJson(mapper.writeValueAsString(userAns));
+                qaq.setUserAnswerJson(mapper.writeValueAsString(userAns));
+                List<String> correctAns = mapper.readValue(bq.getCorrectAnswerJson(), new TypeReference<List<String>>() {});
                 
                 if (userAns.isEmpty()) {
                     unanswered++;
-                    q.setCorrect(false);
+                    qaq.setCorrect(false);
                 } else {
-                    // simple exact match
                     boolean isCorrect = correctAns.containsAll(userAns) && userAns.containsAll(correctAns);
                     if (isCorrect) {
                         correct++;
-                        q.setCorrect(true);
+                        qaq.setCorrect(true);
                     } else {
                         incorrect++;
-                        q.setCorrect(false);
+                        qaq.setCorrect(false);
                     }
                 }
                 
-                questionRepo.update(q);
+                attemptRepo.addAttemptQuestion(qaq);
+                attemptQuestions.add(qaq);
                 
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Error scoring question", e);
             }
         }
         
-        session.setCompletedAt(LocalDateTime.now());
-        session.setScore(correct);
-        session.setCorrectCount(correct);
-        session.setIncorrectCount(incorrect);
-        session.setUnansweredCount(unanswered);
+        attempt.setCompletedAt(LocalDateTime.now());
+        attempt.setScore(correct);
+        attempt.setCorrectCount(correct);
+        attempt.setIncorrectCount(incorrect);
+        attempt.setUnansweredCount(unanswered);
         
-        sessionRepo.update(session);
+        attemptRepo.update(attempt);
         
-        // Go to results
         try {
             ViewManager.ViewResult result = ViewManager.loadViewWithController("/fxml/quiz_result.fxml");
             QuizResultController controller = (QuizResultController) result.getController();
-            controller.initResult(session, questions);
+            controller.initResult(attempt, attemptQuestions);
             
             Parent current = btnSubmit.getParent();
             while (current != null && !"contentArea".equals(current.getId())) {
