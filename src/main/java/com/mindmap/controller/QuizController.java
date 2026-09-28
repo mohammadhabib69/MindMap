@@ -361,9 +361,12 @@ public class QuizController {
                 diff.setStyle("-fx-text-fill: #64748b; -fx-font-size: 11px; -fx-font-weight: bold;");
                 top.getChildren().addAll(type, diff);
                 
+                
                 Label text = new Label(item.getQuestionText());
                 text.setWrapText(true);
-                text.setStyle("-fx-font-size: 15px; -fx-text-fill: #0f172a; -fx-font-weight: 500;");
+                text.prefWidthProperty().bind(listQuestionBank.widthProperty().subtract(80));
+                                                text.setStyle("-fx-font-size: 15px; -fx-text-fill: #0f172a; -fx-font-weight: 500;");
+
                 
                 VBox meta = new VBox(2);
                 Label lTopic = new Label("Topic: " + item.getTopic());
