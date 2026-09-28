@@ -29,10 +29,10 @@
             <Label text="Active recall and spaced repetition schedule" styleClass="view-subtitle"/>
         </VBox>
         <FlowPane hgap="8" vgap="6" alignment="CENTER_RIGHT" HBox.hgrow="NEVER">
-            <Button fx:id="btnStartSession" text="▶ Start Review Session" onAction="#handleStartSession" styleClass="btn-primary" style="-fx-font-size: 12px; -fx-padding: 6 14;"/>
+            <Button fx:id="btnStartSession" text="Start Review Session" onAction="#handleStartSession" styleClass="btn-primary" style="-fx-font-size: 12px; -fx-padding: 6 14;"/>
             <Button fx:id="btnAddNote" text="+ Add Note" onAction="#handleAddNote" styleClass="btn-secondary" style="-fx-font-size: 12px; -fx-padding: 6 12;"/>
-            <Button fx:id="btnScheduleAll" text="⚡ Schedule All" onAction="#handleScheduleAll" styleClass="btn-secondary" style="-fx-font-size: 12px; -fx-padding: 6 12;"/>
-            <Button fx:id="btnRefresh" text="🔄 Refresh" onAction="#handleRefresh" styleClass="btn-secondary" style="-fx-font-size: 12px; -fx-padding: 6 10;"/>
+            <Button fx:id="btnScheduleAll" text="Schedule All" onAction="#handleScheduleAll" styleClass="btn-secondary" style="-fx-font-size: 12px; -fx-padding: 6 12;"/>
+            <Button fx:id="btnRefresh" text="Refresh" onAction="#handleRefresh" styleClass="btn-secondary" style="-fx-font-size: 12px; -fx-padding: 6 10;"/>
         </FlowPane>
     </HBox>
 
@@ -81,7 +81,6 @@
             <StackPane VBox.vgrow="ALWAYS">
                 <ListView fx:id="listDue" styleClass="revision-list"/>
                 <VBox fx:id="boxEmptyDue" alignment="CENTER" spacing="8" styleClass="placeholder-box" style="-fx-padding: 40 16;">
-                    <Label text="🎉" style="-fx-font-size: 28px;"/>
                     <Label text="You're all caught up!" styleClass="placeholder-heading"/>
                     <Label text="No reviews are due today. Check back tomorrow or add notes to the schedule." styleClass="placeholder-subtext" alignment="CENTER" wrapText="true"/>
                 </VBox>
@@ -100,7 +99,6 @@
             <StackPane VBox.vgrow="ALWAYS">
                 <ListView fx:id="listUpcoming" styleClass="revision-list"/>
                 <VBox fx:id="boxEmptyUpcoming" alignment="CENTER" spacing="8" styleClass="placeholder-box" style="-fx-padding: 40 16;">
-                    <Label text="📅" style="-fx-font-size: 28px;"/>
                     <Label text="No upcoming reviews scheduled." styleClass="placeholder-heading"/>
                     <Label text="Reviews will be scheduled here automatically as you complete study sessions." styleClass="placeholder-subtext" alignment="CENTER" wrapText="true"/>
                 </VBox>

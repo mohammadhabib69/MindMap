@@ -31,7 +31,7 @@
             <Label text="Learning Timeline" styleClass="view-header"/>
             <Label text="Chronological record of your study sessions, note activity, and milestones" styleClass="view-subtitle"/>
         </VBox>
-        <Button fx:id="btnRefresh" text="🔄 Refresh" onAction="#handleRefresh" styleClass="btn-secondary" style="-fx-font-size: 12px; -fx-padding: 6 12;"/>
+        <Button fx:id="btnRefresh" text="Refresh" onAction="#handleRefresh" styleClass="btn-secondary" style="-fx-font-size: 12px; -fx-padding: 6 12;"/>
     </HBox>
 
     <!-- Summary Metrics Bar -->
@@ -90,7 +90,6 @@
 
         <!-- Polished Empty State -->
         <VBox fx:id="boxEmptyState" alignment="CENTER" spacing="12" styleClass="placeholder-box" style="-fx-padding: 50 20;" visible="false" managed="false">
-            <Label text="📅" styleClass="placeholder-icon"/>
             <Label text="No learning activity yet." styleClass="placeholder-heading"/>
             <Label text="Create notes and complete review sessions to build your learning timeline." styleClass="placeholder-subtext" alignment="CENTER" wrapText="true" maxWidth="420"/>
         </VBox>

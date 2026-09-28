@@ -132,7 +132,6 @@
 
                     <!-- Empty State for Charts -->
                     <VBox fx:id="boxEmptyCharts" alignment="CENTER" spacing="8" styleClass="placeholder-box" visible="false" managed="false">
-                        <Label text="📚" styleClass="placeholder-icon-small"/>
                         <Label text="No knowledge base data yet" styleClass="placeholder-heading"/>
                         <Label text="Create notes with subjects and difficulties to see distribution charts." styleClass="placeholder-subtext" alignment="CENTER" wrapText="true"/>
                     </VBox>
@@ -219,7 +218,7 @@
             <!-- Favorites -->
             <VBox fx:id="cardFavorites" spacing="10" styleClass="dashboard-card" minWidth="300" prefWidth="320">
                 <HBox alignment="CENTER_LEFT" spacing="8">
-                    <Label text="★ Favorites" styleClass="card-title" style="-fx-text-fill: #eab308;"/>
+                    <Label text="Favorites" styleClass="card-title" style="-fx-text-fill: #eab308;"/>
                     <Region HBox.hgrow="ALWAYS"/>
                 </HBox>
                 <VBox fx:id="boxFavorites" spacing="6"/>
@@ -253,7 +252,6 @@
                 </VBox>
 
                 <VBox fx:id="boxEmptyActivity" alignment="CENTER" spacing="6" styleClass="placeholder-box" style="-fx-padding: 24 16;" visible="false" managed="false">
-                    <Label text="📅" styleClass="placeholder-icon-small"/>
                     <Label text="No recent activity recorded." styleClass="placeholder-heading"/>
                     <Label text="Study sessions and note updates will appear here." styleClass="placeholder-subtext"/>
                 </VBox>
@@ -273,7 +271,6 @@
                 </VBox>
 
                 <VBox fx:id="boxEmptyNotes" alignment="CENTER" spacing="6" styleClass="placeholder-box" style="-fx-padding: 24 16;" visible="false" managed="false">
-                    <Label text="📝" styleClass="placeholder-icon-small"/>
                     <Label text="No notes found." styleClass="placeholder-heading"/>
                     <Label text="Create your first note to populate your knowledge base." styleClass="placeholder-subtext"/>
                 </VBox>
