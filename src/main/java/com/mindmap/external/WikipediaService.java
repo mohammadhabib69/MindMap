@@ -36,7 +36,7 @@ public class WikipediaService {
         try {
             String encodedQuery = URLEncoder.encode(query.trim(), StandardCharsets.UTF_8);
             String url = "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=" 
-                         + encodedQuery + "&utf8=&format=jsonutf8=&utf8=&format=jsonformat=json&utf8=&format=jsonsrlimit=20";
+                         + encodedQuery + "&utf8=1&format=json&srlimit=20";
             
             String jsonResponse = client.sendGetRequest(url);
             JsonNode rootNode = mapper.readTree(jsonResponse);
