@@ -93,7 +93,7 @@ public class DashboardController {
     @FXML private Label lblTotalTags;
 
     // Middle Section: Knowledge Distribution & Revision
-    @FXML private FlowPane paneMiddleSection;
+    @FXML private HBox paneMiddleSection;
     @FXML private VBox cardKnowledgeDistribution;
     @FXML private VBox cardRevisionOverview;
 
@@ -159,7 +159,7 @@ public class DashboardController {
         return paneMetrics;
     }
 
-    public FlowPane getPaneMiddleSection() {
+    public HBox getPaneMiddleSection() {
         return paneMiddleSection;
     }
 
@@ -235,20 +235,8 @@ public class DashboardController {
             setCardWidth(cardTotalTags, metricCardWidth);
         }
 
-        // 2. Middle Section (Knowledge Distribution & Revision, 14px gap)
-        if (paneMiddleSection != null) {
-            if (usableWidth >= 800) {
-                // Side-by-side: 54% / 46% split
-                double wLeft = Math.floor((usableWidth - 14.0) * 0.54);
-                double wRight = Math.floor(usableWidth - 14.0 - wLeft);
-                setCardWidth(cardKnowledgeDistribution, wLeft);
-                setCardWidth(cardRevisionOverview, wRight);
-            } else {
-                // Stacked: Both span full usable width
-                setCardWidth(cardKnowledgeDistribution, usableWidth);
-                setCardWidth(cardRevisionOverview, usableWidth);
-            }
-        }
+        // 2. Middle Section — HBox with HBox.hgrow=ALWAYS handles layout automatically.
+        // No manual width assignment needed; JavaFX divides space equally between the two children.
 
         // 3. Lower Section (Recent Activity & Recent Notes, 14px gap)
         if (paneLowerSection != null) {
