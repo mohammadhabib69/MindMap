@@ -224,8 +224,7 @@ public class ReviewDialogController {
                     setOutcomeButtonsDisable(false);
                     LOGGER.log(Level.SEVERE, "Failed to complete review: " + throwable.getMessage(), throwable);
                     UiUtils.showError("Review Error", "Failed to save review outcome: " + throwable.getMessage());
-                    currentIndex++;
-                    loadCurrentReview();
+                    // Do NOT advance currentIndex, allow user to retry
                 }
         );
     }
