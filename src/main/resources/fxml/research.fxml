@@ -60,6 +60,10 @@
             
             <StackPane VBox.vgrow="ALWAYS">
                 <VBox fx:id="boxEmptySelection" alignment="CENTER" spacing="8" styleClass="placeholder-box">
+                <VBox fx:id="boxLoadingSelection" alignment="CENTER" spacing="12" styleClass="placeholder-box" visible="false" managed="false">
+                    <ProgressIndicator prefWidth="32" prefHeight="32"/>
+                    <Label text="Loading selected result..." styleClass="placeholder-heading"/>
+                </VBox>
                     <Label text="Select a result" styleClass="placeholder-heading"/>
                     <Label text="Choose a Wikipedia result to preview its summary and create a note." styleClass="placeholder-subtext" wrapText="true" alignment="CENTER"/>
                 </VBox>

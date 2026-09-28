@@ -46,6 +46,8 @@ public class ResearchController {
     @FXML private VBox boxEmptyResults;
     @FXML private VBox boxEmptySelection;
     @FXML private VBox boxSelectionDetails;
+    @FXML private VBox boxLoadingSelection;
+    private String currentLoadingTitle;
 
     @FXML private Label lblSource;
     @FXML private HBox boxActions;
@@ -115,17 +117,46 @@ public class ResearchController {
     }
 
     private void loadSummary(String title) {
+        currentLoadingTitle = title;
         setLoadingState(true, "Loading summary for " + title + "...");
+        
+        if (boxEmptySelection != null) {
+            boxEmptySelection.setVisible(false);
+            boxEmptySelection.setManaged(false);
+        }
+        if (boxSelectionDetails != null) {
+            boxSelectionDetails.setVisible(false);
+            boxSelectionDetails.setManaged(false);
+        }
+        if (boxLoadingSelection != null) {
+            boxLoadingSelection.setVisible(true);
+            boxLoadingSelection.setManaged(true);
+        }
         
         TaskExecutor.runAsync(() -> {
             return wikipediaService.getSummary(title);
         }, summary -> {
+            if (!title.equals(currentLoadingTitle)) return;
             setLoadingState(false, "Loaded summary.");
             currentSummary = summary;
+            
+            if (boxLoadingSelection != null) {
+                boxLoadingSelection.setVisible(false);
+                boxLoadingSelection.setManaged(false);
+            }
             displaySummary(summary);
         }, error -> {
+            if (!title.equals(currentLoadingTitle)) return;
             LOGGER.log(Level.WARNING, "Failed to load summary", error);
-            handleError(error);
+            if (boxLoadingSelection != null) {
+                boxLoadingSelection.setVisible(false);
+                boxLoadingSelection.setManaged(false);
+            }
+            if (boxEmptySelection != null) {
+                boxEmptySelection.setVisible(true);
+                boxEmptySelection.setManaged(true);
+            }
+            lblStatus.setText("Unable to load this Wikipedia summary.");
         });
     }
 
@@ -133,13 +164,30 @@ public class ResearchController {
         if (summary != null) {
             lblTitle.setText(summary.getTitle());
             lblSummary.setText(summary.getExtract());
-            boxSource.setVisible(true);
-            boxSource.setManaged(true);
-            boxActions.setVisible(true);
+            if (lblSource != null) {
+                lblSource.setText("Wikipedia");
+            }
+            if (boxSource != null) {
+                boxSource.setVisible(true);
+                boxSource.setManaged(true);
+            }
+            if (boxActions != null) {
+                boxActions.setVisible(true);
+            }
+            
+            if (boxEmptySelection != null) {
+                boxEmptySelection.setVisible(false);
+                boxEmptySelection.setManaged(false);
+            }
+            if (boxSelectionDetails != null) {
+                boxSelectionDetails.setVisible(true);
+                boxSelectionDetails.setManaged(true);
+            }
         }
     }
 
     private void clearDetails() {
+        currentLoadingTitle = null;
         lblTitle.setText("");
         lblSummary.setText("");
         currentSummary = null;
@@ -150,6 +198,10 @@ public class ResearchController {
         if (boxSelectionDetails != null) {
             boxSelectionDetails.setVisible(false);
             boxSelectionDetails.setManaged(false);
+        }
+        if (boxLoadingSelection != null) {
+            boxLoadingSelection.setVisible(false);
+            boxLoadingSelection.setManaged(false);
         }
     }
 
