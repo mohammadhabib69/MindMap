@@ -30,45 +30,42 @@
     <Region prefHeight="24"/>
 
     <!-- Main Content Area uses a StackPane to hold both views so they take full space -->
-    <StackPane VBox.vgrow="ALWAYS" alignment="TOP_LEFT" minHeight="0">
+    <StackPane VBox.vgrow="ALWAYS" alignment="TOP_LEFT" minHeight="0" minWidth="0">
         
         <!-- QUESTION BANK VIEW -->
         <VBox fx:id="boxQuestionBank" spacing="16" VBox.vgrow="ALWAYS" minHeight="0">
             
             <!-- Statistics Bar -->
-            <HBox spacing="16">
-                <VBox spacing="4" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 16; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8;">
+            <HBox spacing="16" minWidth="0">
+                <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="0" style="-fx-background-color: white; -fx-padding: 16; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8;">
                     <Label text="QUESTIONS" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
                     <Label fx:id="lblStatQuestions" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
                 </VBox>
-                <VBox spacing="4" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 16; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8;">
+                <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="0" style="-fx-background-color: white; -fx-padding: 16; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8;">
                     <Label text="TOPICS" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
                     <Label fx:id="lblStatTopics" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
                 </VBox>
-                <VBox spacing="4" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 16; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8;">
+                <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="0" style="-fx-background-color: white; -fx-padding: 16; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8;">
                     <Label text="SUBJECTS" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
                     <Label fx:id="lblStatSubjects" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
                 </VBox>
-                <VBox spacing="4" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 16; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8;">
+                <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="0" style="-fx-background-color: white; -fx-padding: 16; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8;">
                     <Label text="EXAMS TAKEN" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
                     <Label fx:id="lblStatExams" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
                 </VBox>
             </HBox>
 
-            <HBox spacing="16" VBox.vgrow="ALWAYS" minHeight="0">
-                <!-- Left side: The List of questions -->
-                <VBox spacing="12" HBox.hgrow="ALWAYS" minHeight="0">
-                    <HBox spacing="8" alignment="CENTER_LEFT">
-                        <TextField fx:id="txtSearchBank" promptText="🔍 Search questions..." HBox.hgrow="ALWAYS" style="-fx-padding: 8 12; -fx-background-radius: 6; -fx-border-color: #cbd5e1; -fx-border-radius: 6; -fx-background-color: white;"/>
-                        <ComboBox fx:id="comboFilterSubject" promptText="Subject" styleClass="modern-combo"/>
-                        <ComboBox fx:id="comboFilterTopic" promptText="Topic" styleClass="modern-combo"/>
-                        <ComboBox fx:id="comboFilterDifficulty" promptText="Difficulty" styleClass="modern-combo"/>
-                        <ComboBox fx:id="comboFilterType" promptText="Type" styleClass="modern-combo"/>
-                        <Button fx:id="btnGenerateBank" text="+ Generate Questions" onAction="#handleGenerateBank" style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 6; -fx-cursor: hand;"/>
-                    </HBox>
-                    <ListView fx:id="listQuestionBank" VBox.vgrow="ALWAYS" minHeight="0" style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;"/>
-                </VBox>
-            </HBox>
+            <VBox spacing="12" VBox.vgrow="ALWAYS" minHeight="0">
+                <HBox spacing="8" alignment="CENTER_LEFT" minWidth="0">
+                    <TextField fx:id="txtSearchBank" promptText="🔍 Search questions..." HBox.hgrow="ALWAYS" style="-fx-padding: 8 12; -fx-background-radius: 6; -fx-border-color: #cbd5e1; -fx-border-radius: 6; -fx-background-color: white;"/>
+                    <ComboBox fx:id="comboFilterSubject" promptText="Subject" styleClass="modern-combo"/>
+                    <ComboBox fx:id="comboFilterTopic" promptText="Topic" styleClass="modern-combo"/>
+                    <ComboBox fx:id="comboFilterDifficulty" promptText="Difficulty" styleClass="modern-combo"/>
+                    <ComboBox fx:id="comboFilterType" promptText="Type" styleClass="modern-combo"/>
+                    <Button fx:id="btnGenerateBank" text="+ Generate Questions" onAction="#handleGenerateBank" style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                </HBox>
+                <ListView fx:id="listQuestionBank" VBox.vgrow="ALWAYS" minHeight="0" style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;"/>
+            </VBox>
         </VBox>
 
         <!-- EXAM SETUP VIEW -->
@@ -93,7 +90,7 @@
                             <ComboBox fx:id="comboExamTopic" maxWidth="Infinity" styleClass="modern-combo"/>
                         </VBox>
                         
-                        <HBox spacing="16">
+                        <HBox spacing="16" minWidth="0">
                             <VBox spacing="6" HBox.hgrow="ALWAYS">
                                 <Label text="Difficulty" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #475569;"/>
                                 <ComboBox fx:id="comboExamDifficulty" maxWidth="Infinity" styleClass="modern-combo"/>
@@ -104,7 +101,7 @@
                             </VBox>
                         </HBox>
                         
-                        <HBox spacing="16">
+                        <HBox spacing="16" minWidth="0">
                             <VBox spacing="6" HBox.hgrow="ALWAYS">
                                 <Label text="Mode" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #475569;"/>
                                 <ComboBox fx:id="comboExamMode" maxWidth="Infinity" styleClass="modern-combo"/>

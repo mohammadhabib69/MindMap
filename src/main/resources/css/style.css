@@ -1357,3 +1357,11 @@
 .modern-combo:focused {
     -fx-border-color: #4f46e5;
 }
+
+/* Prevent unnecessary horizontal scrollbars in Question Bank */
+#listQuestionBank .scroll-bar:horizontal {
+    -fx-scale-x: 0;
+    -fx-scale-y: 0;
+    -fx-pref-height: 0;
+    -fx-min-height: 0;
+}
