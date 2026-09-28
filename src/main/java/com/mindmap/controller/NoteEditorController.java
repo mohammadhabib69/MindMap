@@ -346,10 +346,10 @@ txtTitle.setText(note.getTitle());
     private void updateFavoriteButtonUI() {
         if (btnFavorite != null) {
             if (btnFavorite.isSelected()) {
-                btnFavorite.setText("★ Favorite");
-                btnFavorite.setStyle("-fx-text-fill: #eab308; -fx-font-weight: bold;");
+                btnFavorite.setText("Favorited");
+                btnFavorite.setStyle("-fx-text-fill: #d97706; -fx-font-weight: bold;");
             } else {
-                btnFavorite.setText("☆ Favorite");
+                btnFavorite.setText("Favorite");
                 btnFavorite.setStyle("");
             }
         }

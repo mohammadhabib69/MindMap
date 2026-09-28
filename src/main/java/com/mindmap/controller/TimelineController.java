@@ -168,7 +168,7 @@ public class TimelineController {
         String query = (txtSearch != null && txtSearch.getText() != null) ? txtSearch.getText().trim() : null;
 
         if (lblFilterStatus != null) {
-            lblFilterStatus.setText("⏳ Filtering events...");
+            lblFilterStatus.setText("Filtering events...");
         }
 
         long reqId = currentRequestId.incrementAndGet();
@@ -375,9 +375,6 @@ public class TimelineController {
             headerBox.getStyleClass().add("timeline-header-container");
             headerBox.setPadding(new Insets(16, 4, 6, 8));
 
-            Label lblCalendarIcon = new Label("📅");
-            lblCalendarIcon.setStyle("-fx-font-size: 13px;");
-
             lblHeaderTitle = new Label();
             lblHeaderTitle.getStyleClass().add("timeline-header-title");
 
@@ -391,7 +388,7 @@ public class TimelineController {
             lblHeaderCount = new Label();
             lblHeaderCount.getStyleClass().add("timeline-header-count");
 
-            headerBox.getChildren().addAll(lblCalendarIcon, lblHeaderTitle, lblHeaderSubtitle, separator, lblHeaderCount);
+            headerBox.getChildren().addAll(lblHeaderTitle, lblHeaderSubtitle, separator, lblHeaderCount);
 
             // -------------------------------------------------------------
             // 2. Build Event Row UI (instantiated once)
@@ -471,10 +468,10 @@ public class TimelineController {
             actionRow = new HBox(8);
             actionRow.setAlignment(Pos.CENTER_RIGHT);
 
-            btnView = new Button("👁 View Note");
+            btnView = new Button("View Note");
             btnView.getStyleClass().addAll("timeline-action-btn", "btn-secondary");
 
-            btnMindMap = new Button("🌐 Mind Map");
+            btnMindMap = new Button("Mind Map");
             btnMindMap.getStyleClass().addAll("timeline-action-btn", "btn-secondary");
 
             actionRow.getChildren().addAll(btnView, btnMindMap);

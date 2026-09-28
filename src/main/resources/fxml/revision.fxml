@@ -19,7 +19,7 @@
       stylesheets="@../css/style.css">
 
     <padding>
-        <Insets top="24" right="24" bottom="24" left="24"/>
+        <Insets top="24" right="32" bottom="32" left="32"/>
     </padding>
 
     <!-- Header Section -->
@@ -29,50 +29,50 @@
             <Label text="Active recall and spaced repetition schedule" styleClass="view-subtitle"/>
         </VBox>
         <FlowPane hgap="8" vgap="6" alignment="CENTER_RIGHT" HBox.hgrow="NEVER">
-            <Button fx:id="btnStartSession" text="Start Review Session" onAction="#handleStartSession" styleClass="btn-primary" style="-fx-font-size: 12px; -fx-padding: 6 14;"/>
-            <Button fx:id="btnAddNote" text="+ Add Note" onAction="#handleAddNote" styleClass="btn-secondary" style="-fx-font-size: 12px; -fx-padding: 6 12;"/>
-            <Button fx:id="btnScheduleAll" text="Schedule All" onAction="#handleScheduleAll" styleClass="btn-secondary" style="-fx-font-size: 12px; -fx-padding: 6 12;"/>
-            <Button fx:id="btnRefresh" text="Refresh" onAction="#handleRefresh" styleClass="btn-secondary" style="-fx-font-size: 12px; -fx-padding: 6 10;"/>
+            <Button fx:id="btnStartSession" text="Start Review Session" onAction="#handleStartSession" styleClass="btn-primary"/>
+            <Button fx:id="btnAddNote" text="+ Add Note" onAction="#handleAddNote" styleClass="btn-secondary"/>
+            <Button fx:id="btnScheduleAll" text="Schedule All" onAction="#handleScheduleAll" styleClass="btn-secondary"/>
+            <Button fx:id="btnRefresh" text="Refresh" onAction="#handleRefresh" styleClass="btn-secondary"/>
         </FlowPane>
     </HBox>
 
     <!-- Spaced Repetition Summary Metrics Bar -->
     <HBox spacing="14" alignment="CENTER_LEFT">
         <!-- Due Today Metric Card -->
-        <VBox spacing="6" HBox.hgrow="ALWAYS" styleClass="card" style="-fx-padding: 14 18; -fx-background-color: #ffffff;">
-            <Label text="DUE TODAY" styleClass="inspector-section-header" style="-fx-text-fill: #dc2626;"/>
+        <VBox spacing="6" HBox.hgrow="ALWAYS" styleClass="dashboard-metric-card">
+            <Label text="DUE TODAY" styleClass="stat-label" style="-fx-text-fill: #dc2626;"/>
             <HBox alignment="BASELINE_LEFT" spacing="8">
-                <Label fx:id="lblStatDueToday" text="0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
-                <Label text="notes need review" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
+                <Label fx:id="lblStatDueToday" text="0" styleClass="stat-value" style="-fx-text-fill: #dc2626;"/>
+                <Label text="notes need review" styleClass="stat-detail"/>
             </HBox>
         </VBox>
 
         <!-- Upcoming Metric Card -->
-        <VBox spacing="6" HBox.hgrow="ALWAYS" styleClass="card" style="-fx-padding: 14 18; -fx-background-color: #ffffff;">
-            <Label text="COMPLETED" styleClass="inspector-section-header" style="-fx-text-fill: #2563eb;"/>
+        <VBox spacing="6" HBox.hgrow="ALWAYS" styleClass="dashboard-metric-card">
+            <Label text="COMPLETED" styleClass="stat-label"/>
             <HBox alignment="BASELINE_LEFT" spacing="8">
-                <Label fx:id="lblStatUpcoming" text="0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
-                <Label text="scheduled future reviews" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
+                <Label fx:id="lblStatUpcoming" text="0" styleClass="stat-value"/>
+                <Label text="scheduled future reviews" styleClass="stat-detail"/>
             </HBox>
         </VBox>
 
         <!-- Total Scheduled Metric Card -->
-        <VBox spacing="6" HBox.hgrow="ALWAYS" styleClass="card" style="-fx-padding: 14 18; -fx-background-color: #ffffff;">
-            <Label text="TOTAL SCHEDULED" styleClass="inspector-section-header" style="-fx-text-fill: #10b981;"/>
+        <VBox spacing="6" HBox.hgrow="ALWAYS" styleClass="dashboard-metric-card">
+            <Label text="TOTAL SCHEDULED" styleClass="stat-label"/>
             <HBox alignment="BASELINE_LEFT" spacing="8">
-                <Label fx:id="lblStatTotal" text="0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
-                <Label text="active in memory engine" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
+                <Label fx:id="lblStatTotal" text="0" styleClass="stat-value"/>
+                <Label text="active in memory engine" styleClass="stat-detail"/>
             </HBox>
         </VBox>
     </HBox>
 
     <!-- Main Content Columns: Due Today & Upcoming Reviews -->
-    <HBox spacing="14" VBox.vgrow="ALWAYS">
+    <HBox spacing="16" VBox.vgrow="ALWAYS">
 
         <!-- Column 1: Due Today -->
         <VBox spacing="10" HBox.hgrow="ALWAYS" styleClass="revision-column" minWidth="280">
             <HBox alignment="CENTER_LEFT" spacing="8" styleClass="revision-column-header">
-                <Label text="Due Today" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                <Label text="Due Today" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #172033;"/>
                 <Label fx:id="lblDueBadge" text="0" styleClass="revision-count-badge, revision-count-due"/>
                 <Region HBox.hgrow="ALWAYS"/>
             </HBox>
@@ -90,7 +90,7 @@
         <!-- Column 2: Upcoming Reviews -->
         <VBox spacing="10" HBox.hgrow="ALWAYS" styleClass="revision-column" minWidth="280">
             <HBox alignment="CENTER_LEFT" spacing="8" styleClass="revision-column-header">
-                <Label text="Completed" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                <Label text="Completed" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #172033;"/>
                 <Label fx:id="lblUpcomingBadge" text="0" styleClass="revision-count-badge, revision-count-upcoming"/>
                 <Region HBox.hgrow="ALWAYS"/>
             </HBox>

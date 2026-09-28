@@ -132,7 +132,7 @@ public class RevisionController {
     public CompletableFuture<RevisionSnapshot> loadRevisionData() {
         if (btnRefresh != null) {
             btnRefresh.setDisable(true);
-            btnRefresh.setText("⏳");
+            btnRefresh.setText("Refreshing...");
         }
 
         final RevisionService service = this.revisionService;
@@ -155,7 +155,7 @@ public class RevisionController {
                     } finally {
                         if (btnRefresh != null) {
                             btnRefresh.setDisable(false);
-                            btnRefresh.setText("🔄 Refresh");
+                            btnRefresh.setText("Refresh");
                         }
                     }
                 },
@@ -163,7 +163,7 @@ public class RevisionController {
                     LOGGER.log(Level.SEVERE, "Failed to load revision data: " + throwable.getMessage(), throwable);
                     if (btnRefresh != null) {
                         btnRefresh.setDisable(false);
-                        btnRefresh.setText("🔄 Refresh");
+                        btnRefresh.setText("Refresh");
                     }
                     future.completeExceptionally(throwable);
                 }
@@ -284,13 +284,13 @@ public class RevisionController {
             HBox actionRow = new HBox(6);
             actionRow.setAlignment(Pos.CENTER_RIGHT);
 
-            btnReview = new Button("▶ Review");
+            btnReview = new Button("Review");
             btnReview.getStyleClass().addAll("revision-cell-btn", "revision-cell-btn-review");
 
-            btnView = new Button("👁 View");
+            btnView = new Button("View");
             btnView.getStyleClass().addAll("revision-cell-btn", "revision-cell-btn-secondary");
 
-            btnMindMap = new Button("🌐 Map");
+            btnMindMap = new Button("Map");
             btnMindMap.getStyleClass().addAll("revision-cell-btn", "revision-cell-btn-secondary");
 
             actionRow.getChildren().addAll(btnReview, btnView, btnMindMap);
@@ -415,10 +415,10 @@ public class RevisionController {
             HBox actionRow = new HBox(6);
             actionRow.setAlignment(Pos.CENTER_RIGHT);
 
-            btnView = new Button("👁 View");
+            btnView = new Button("View");
             btnView.getStyleClass().addAll("revision-cell-btn", "revision-cell-btn-secondary");
 
-            btnMindMap = new Button("🌐 Map");
+            btnMindMap = new Button("Map");
             btnMindMap.getStyleClass().addAll("revision-cell-btn", "revision-cell-btn-secondary");
 
             actionRow.getChildren().addAll(btnView, btnMindMap);
@@ -471,7 +471,7 @@ public class RevisionController {
             if (sr.getReviewDate() != null) {
                 dateText += " (" + sr.getReviewDate().format(DATE_FORMATTER) + ")";
             }
-            lblDate.setText("📅 " + dateText);
+            lblDate.setText(dateText);
 
             // Wire actions
             btnView.setOnAction(e -> handleViewNote(note));
@@ -605,7 +605,7 @@ public class RevisionController {
     private void handleScheduleAll() {
         if (btnScheduleAll != null) {
             btnScheduleAll.setDisable(true);
-            btnScheduleAll.setText("⚡ Scheduling...");
+            btnScheduleAll.setText("Scheduling...");
         }
 
         final RevisionService service = this.revisionService;
@@ -614,7 +614,7 @@ public class RevisionController {
                 scheduledCount -> {
                     if (btnScheduleAll != null) {
                         btnScheduleAll.setDisable(false);
-                        btnScheduleAll.setText("⚡ Schedule All");
+                        btnScheduleAll.setText("Schedule All");
                     }
                     if (scheduledCount > 0) {
                         UiUtils.showInfo("Schedule Notes", "Successfully added " + scheduledCount + " " +
@@ -629,7 +629,7 @@ public class RevisionController {
                     UiUtils.showError("Error", "Failed to schedule all notes: " + throwable.getMessage());
                     if (btnScheduleAll != null) {
                         btnScheduleAll.setDisable(false);
-                        btnScheduleAll.setText("⚡ Schedule All");
+                        btnScheduleAll.setText("Schedule All");
                     }
                 }
         );

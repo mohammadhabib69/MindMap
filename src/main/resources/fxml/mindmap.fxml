@@ -24,18 +24,18 @@
       stylesheets="@../css/style.css">
 
     <padding>
-        <Insets top="20" right="20" bottom="20" left="20"/>
+        <Insets top="24" right="32" bottom="32" left="32"/>
     </padding>
 
     <!-- Header Section -->
     <HBox alignment="CENTER_LEFT" spacing="12">
-        <VBox spacing="3" HBox.hgrow="ALWAYS" minWidth="120">
+        <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="120">
             <Label text="Knowledge Space" styleClass="view-header"/>
             <Label text="Visual connections, prerequisites, and conceptual relationships" styleClass="view-subtitle"/>
         </VBox>
-        <HBox spacing="8" alignment="CENTER_RIGHT" HBox.hgrow="NEVER">
+        <HBox spacing="10" alignment="CENTER_RIGHT" HBox.hgrow="NEVER">
             <!-- 2D / 3D View Toggle -->
-            <HBox alignment="CENTER" minWidth="-Infinity" style="-fx-background-color: #e2e8f0; -fx-padding: 2; -fx-background-radius: 8px;">
+            <HBox alignment="CENTER" minWidth="-Infinity" style="-fx-background-color: #f1f5f9; -fx-padding: 3; -fx-background-radius: 8px;">
                 <fx:define>
                     <ToggleGroup fx:id="viewToggleGroup"/>
                 </fx:define>
@@ -43,29 +43,29 @@
                 <ToggleButton fx:id="btn2DView" text="2D Graph" toggleGroup="$viewToggleGroup" onAction="#handleSwitchTo2D" styleClass="view-toggle-btn" minWidth="-Infinity"/>
             </HBox>
 
-            <Button fx:id="btnAddConnection" text="+ Connect Notes" onAction="#handleAddConnection" styleClass="btn-primary" minWidth="-Infinity" style="-fx-padding: 6 12; -fx-font-size: 12px;"/>
+            <Button fx:id="btnAddConnection" text="+ Connect Notes" onAction="#handleAddConnection" styleClass="btn-primary" minWidth="-Infinity"/>
         </HBox>
     </HBox>
 
     <!-- Toolbar / Search & Navigation Section -->
-    <HBox alignment="CENTER_LEFT" spacing="8" style="-fx-padding: 2 0 4 0;">
-        <TextField fx:id="txtSearch" promptText="🔍 Search notes in space..." minWidth="80" prefWidth="180" maxWidth="280" HBox.hgrow="ALWAYS" styleClass="input-field" style="-fx-padding: 6 10; -fx-font-size: 12px;"/>
-        <Button fx:id="btnClearSearch" text="✕" onAction="#handleClearSearch" styleClass="btn-secondary" minWidth="-Infinity" style="-fx-padding: 6 9; -fx-font-size: 11px;"/>
-        <Button fx:id="btnFocusSelected" text="Focus" onAction="#handleFocusSelected" styleClass="btn-secondary" minWidth="-Infinity" style="-fx-padding: 6 10; -fx-font-size: 11px;"/>
-        <Button fx:id="btnAutoLayout" text="Auto Layout" onAction="#handleAutoLayout" styleClass="btn-secondary" minWidth="-Infinity" visible="false" managed="false" style="-fx-padding: 6 10; -fx-font-size: 11px;"/>
-        <Button fx:id="btnRefresh" text="Refresh" onAction="#handleRefresh" styleClass="btn-secondary" minWidth="-Infinity" style="-fx-padding: 6 10; -fx-font-size: 11px;"/>
+    <HBox alignment="CENTER_LEFT" spacing="10">
+        <TextField fx:id="txtSearch" promptText="Search notes in space..." minWidth="120" prefWidth="220" maxWidth="320" HBox.hgrow="ALWAYS" styleClass="input-field"/>
+        <Button fx:id="btnClearSearch" text="Clear" onAction="#handleClearSearch" styleClass="btn-secondary" minWidth="-Infinity"/>
+        <Button fx:id="btnFocusSelected" text="Focus" onAction="#handleFocusSelected" styleClass="btn-secondary" minWidth="-Infinity"/>
+        <Button fx:id="btnAutoLayout" text="Auto Layout" onAction="#handleAutoLayout" styleClass="btn-secondary" minWidth="-Infinity" visible="false" managed="false"/>
+        <Button fx:id="btnRefresh" text="Refresh" onAction="#handleRefresh" styleClass="btn-secondary" minWidth="-Infinity"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <HBox spacing="3" alignment="CENTER" minWidth="-Infinity" style="-fx-background-color: #ffffff; -fx-padding: 2 4; -fx-background-radius: 8px; -fx-border-color: #cbd5e1; -fx-border-radius: 8px; -fx-border-width: 1px;">
-            <Button fx:id="btnZoomOut" text="-" onAction="#handleZoomOut" styleClass="btn-secondary" style="-fx-padding: 4 7; -fx-font-size: 11px;"/>
-            <Label fx:id="lblZoomLevel" text="3D" style="-fx-font-size: 11px; -fx-text-fill: #475569; -fx-padding: 0 4; -fx-font-weight: bold;"/>
-            <Button fx:id="btnZoomIn" text="+" onAction="#handleZoomIn" styleClass="btn-secondary" style="-fx-padding: 4 7; -fx-font-size: 11px;"/>
-            <Button fx:id="btnResetView" text="Reset" onAction="#handleResetView" styleClass="btn-secondary" style="-fx-padding: 4 7; -fx-font-size: 11px;"/>
+        <HBox spacing="4" alignment="CENTER" minWidth="-Infinity" style="-fx-background-color: #ffffff; -fx-padding: 2 6; -fx-background-radius: 8px; -fx-border-color: #cbd5e1; -fx-border-radius: 8px; -fx-border-width: 1px;">
+            <Button fx:id="btnZoomOut" text="-" onAction="#handleZoomOut" styleClass="btn-secondary" style="-fx-padding: 4 8; -fx-font-size: 11px;"/>
+            <Label fx:id="lblZoomLevel" text="3D" style="-fx-font-size: 11px; -fx-text-fill: #475569; -fx-padding: 0 6; -fx-font-weight: bold;"/>
+            <Button fx:id="btnZoomIn" text="+" onAction="#handleZoomIn" styleClass="btn-secondary" style="-fx-padding: 4 8; -fx-font-size: 11px;"/>
+            <Button fx:id="btnResetView" text="Reset" onAction="#handleResetView" styleClass="btn-secondary" style="-fx-padding: 4 8; -fx-font-size: 11px;"/>
         </HBox>
-        <Label fx:id="lblGraphStats" text="0 notes • 0 connections" minWidth="-Infinity" style="-fx-font-size: 11px; -fx-text-fill: #64748b; -fx-font-weight: 500;"/>
+        <Label fx:id="lblGraphStats" text="0 notes • 0 connections" minWidth="-Infinity" style="-fx-font-size: 12px; -fx-text-fill: #64748b; -fx-font-weight: 500;"/>
     </HBox>
 
     <!-- Main Content Area: Graph Canvas + Side Inspector Panel -->
-    <HBox spacing="14" VBox.vgrow="ALWAYS" alignment="TOP_LEFT">
+    <HBox spacing="16" VBox.vgrow="ALWAYS" alignment="TOP_LEFT">
 
         <!-- Visual Canvas Area (hosts both 2D and 3D) -->
         <StackPane fx:id="canvasContainer" HBox.hgrow="ALWAYS" minWidth="80" minHeight="80" styleClass="graph-canvas-viewport">
@@ -78,8 +78,8 @@
 
             <!-- Banner: No Connections Yet -->
             <VBox fx:id="bannerNoConnections" alignment="TOP_CENTER" mouseTransparent="true" visible="false" style="-fx-padding: 16 0 0 0;">
-                <HBox alignment="CENTER" spacing="8" style="-fx-background-color: rgba(239, 246, 255, 0.94); -fx-padding: 8 16; -fx-background-radius: 20px; -fx-border-color: #bfdbfe; -fx-border-radius: 20px; -fx-border-width: 1px;">
-                    <Label text="No connections yet. Click '+ Connect Notes' above to link related study concepts." style="-fx-font-size: 12px; -fx-text-fill: #1d4ed8; -fx-font-weight: 500;"/>
+                <HBox alignment="CENTER" spacing="8" style="-fx-background-color: rgba(238, 242, 255, 0.95); -fx-padding: 8 16; -fx-background-radius: 20px; -fx-border-color: #c7d2fe; -fx-border-radius: 20px; -fx-border-width: 1px;">
+                    <Label text="No connections yet. Click '+ Connect Notes' above to link related study concepts." style="-fx-font-size: 12px; -fx-text-fill: #4f46e5; -fx-font-weight: 500;"/>
                 </HBox>
             </VBox>
 
@@ -92,13 +92,13 @@
         </StackPane>
 
         <!-- Side Inspector Panel -->
-        <VBox fx:id="inspectorPanel" prefWidth="255" minWidth="200" maxWidth="275" maxHeight="-Infinity" styleClass="graph-inspector" spacing="12">
+        <VBox fx:id="inspectorPanel" prefWidth="280" minWidth="240" maxWidth="320" maxHeight="-Infinity" styleClass="graph-inspector" spacing="14">
 
             <!-- State A: Overview (No note selected) -->
             <VBox fx:id="boxOverview" spacing="14">
                 <VBox spacing="4">
                     <Label text="Space Inspector" styleClass="inspector-header"/>
-                    <Label text="Select a 3D node or connection to inspect its details and relationships." wrapText="true" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
+                    <Label text="Select a 3D node or connection to inspect its details and relationships." wrapText="true" style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
                 </VBox>
 
                 <VBox spacing="8" style="-fx-background-color: #f8fafc; -fx-padding: 12; -fx-border-color: #e2e8f0; -fx-border-radius: 8px; -fx-background-radius: 8px;">
@@ -106,22 +106,21 @@
                     <HBox alignment="CENTER_LEFT" spacing="8">
                         <Label text="Total Notes:" style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
                         <Region HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="lblOverviewTotalNotes" text="0" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                        <Label fx:id="lblOverviewTotalNotes" text="0" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #172033;"/>
                     </HBox>
                     <HBox alignment="CENTER_LEFT" spacing="8">
                         <Label text="Total Connections:" style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
                         <Region HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="lblOverviewTotalConnections" text="0" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                        <Label fx:id="lblOverviewTotalConnections" text="0" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #172033;"/>
                     </HBox>
                 </VBox>
 
                 <VBox spacing="6" style="-fx-background-color: #f8fafc; -fx-padding: 12; -fx-border-color: #e2e8f0; -fx-border-radius: 8px; -fx-background-radius: 8px;">
-                    <Label text="3D NAVIGATION CONTROLS" styleClass="inspector-section-header"/>
+                    <Label text="3D CONTROLS" styleClass="inspector-section-header"/>
                     <Label text="• Left-drag: Orbit &amp; rotate space" style="-fx-font-size: 11px; -fx-text-fill: #475569;"/>
                     <Label text="• Right-drag: Pan camera" style="-fx-font-size: 11px; -fx-text-fill: #475569;"/>
                     <Label text="• Scroll: Zoom in / out" style="-fx-font-size: 11px; -fx-text-fill: #475569;"/>
-                    <Label text="• Click sphere: Select note" style="-fx-font-size: 11px; -fx-text-fill: #475569;"/>
-                    <Label text="• Click cylinder: View link" style="-fx-font-size: 11px; -fx-text-fill: #475569;"/>
+                    <Label text="• Click node: Select note" style="-fx-font-size: 11px; -fx-text-fill: #475569;"/>
                 </VBox>
 
                 <Button text="+ Connect Notes" onAction="#handleAddConnection" maxWidth="Infinity" styleClass="btn-primary"/>
@@ -132,11 +131,11 @@
                 <HBox alignment="CENTER_LEFT" spacing="6">
                     <Label text="Note Details" styleClass="inspector-header"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="✕" onAction="#handleDeselect" styleClass="btn-delete-mini" style="-fx-font-size: 12px;"/>
+                    <Button text="✕" onAction="#handleDeselect" styleClass="btn-delete-mini"/>
                 </HBox>
 
                 <!-- Note Title -->
-                <Label fx:id="lblSelectedTitle" text="Note Title" wrapText="true" minWidth="0" maxWidth="Infinity" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                <Label fx:id="lblSelectedTitle" text="Note Title" wrapText="true" minWidth="0" maxWidth="Infinity" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #172033;"/>
 
                 <!-- Badges -->
                 <HBox spacing="8" alignment="CENTER_LEFT">
@@ -149,12 +148,12 @@
 
                 <!-- Action Buttons for Selected Note -->
                 <FlowPane fx:id="paneSelectedActions" hgap="6" vgap="6" alignment="CENTER_LEFT">
-                    <Button fx:id="btnViewSelected" text="View Note" onAction="#handleViewSelectedNote" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 5 10; -fx-cursor: hand;"/>
-                    <Button fx:id="btnEditSelected" text="Edit Note" onAction="#handleEditSelectedNote" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 5 10; -fx-cursor: hand;"/>
-                    <Button fx:id="btnConnectFromSelected" text="+ Link" onAction="#handleConnectFromSelected" styleClass="btn-primary" style="-fx-font-size: 11px; -fx-padding: 5 10; -fx-cursor: hand;"/>
+                    <Button fx:id="btnViewSelected" text="View Note" onAction="#handleViewSelectedNote" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 5 10;"/>
+                    <Button fx:id="btnEditSelected" text="Edit Note" onAction="#handleEditSelectedNote" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 5 10;"/>
+                    <Button fx:id="btnConnectFromSelected" text="+ Link" onAction="#handleConnectFromSelected" styleClass="btn-primary" style="-fx-font-size: 11px; -fx-padding: 5 10;"/>
                 </FlowPane>
 
-                <Button fx:id="btnInspectorFocus" text="Focus Node" onAction="#handleFocusSelected" maxWidth="Infinity" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 6 10; -fx-cursor: hand;"/>
+                <Button fx:id="btnInspectorFocus" text="Focus Node" onAction="#handleFocusSelected" maxWidth="Infinity" styleClass="btn-secondary" style="-fx-font-size: 11px; -fx-padding: 6 10;"/>
 
                 <Separator style="-fx-padding: 4 0 4 0;"/>
 
@@ -162,7 +161,7 @@
                 <HBox alignment="CENTER_LEFT">
                     <Label fx:id="lblConnectionsHeader" text="Connections" styleClass="inspector-section-header"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Label fx:id="lblConnectionCount" text="0" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #3b82f6;"/>
+                    <Label fx:id="lblConnectionCount" text="0" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #4f46e5;"/>
                 </HBox>
 
                 <!-- Connections Scroll List -->

@@ -138,23 +138,27 @@ public class MainController {
     
     private void buildQuickSearchUI() {
         quickSearchOverlay = new javafx.scene.layout.StackPane();
-        quickSearchOverlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.4);");
+        quickSearchOverlay.setStyle("-fx-background-color: rgba(15, 23, 42, 0.45);");
         quickSearchOverlay.setVisible(false);
         
-        javafx.scene.layout.VBox dialog = new javafx.scene.layout.VBox(10);
-        dialog.setMaxWidth(600);
-        dialog.setMaxHeight(400);
-        dialog.setStyle("-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 20, 0, 0, 10);");
+        javafx.scene.layout.VBox dialog = new javafx.scene.layout.VBox(12);
+        dialog.setMaxWidth(620);
+        dialog.setMaxHeight(420);
+        dialog.setStyle("-fx-background-color: #ffffff; -fx-background-radius: 12px; -fx-border-color: #e2e8f0; -fx-border-radius: 12px; -fx-border-width: 1px; -fx-padding: 24px; -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.15), 20, 0, 0, 8);");
         
-        javafx.scene.control.Label lbl = new javafx.scene.control.Label("🔎 Global Quick Search");
-        lbl.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #475569;");
+        javafx.scene.layout.VBox headerBox = new javafx.scene.layout.VBox(3);
+        javafx.scene.control.Label lbl = new javafx.scene.control.Label("Search Knowledge Base");
+        lbl.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #172033;");
+        javafx.scene.control.Label lblSub = new javafx.scene.control.Label("Type to find notes by title, subject, or tag. Press Esc to dismiss.");
+        lblSub.setStyle("-fx-font-size: 12px; -fx-text-fill: #64748b;");
+        headerBox.getChildren().addAll(lbl, lblSub);
         
         txtQuickSearch = new javafx.scene.control.TextField();
-        txtQuickSearch.setPromptText("Search notes, subjects, tags... (Press ESC to close)");
-        txtQuickSearch.setStyle("-fx-font-size: 16px; -fx-padding: 10;");
+        txtQuickSearch.setPromptText("Search notes, subjects, tags...");
+        txtQuickSearch.setStyle("-fx-font-size: 14px; -fx-padding: 10px 14px; -fx-background-color: #ffffff; -fx-border-color: #cbd5e1; -fx-border-radius: 8px; -fx-background-radius: 8px;");
         
         listQuickSearch = new javafx.scene.control.ListView<>();
-        listQuickSearch.setStyle("-fx-background-color: transparent;");
+        listQuickSearch.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
         listQuickSearch.setCellFactory(lv -> new javafx.scene.control.ListCell<>() {
             @Override
             protected void updateItem(com.mindmap.model.Note item, boolean empty) {
@@ -162,14 +166,17 @@ public class MainController {
                 if (empty || item == null) {
                     setText(null);
                     setGraphic(null);
+                    setStyle("-fx-background-color: transparent;");
                 } else {
-                    javafx.scene.layout.VBox box = new javafx.scene.layout.VBox(4);
+                    javafx.scene.layout.VBox box = new javafx.scene.layout.VBox(3);
+                    box.setStyle("-fx-padding: 8px 12px; -fx-background-color: #ffffff; -fx-background-radius: 6px; -fx-border-color: #f1f5f9; -fx-border-radius: 6px; -fx-border-width: 1px;");
                     javafx.scene.control.Label title = new javafx.scene.control.Label(item.getTitle());
-                    title.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
-                    javafx.scene.control.Label subj = new javafx.scene.control.Label(item.getSubject() + " | Tags: " + item.getTagsString());
+                    title.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #172033;");
+                    javafx.scene.control.Label subj = new javafx.scene.control.Label(item.getSubject() + (item.getTagsString() != null && !item.getTagsString().isEmpty() ? " • " + item.getTagsString() : ""));
                     subj.setStyle("-fx-font-size: 11px; -fx-text-fill: #64748b;");
                     box.getChildren().addAll(title, subj);
                     setGraphic(box);
+                    setStyle("-fx-background-color: transparent; -fx-padding: 2px 0;");
                 }
             }
         });
@@ -235,7 +242,7 @@ public class MainController {
             }
         });
         
-        dialog.getChildren().addAll(lbl, txtQuickSearch, listQuickSearch);
+        dialog.getChildren().addAll(headerBox, txtQuickSearch, listQuickSearch);
         quickSearchOverlay.getChildren().add(dialog);
         
         quickSearchOverlay.setOnMouseClicked(e -> {
@@ -322,43 +329,39 @@ public class MainController {
         dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
         dialog.getDialogPane().getStyleClass().add("card");
         
-        javafx.scene.layout.VBox content = new javafx.scene.layout.VBox(24);
-        content.setPadding(new javafx.geometry.Insets(32, 48, 24, 48));
+        javafx.scene.layout.VBox content = new javafx.scene.layout.VBox(20);
+        content.setPadding(new javafx.geometry.Insets(32, 44, 24, 44));
         content.setAlignment(javafx.geometry.Pos.CENTER);
         
-        javafx.scene.layout.VBox header = new javafx.scene.layout.VBox(8);
+        javafx.scene.layout.VBox header = new javafx.scene.layout.VBox(4);
         header.setAlignment(javafx.geometry.Pos.CENTER);
         javafx.scene.control.Label title = new javafx.scene.control.Label("MindMap");
-        title.setStyle("-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
-        javafx.scene.control.Label subtitle = new javafx.scene.control.Label("Personal Knowledge Base & Study Organizer");
-        subtitle.setStyle("-fx-font-size: 14px; -fx-text-fill: #475569;");
+        title.setStyle("-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #172033;");
+        javafx.scene.control.Label subtitle = new javafx.scene.control.Label("Personal Knowledge Base");
+        subtitle.setStyle("-fx-font-size: 14px; -fx-text-fill: #64748b;");
         header.getChildren().addAll(title, subtitle);
         
         javafx.scene.control.Label version = new javafx.scene.control.Label("Version 1.0.0");
-        version.setStyle("-fx-font-size: 13px; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-padding: 8px 16px; -fx-background-color: #f1f5f9; -fx-background-radius: 20px;");
+        version.setStyle("-fx-font-size: 12px; -fx-text-fill: #4f46e5; -fx-font-weight: bold; -fx-padding: 4px 14px; -fx-background-color: #eef2ff; -fx-background-radius: 12px; -fx-border-color: #e0e7ff; -fx-border-radius: 12px; -fx-border-width: 1px;");
         
         javafx.scene.control.Label desc = new javafx.scene.control.Label(
-            "An integrated platform for capturing thoughts,\n" +
-            "connecting ideas visually, and retaining\n" +
-            "knowledge through spaced repetition."
+            "Organize your notes. Connect your ideas. Build better study habits."
         );
-        desc.setStyle("-fx-font-size: 14px; -fx-text-fill: #475569; -fx-text-alignment: center;");
+        desc.setWrapText(true);
+        desc.setStyle("-fx-font-size: 14px; -fx-text-fill: #334155; -fx-text-alignment: center; -fx-alignment: center; -fx-padding: 6 0;");
         
-        javafx.scene.layout.VBox tech = new javafx.scene.layout.VBox(8);
+        javafx.scene.layout.VBox tech = new javafx.scene.layout.VBox(4);
         tech.setAlignment(javafx.geometry.Pos.CENTER);
-        javafx.scene.control.Label techTitle = new javafx.scene.control.Label("Technology");
-        techTitle.setStyle("-fx-font-size: 11px; -fx-text-fill: #94a3b8; -fx-font-weight: bold;");
+        javafx.scene.control.Label techTitle = new javafx.scene.control.Label("TECHNOLOGY");
+        techTitle.setStyle("-fx-font-size: 11px; -fx-text-fill: #94a3b8; -fx-font-weight: bold; -fx-letter-spacing: 0.5px;");
         javafx.scene.control.Label techDesc = new javafx.scene.control.Label("JavaFX • SQLite • Jackson • OpenPDF");
         techDesc.setStyle("-fx-font-size: 13px; -fx-text-fill: #64748b;");
         tech.getChildren().addAll(techTitle, techDesc);
-        desc.setWrapText(true);
-        desc.setMinHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
-        desc.setStyle("-fx-font-size: 14px; -fx-text-fill: #334155; -fx-text-alignment: center; -fx-alignment: center; -fx-padding: 10 0 10 0;");
         
         javafx.scene.control.Label copyright = new javafx.scene.control.Label("© 2026 MindMap");
         copyright.setStyle("-fx-font-size: 12px; -fx-text-fill: #94a3b8;");
         
-        content.getChildren().addAll(header, version, desc, copyright);
+        content.getChildren().addAll(header, version, desc, tech, copyright);
         
         dialog.getDialogPane().setContent(content);
         dialog.getDialogPane().getButtonTypes().add(javafx.scene.control.ButtonType.CLOSE);

@@ -155,10 +155,10 @@ public class ReviewDialogController {
         int nextGood = revisionService.calculateNextInterval(currentInterval, ReviewOutcome.GOOD);
         int nextEasy = revisionService.calculateNextInterval(currentInterval, ReviewOutcome.EASY);
 
-        btnAgain.setText("🔄 Again (" + nextAgain + "d)");
-        btnHard.setText("⚡ Hard (" + nextHard + "d)");
-        btnGood.setText("👍 Good (" + nextGood + "d)");
-        btnEasy.setText("🌟 Easy (" + nextEasy + "d)");
+        btnAgain.setText("Again (" + nextAgain + "d)");
+        btnHard.setText("Hard (" + nextHard + "d)");
+        btnGood.setText("Good (" + nextGood + "d)");
+        btnEasy.setText("Easy (" + nextEasy + "d)");
 
         // Reset display state to unrevealed
         boxReviewContainer.setVisible(true);

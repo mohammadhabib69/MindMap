@@ -13,29 +13,29 @@
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.mindmap.controller.ScheduleNoteDialogController"
-      spacing="14"
-      prefWidth="460"
-      prefHeight="420"
-      minWidth="360"
-      minHeight="350"
-      styleClass="review-dialog-root"
+      spacing="16"
+      prefWidth="480"
+      prefHeight="440"
+      minWidth="380"
+      minHeight="360"
+      styleClass="dialog-container"
       stylesheets="@../css/style.css">
 
     <padding>
-        <Insets top="20" right="20" bottom="20" left="20"/>
+        <Insets top="24" right="28" bottom="24" left="28"/>
     </padding>
 
     <!-- Header -->
-    <VBox spacing="3">
-        <Label text="Add Note to Revision" styleClass="view-header" style="-fx-font-size: 16px;"/>
-        <Label text="Select a note from your knowledge base to schedule for spaced repetition." style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
+    <VBox spacing="4">
+        <Label text="Add Note to Revision" styleClass="dialog-title"/>
+        <Label text="Select a note from your knowledge base to schedule for spaced repetition" styleClass="dialog-subtitle"/>
     </VBox>
 
     <!-- Search Input -->
-    <TextField fx:id="txtSearchNote" promptText="🔍 Filter unscheduled notes..." styleClass="input-field" style="-fx-font-size: 12px;"/>
+    <TextField fx:id="txtSearchNote" promptText="Filter unscheduled notes..." styleClass="input-field"/>
 
     <!-- Unscheduled Notes List -->
-    <ListView fx:id="listUnscheduledNotes" VBox.vgrow="ALWAYS" styleClass="inspector-scroll" style="-fx-border-color: #cbd5e1; -fx-border-radius: 8px; -fx-background-radius: 8px;"/>
+    <ListView fx:id="listUnscheduledNotes" VBox.vgrow="ALWAYS" styleClass="revision-list" style="-fx-border-color: #cbd5e1; -fx-border-radius: 8px; -fx-background-radius: 8px;"/>
 
     <!-- Bottom Action Bar -->
     <HBox spacing="10" alignment="CENTER_RIGHT">

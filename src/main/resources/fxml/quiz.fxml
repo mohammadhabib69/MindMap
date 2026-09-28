@@ -6,28 +6,29 @@
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.mindmap.controller.QuizController"
-      spacing="0" styleClass="screen-container" style="-fx-background-color: #f8fafc;">
+      spacing="0" styleClass="screen-container"
+      stylesheets="@../css/style.css">
 
     <padding>
-        <Insets top="24" right="32" bottom="24" left="32"/>
+        <Insets top="24" right="32" bottom="32" left="32"/>
     </padding>
 
     <!-- Header Section -->
     <HBox alignment="CENTER_LEFT" spacing="20">
         <VBox spacing="4">
-            <Label text="Quiz &amp; Exam" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
-            <Label text="Study from your saved notes and test your knowledge." style="-fx-font-size: 14px; -fx-text-fill: #64748b;"/>
+            <Label text="Quiz &amp; Exam" styleClass="view-header"/>
+            <Label text="Study from your saved notes and test your knowledge" styleClass="view-subtitle"/>
         </VBox>
         <Region HBox.hgrow="ALWAYS"/>
         
         <!-- Segmented Control (Tabs) -->
-        <HBox alignment="CENTER" spacing="0" style="-fx-background-color: #e2e8f0; -fx-background-radius: 8; -fx-padding: 4;">
-            <Button fx:id="btnTabBank" text="Question Bank" onAction="#handleTabBank" styleClass="segment-btn" style="-fx-background-radius: 6; -fx-padding: 8 20; -fx-font-weight: bold; -fx-cursor: hand;"/>
-            <Button fx:id="btnTabExam" text="Take Exam" onAction="#handleTabExam" styleClass="segment-btn" style="-fx-background-radius: 6; -fx-padding: 8 20; -fx-font-weight: bold; -fx-cursor: hand;"/>
+        <HBox alignment="CENTER" spacing="0" style="-fx-background-color: #f1f5f9; -fx-background-radius: 8; -fx-padding: 3;">
+            <Button fx:id="btnTabBank" text="Question Bank" onAction="#handleTabBank" styleClass="segment-btn, segment-active" style="-fx-background-radius: 6; -fx-padding: 6 18;"/>
+            <Button fx:id="btnTabExam" text="Take Exam" onAction="#handleTabExam" styleClass="segment-btn" style="-fx-background-radius: 6; -fx-padding: 6 18;"/>
         </HBox>
     </HBox>
 
-    <Region prefHeight="24"/>
+    <Region prefHeight="24" minHeight="24"/>
 
     <!-- Main Content Area uses a StackPane to hold both views so they take full space -->
     <StackPane VBox.vgrow="ALWAYS" alignment="TOP_LEFT" minHeight="0" minWidth="0">
@@ -36,92 +37,92 @@
         <VBox fx:id="boxQuestionBank" spacing="16" VBox.vgrow="ALWAYS" minHeight="0">
             
             <!-- Statistics Bar -->
-            <HBox spacing="16" minWidth="0">
-                <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="0" style="-fx-background-color: white; -fx-padding: 16; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8;">
-                    <Label text="QUESTIONS" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
-                    <Label fx:id="lblStatQuestions" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+            <HBox spacing="14" minWidth="0">
+                <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="0" styleClass="dashboard-metric-card">
+                    <Label text="QUESTIONS" styleClass="stat-label"/>
+                    <Label fx:id="lblStatQuestions" text="0" styleClass="stat-value"/>
                 </VBox>
-                <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="0" style="-fx-background-color: white; -fx-padding: 16; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8;">
-                    <Label text="TOPICS" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
-                    <Label fx:id="lblStatTopics" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="0" styleClass="dashboard-metric-card">
+                    <Label text="TOPICS" styleClass="stat-label"/>
+                    <Label fx:id="lblStatTopics" text="0" styleClass="stat-value"/>
                 </VBox>
-                <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="0" style="-fx-background-color: white; -fx-padding: 16; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8;">
-                    <Label text="SUBJECTS" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
-                    <Label fx:id="lblStatSubjects" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="0" styleClass="dashboard-metric-card">
+                    <Label text="SUBJECTS" styleClass="stat-label"/>
+                    <Label fx:id="lblStatSubjects" text="0" styleClass="stat-value"/>
                 </VBox>
-                <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="0" style="-fx-background-color: white; -fx-padding: 16; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8;">
-                    <Label text="EXAMS TAKEN" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
-                    <Label fx:id="lblStatExams" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="0" styleClass="dashboard-metric-card">
+                    <Label text="EXAMS TAKEN" styleClass="stat-label"/>
+                    <Label fx:id="lblStatExams" text="0" styleClass="stat-value"/>
                 </VBox>
             </HBox>
 
             <VBox spacing="12" VBox.vgrow="ALWAYS" minHeight="0">
-                <HBox spacing="8" alignment="CENTER_LEFT" minWidth="0">
-                    <TextField fx:id="txtSearchBank" promptText="🔍 Search questions..." HBox.hgrow="ALWAYS" style="-fx-padding: 8 12; -fx-background-radius: 6; -fx-border-color: #cbd5e1; -fx-border-radius: 6; -fx-background-color: white;"/>
+                <HBox spacing="10" alignment="CENTER_LEFT" minWidth="0">
+                    <TextField fx:id="txtSearchBank" promptText="Search questions..." HBox.hgrow="ALWAYS" styleClass="input-field"/>
                     <ComboBox fx:id="comboFilterSubject" promptText="Subject" styleClass="modern-combo"/>
                     <ComboBox fx:id="comboFilterTopic" promptText="Topic" styleClass="modern-combo"/>
                     <ComboBox fx:id="comboFilterDifficulty" promptText="Difficulty" styleClass="modern-combo"/>
                     <ComboBox fx:id="comboFilterType" promptText="Type" styleClass="modern-combo"/>
-                    <Button fx:id="btnGenerateBank" text="+ Generate Questions" onAction="#handleGenerateBank" style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                    <Button fx:id="btnGenerateBank" text="+ Generate Questions" onAction="#handleGenerateBank" styleClass="btn-primary"/>
                 </HBox>
                 <ListView fx:id="listQuestionBank" VBox.vgrow="ALWAYS" minHeight="0" style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;"/>
             </VBox>
         </VBox>
 
         <!-- EXAM SETUP VIEW -->
-        <VBox fx:id="boxExamSetup" spacing="24" visible="false" managed="false" alignment="TOP_CENTER" style="-fx-padding: 20 0 0 0;">
+        <VBox fx:id="boxExamSetup" spacing="24" visible="false" managed="false" alignment="TOP_CENTER" style="-fx-padding: 16 0 0 0;">
             
-            <Label text="Test yourself using your saved Question Bank." style="-fx-font-size: 16px; -fx-text-fill: #64748b;"/>
+            <Label text="Test yourself using your saved Question Bank." style="-fx-font-size: 15px; -fx-text-fill: #64748b;"/>
             
             <HBox spacing="24" alignment="TOP_CENTER">
                 <!-- Setup Form -->
-                <VBox spacing="20" style="-fx-background-color: white; -fx-padding: 32; -fx-border-color: #e2e8f0; -fx-border-radius: 12; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.04), 8, 0.08, 0, 2);" minWidth="400">
+                <VBox spacing="20" styleClass="card" minWidth="420" prefWidth="440" style="-fx-padding: 28;">
                     
-                    <Label text="Configure Exam" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                    <Label text="Configure Exam" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #172033;"/>
                     
                     <VBox spacing="16">
                         <VBox spacing="6">
-                            <Label text="Subject" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                            <Label text="Subject" styleClass="form-label"/>
                             <ComboBox fx:id="comboExamSubject" maxWidth="Infinity" styleClass="modern-combo"/>
                         </VBox>
                         
                         <VBox spacing="6">
-                            <Label text="Topic" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                            <Label text="Topic" styleClass="form-label"/>
                             <ComboBox fx:id="comboExamTopic" maxWidth="Infinity" styleClass="modern-combo"/>
                         </VBox>
                         
                         <HBox spacing="16" minWidth="0">
                             <VBox spacing="6" HBox.hgrow="ALWAYS">
-                                <Label text="Difficulty" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                                <Label text="Difficulty" styleClass="form-label"/>
                                 <ComboBox fx:id="comboExamDifficulty" maxWidth="Infinity" styleClass="modern-combo"/>
                             </VBox>
                             <VBox spacing="6" HBox.hgrow="ALWAYS">
-                                <Label text="Question Count" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                                <Label text="Question Count" styleClass="form-label"/>
                                 <ComboBox fx:id="comboExamCount" maxWidth="Infinity" styleClass="modern-combo"/>
                             </VBox>
                         </HBox>
                         
                         <HBox spacing="16" minWidth="0">
                             <VBox spacing="6" HBox.hgrow="ALWAYS">
-                                <Label text="Mode" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                                <Label text="Mode" styleClass="form-label"/>
                                 <ComboBox fx:id="comboExamMode" maxWidth="Infinity" styleClass="modern-combo"/>
                             </VBox>
                             <VBox spacing="6" HBox.hgrow="ALWAYS">
-                                <Label text="Time Limit (min)" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                                <Label text="Time Limit (min)" styleClass="form-label"/>
                                 <ComboBox fx:id="comboExamTime" maxWidth="Infinity" styleClass="modern-combo"/>
                             </VBox>
                         </HBox>
                     </VBox>
                     
                     <VBox spacing="12" alignment="CENTER" style="-fx-padding: 16 0 0 0; -fx-border-color: #e2e8f0 transparent transparent transparent; -fx-border-width: 1 0 0 0;">
-                        <Label fx:id="lblAvailableBankCount" text="0 questions available" style="-fx-font-size: 14px; -fx-text-fill: #64748b;"/>
-                        <Button fx:id="btnStartExam" text="Start Exam" onAction="#handleStartExam" maxWidth="Infinity" style="-fx-background-color: #4f46e5; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-padding: 12; -fx-background-radius: 8; -fx-cursor: hand;"/>
+                        <Label fx:id="lblAvailableBankCount" text="0 questions available" style="-fx-font-size: 13px; -fx-text-fill: #64748b;"/>
+                        <Button fx:id="btnStartExam" text="Start Exam" onAction="#handleStartExam" maxWidth="Infinity" styleClass="btn-primary" style="-fx-font-size: 14px; -fx-padding: 10;"/>
                     </VBox>
                 </VBox>
                 
                 <!-- Recent Attempts Sidebar -->
                 <VBox fx:id="boxRecentAttempts" spacing="12" minWidth="280" maxWidth="280">
-                    <Label text="Recent Attempts" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                    <Label text="Recent Attempts" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #172033;"/>
                     <ListView fx:id="listRecentAttempts" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;"/>
                 </VBox>
             </HBox>

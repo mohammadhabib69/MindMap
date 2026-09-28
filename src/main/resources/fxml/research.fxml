@@ -22,18 +22,18 @@
       stylesheets="@../css/style.css">
 
     <padding>
-        <Insets top="24" right="24" bottom="24" left="24"/>
+        <Insets top="24" right="32" bottom="32" left="32"/>
     </padding>
 
     <!-- Header Section -->
     <VBox spacing="4">
-        <Label text="Research / External Knowledge" styleClass="view-header"/>
-        <Label text="Search Wikipedia to enrich your notes" styleClass="view-subtitle"/>
+        <Label text="Research &amp; External Knowledge" styleClass="view-header"/>
+        <Label text="Search Wikipedia to enrich your notes and discover new study topics" styleClass="view-subtitle"/>
     </VBox>
 
     <!-- Search Bar Section -->
     <HBox spacing="10" alignment="CENTER_LEFT">
-        <TextField fx:id="txtSearch" promptText="Search Wikipedia..." HBox.hgrow="ALWAYS" onAction="#handleSearch" styleClass="text-field"/>
+        <TextField fx:id="txtSearch" promptText="Search Wikipedia articles..." HBox.hgrow="ALWAYS" onAction="#handleSearch" styleClass="input-field"/>
         <Button fx:id="btnSearch" text="Search" onAction="#handleSearch" styleClass="btn-primary"/>
         <ProgressIndicator fx:id="progressIndicator" visible="false" managed="false" prefWidth="20" prefHeight="20"/>
     </HBox>
@@ -41,42 +41,43 @@
     <Label fx:id="lblStatus" text="" styleClass="setting-value" style="-fx-text-fill: #64748b;" />
 
     <!-- Split Pane for Results and Details -->
-    <SplitPane VBox.vgrow="ALWAYS" dividerPositions="0.38" style="-fx-background-color: transparent; -fx-padding: 0;">
+    <SplitPane VBox.vgrow="ALWAYS" dividerPositions="0.4" style="-fx-background-color: transparent; -fx-padding: 0;">
         <!-- Left: Results List -->
         <VBox spacing="12" styleClass="card" style="-fx-padding: 16;">
-            <Label text="RESULTS" styleClass="inspector-section-header" style="-fx-text-fill: #64748b;"/>
+            <Label text="RESULTS" styleClass="inspector-section-header"/>
             <StackPane VBox.vgrow="ALWAYS">
-                <ListView fx:id="listResults" styleClass="research-list"/>
+                <ListView fx:id="listResults" styleClass="revision-list"/>
                 <VBox fx:id="boxEmptyResults" alignment="CENTER" spacing="8" styleClass="placeholder-box" visible="false">
                     <Label text="No results found" styleClass="placeholder-heading"/>
-                    <Label text="Try another search term." styleClass="placeholder-subtext"/>
+                    <Label text="Try searching for another concept or topic." styleClass="placeholder-subtext"/>
                 </VBox>
             </StackPane>
         </VBox>
 
         <!-- Right: Detail View -->
-        <VBox spacing="12" styleClass="card" style="-fx-padding: 16;">
-            <Label text="SELECTED RESULT" styleClass="inspector-section-header" style="-fx-text-fill: #64748b;"/>
+        <VBox spacing="12" styleClass="card" style="-fx-padding: 20;">
+            <Label text="SELECTED RESULT" styleClass="inspector-section-header"/>
             
             <StackPane VBox.vgrow="ALWAYS">
                 <VBox fx:id="boxEmptySelection" alignment="CENTER" spacing="8" styleClass="placeholder-box">
-                <VBox fx:id="boxLoadingSelection" alignment="CENTER" spacing="12" styleClass="placeholder-box" visible="false" managed="false">
-                    <ProgressIndicator prefWidth="32" prefHeight="32"/>
-                    <Label text="Loading selected result..." styleClass="placeholder-heading"/>
-                </VBox>
                     <Label text="Select a result" styleClass="placeholder-heading"/>
                     <Label text="Choose a Wikipedia result to preview its summary and create a note." styleClass="placeholder-subtext" wrapText="true" alignment="CENTER"/>
                 </VBox>
 
-                <VBox fx:id="boxSelectionDetails" visible="false" spacing="12">
+                <VBox fx:id="boxLoadingSelection" alignment="CENTER" spacing="12" styleClass="placeholder-box" visible="false" managed="false">
+                    <ProgressIndicator prefWidth="32" prefHeight="32"/>
+                    <Label text="Loading selected result..." styleClass="placeholder-heading"/>
+                </VBox>
+
+                <VBox fx:id="boxSelectionDetails" visible="false" spacing="16">
                     <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: #ffffff; -fx-border-color: transparent; -fx-padding: 0;">
-                        <VBox spacing="12" style="-fx-padding: 4 12 4 4;">
-                            <Label fx:id="lblTitle" wrapText="true" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
-                            <Label fx:id="lblSummary" wrapText="true" style="-fx-font-size: 13px; -fx-text-fill: #334155; -fx-line-spacing: 0.3em;"/>
+                        <VBox spacing="14" style="-fx-padding: 4 12 4 4;">
+                            <Label fx:id="lblTitle" wrapText="true" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #172033;"/>
+                            <Label fx:id="lblSummary" wrapText="true" style="-fx-font-size: 13px; -fx-text-fill: #334155; -fx-line-spacing: 4px;"/>
                             
                             <HBox fx:id="boxSource" spacing="6" alignment="CENTER_LEFT" style="-fx-padding: 12 0 0 0;">
-                                <Label text="Source:" style="-fx-font-weight: bold; -fx-text-fill: #64748b;"/>
-                                <Label fx:id="lblSource" text="Wikipedia" style="-fx-text-fill: #3b82f6;"/>
+                                <Label text="Source:" style="-fx-font-weight: bold; -fx-text-fill: #64748b; -fx-font-size: 12px;"/>
+                                <Label fx:id="lblSource" text="Wikipedia" style="-fx-text-fill: #4f46e5; -fx-font-weight: 500; -fx-font-size: 12px;"/>
                             </HBox>
                         </VBox>
                     </ScrollPane>

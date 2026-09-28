@@ -15,13 +15,13 @@
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.mindmap.controller.NoteEditorController"
       spacing="16"
-      prefWidth="560"
-      prefHeight="580"
+      prefWidth="580"
+      prefHeight="600"
       styleClass="dialog-container"
       stylesheets="@../css/style.css">
 
     <padding>
-        <Insets top="24" right="28" bottom="24" left="28"/>
+        <Insets top="28" right="32" bottom="28" left="32"/>
     </padding>
 
     <!-- Dialog Header & Templates -->
@@ -30,7 +30,7 @@
             <Label fx:id="lblDialogTitle" text="Create New Note" styleClass="dialog-title"/>
             <Label text="Fill in note details below. Fields marked * are required." styleClass="dialog-subtitle"/>
         </VBox>
-        <ComboBox fx:id="cmbTemplate" promptText="Select Template" visible="false" managed="false" styleClass="input-field"/>
+        <ComboBox fx:id="cmbTemplate" promptText="Select Template" visible="false" managed="false" styleClass="modern-combo"/>
     </HBox>
 
     <!-- Title Field -->
@@ -45,9 +45,9 @@
             <Label text="Subject / Topic" styleClass="form-label"/>
             <TextField fx:id="txtSubject" promptText="e.g., Computer Science, Algorithms" styleClass="input-field"/>
         </VBox>
-        <VBox spacing="6" prefWidth="160">
+        <VBox spacing="6" prefWidth="180">
             <Label text="Difficulty" styleClass="form-label"/>
-            <ComboBox fx:id="cmbDifficulty" maxWidth="Infinity" styleClass="input-field"/>
+            <ComboBox fx:id="cmbDifficulty" maxWidth="Infinity" styleClass="modern-combo"/>
         </VBox>
     </HBox>
 
@@ -68,10 +68,10 @@
 
     <!-- Action Buttons -->
     <HBox spacing="12" alignment="CENTER_LEFT">
-        <ToggleButton fx:id="btnFavorite" text="☆ Favorite" onAction="#handleToggleFavorite" styleClass="btn-secondary"/>
+        <ToggleButton fx:id="btnFavorite" text="Favorite" onAction="#handleToggleFavorite" styleClass="btn-secondary"/>
         <Region HBox.hgrow="ALWAYS"/>
         <Button fx:id="btnCancel" text="Cancel" onAction="#handleCancel" cancelButton="true" styleClass="btn-secondary"/>
-        <Button fx:id="btnSave" text="Save" onAction="#handleSave" defaultButton="true" styleClass="btn-primary"/>
+        <Button fx:id="btnSave" text="Save Note" onAction="#handleSave" defaultButton="true" styleClass="btn-primary"/>
     </HBox>
 
 </VBox>

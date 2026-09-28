@@ -15,85 +15,85 @@
             fx:controller="com.mindmap.controller.SettingsController"
             fitToWidth="true"
             hbarPolicy="NEVER"
-            styleClass="edge-to-edge"
+            styleClass="inspector-scroll"
             stylesheets="@../css/style.css">
 
-    <VBox spacing="24" styleClass="screen-container">
+    <VBox spacing="20" styleClass="screen-container">
         <padding>
             <Insets top="24" right="32" bottom="32" left="32"/>
         </padding>
 
         <!-- Header Section -->
-        <VBox spacing="6">
+        <VBox spacing="4">
             <Label text="Settings" styleClass="view-header"/>
             <Label text="Manage appearance, storage, and application preferences" styleClass="view-subtitle"/>
         </VBox>
 
         <!-- Section 1: Appearance -->
-        <VBox spacing="16" styleClass="card" style="-fx-padding: 20;">
-            <Label text="APPEARANCE" styleClass="inspector-section-header" style="-fx-text-fill: #64748b;"/>
-            <GridPane hgap="24" vgap="16">
+        <VBox spacing="14" styleClass="card">
+            <Label text="APPEARANCE" styleClass="inspector-section-header"/>
+            <GridPane hgap="24" vgap="14">
                 <columnConstraints>
-                    <ColumnConstraints prefWidth="200" minWidth="150"/>
+                    <ColumnConstraints prefWidth="180" minWidth="140"/>
                     <ColumnConstraints hgrow="ALWAYS"/>
                 </columnConstraints>
                 <Label text="Theme" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                <Label text="Default Light" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                <Label text="Default Academic Light" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
 
-                <Label text="Font" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                <Label text="System UI" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                <Label text="Font Family" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                <Label text="System UI / Inter" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
             </GridPane>
         </VBox>
 
-        <!-- Section 2: Database -->
-        <VBox spacing="16" styleClass="card" style="-fx-padding: 20;">
-            <Label text="DATABASE" styleClass="inspector-section-header" style="-fx-text-fill: #64748b;"/>
-            <GridPane hgap="24" vgap="16">
+        <!-- Section 2: Data Management -->
+        <VBox spacing="14" styleClass="card">
+            <Label text="DATA MANAGEMENT" styleClass="inspector-section-header"/>
+            <GridPane hgap="24" vgap="14">
                 <columnConstraints>
-                    <ColumnConstraints prefWidth="200" minWidth="150"/>
+                    <ColumnConstraints prefWidth="180" minWidth="140"/>
                     <ColumnConstraints hgrow="ALWAYS"/>
                 </columnConstraints>
-                <Label text="Storage" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                
+                <Label text="Export Data" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.valignment="CENTER"/>
+                <Button text="Export to JSON..." onAction="#handleExport" styleClass="btn-secondary" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                <Label text="Import Data" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.valignment="CENTER"/>
+                <Button text="Import from JSON..." onAction="#handleImport" styleClass="btn-secondary" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                <Label text="Export Notes" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.valignment="CENTER"/>
+                <Button text="Export to PDF..." onAction="#handleExportPdfAll" styleClass="btn-secondary" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+            </GridPane>
+        </VBox>
+
+        <!-- Section 3: Advanced Storage -->
+        <VBox spacing="14" styleClass="card">
+            <Label text="ADVANCED" styleClass="inspector-section-header"/>
+            <GridPane hgap="24" vgap="14">
+                <columnConstraints>
+                    <ColumnConstraints prefWidth="180" minWidth="140"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+                <Label text="Database Engine" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
                 <Label text="SQLite JDBC" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
 
                 <Label text="Database File" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                <Label fx:id="lblDatabaseUrl" text="mindmap.sqlite" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                <Label fx:id="lblDatabaseUrl" text="mindmap.sqlite" styleClass="code-badge" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 
                 <Label text="Foreign Keys" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
                 <Label text="Enabled" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
             </GridPane>
         </VBox>
 
-        <!-- Section 3: Data Management -->
-        <VBox spacing="16" styleClass="card" style="-fx-padding: 20;">
-            <Label text="DATA MANAGEMENT" styleClass="inspector-section-header" style="-fx-text-fill: #64748b;"/>
-            <GridPane hgap="24" vgap="16">
-                <columnConstraints>
-                    <ColumnConstraints prefWidth="200" minWidth="150"/>
-                    <ColumnConstraints hgrow="ALWAYS"/>
-                </columnConstraints>
-                
-                <Label text="Export Data" styleClass="setting-label" style="-fx-alignment: center-left;" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.valignment="CENTER"/>
-                <Button text="Export to JSON..." onAction="#handleExport" styleClass="btn-secondary" style="-fx-padding: 6 16;" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-
-                <Label text="Import Data" styleClass="setting-label" style="-fx-alignment: center-left;" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.valignment="CENTER"/>
-                <Button text="Import from JSON..." onAction="#handleImport" styleClass="btn-secondary" style="-fx-padding: 6 16;" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-
-                <Label text="Export Notes" styleClass="setting-label" style="-fx-alignment: center-left;" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.valignment="CENTER"/>
-                <Button text="Export to PDF..." onAction="#handleExportPdfAll" styleClass="btn-secondary" style="-fx-padding: 6 16;" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-            </GridPane>
-        </VBox>
-
         <!-- Section 4: Application -->
-        <VBox spacing="16" styleClass="card" style="-fx-padding: 20;">
-            <Label text="APPLICATION" styleClass="inspector-section-header" style="-fx-text-fill: #64748b;"/>
-            <GridPane hgap="24" vgap="16">
+        <VBox spacing="14" styleClass="card">
+            <Label text="APPLICATION" styleClass="inspector-section-header"/>
+            <GridPane hgap="24" vgap="14">
                 <columnConstraints>
-                    <ColumnConstraints prefWidth="200" minWidth="150"/>
+                    <ColumnConstraints prefWidth="180" minWidth="140"/>
                     <ColumnConstraints hgrow="ALWAYS"/>
                 </columnConstraints>
                 <Label text="Application Name" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                <Label text="MindMap" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="0" wrapText="true"/>
+                <Label text="MindMap" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
 
                 <Label text="Version" styleClass="setting-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
                 <Label fx:id="lblAppVersion" text="1.0.0" styleClass="setting-value" GridPane.columnIndex="1" GridPane.rowIndex="1"/>

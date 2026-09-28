@@ -6,6 +6,7 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox xmlns="http://javafx.com/javafx"
@@ -18,12 +19,12 @@
       stylesheets="@../css/style.css">
 
     <padding>
-        <Insets top="24" right="28" bottom="24" left="28"/>
+        <Insets top="28" right="32" bottom="28" left="32"/>
     </padding>
 
     <!-- Header Section -->
     <VBox spacing="6">
-        <Label fx:id="lblTitle" text="Note Title" styleClass="view-title" wrapText="true"/>
+        <Label fx:id="lblTitle" text="Note Title" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #172033;" wrapText="true"/>
         <HBox spacing="10" alignment="CENTER_LEFT">
             <Label fx:id="lblSubject" text="Subject" styleClass="badge-subject"/>
             <Label fx:id="lblDifficulty" text="MEDIUM" styleClass="badge-difficulty"/>
@@ -32,7 +33,7 @@
 
     <!-- Tags Row -->
     <VBox spacing="6">
-        <Label text="Tags:" styleClass="meta-heading"/>
+        <Label text="Tags" styleClass="meta-heading"/>
         <FlowPane fx:id="flowTags" hgap="6" vgap="6"/>
     </VBox>
 
@@ -50,14 +51,14 @@
 
     <!-- Note Content -->
     <VBox spacing="6" VBox.vgrow="ALWAYS">
-        <Label text="Content:" styleClass="meta-heading"/>
+        <Label text="Content" styleClass="meta-heading"/>
         <TextArea fx:id="txtContent" editable="false" wrapText="true" VBox.vgrow="ALWAYS" styleClass="text-area-viewer"/>
     </VBox>
 
     <!-- Action Buttons -->
     <HBox spacing="12" alignment="CENTER_RIGHT">
-        <Button fx:id="btnEdit" text="Edit Note" onAction="#handleEdit" styleClass="btn-primary"/>
         <Button fx:id="btnClose" text="Close" onAction="#handleClose" styleClass="btn-secondary"/>
+        <Button fx:id="btnEdit" text="Edit Note" onAction="#handleEdit" styleClass="btn-primary"/>
     </HBox>
 
 </VBox>

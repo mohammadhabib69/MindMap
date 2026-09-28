@@ -9,6 +9,7 @@ import com.mindmap.service.NoteService;
 import com.mindmap.service.SearchService;
 import com.mindmap.util.AnimationUtil;
 import com.mindmap.util.DateUtil;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -135,6 +136,27 @@ public class NotesController {
     }
 
     private void configureColumns() {
+        if (colFavorite != null) {
+            colFavorite.setCellValueFactory(cellData ->
+                    new SimpleBooleanProperty(cellData.getValue().isFavorite()));
+            colFavorite.setCellFactory(column -> new TableCell<>() {
+                @Override
+                protected void updateItem(Boolean favorite, boolean empty) {
+                    super.updateItem(favorite, empty);
+                    if (empty || favorite == null || !favorite) {
+                        setGraphic(null);
+                        setText(null);
+                    } else {
+                        Label star = new Label("★");
+                        star.setStyle("-fx-text-fill: #d97706; -fx-font-size: 13px;");
+                        setGraphic(star);
+                        setText(null);
+                        setAlignment(Pos.CENTER);
+                    }
+                }
+            });
+        }
+
         colTitle.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getTitle()));
 

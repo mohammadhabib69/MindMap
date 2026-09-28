@@ -11,6 +11,7 @@ import com.mindmap.service.StudyRecommendationService;
 import com.mindmap.service.StudyRecommendationService.Recommendation;
 
 import com.mindmap.service.NoteService;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -282,7 +283,7 @@ public class DashboardController {
     public CompletableFuture<DashboardStats> loadDashboardData() {
         if (btnRefresh != null) {
             btnRefresh.setDisable(true);
-            btnRefresh.setText("⏳ Loading...");
+            btnRefresh.setText("Loading...");
         }
 
         final DashboardService service = this.dashboardService;
@@ -307,7 +308,7 @@ public class DashboardController {
                     } finally {
                         if (btnRefresh != null) {
                             btnRefresh.setDisable(false);
-                            btnRefresh.setText("🔄 Refresh");
+                            btnRefresh.setText("Refresh");
                         }
                     }
                 },
@@ -315,7 +316,7 @@ public class DashboardController {
                     LOGGER.log(Level.SEVERE, "Failed to load dashboard data asynchronously: " + throwable.getMessage(), throwable);
                     if (btnRefresh != null) {
                         btnRefresh.setDisable(false);
-                        btnRefresh.setText("🔄 Refresh");
+                        btnRefresh.setText("Refresh");
                     }
                     future.completeExceptionally(throwable);
                 }
@@ -387,6 +388,13 @@ public class DashboardController {
                 series.getData().add(new XYChart.Data<>(label, entry.getValue()));
             }
             chartSubjects.getData().add(series);
+            Platform.runLater(() -> {
+                for (XYChart.Data<String, Number> d : series.getData()) {
+                    if (d.getNode() != null) {
+                        d.getNode().setStyle("-fx-bar-fill: #4f46e5;");
+                    }
+                }
+            });
         }
 
         // 2. PieChart: Notes by Difficulty
@@ -400,6 +408,20 @@ public class DashboardController {
                 }
             }
             chartDifficulty.setData(pieData);
+            Platform.runLater(() -> {
+                for (PieChart.Data d : pieData) {
+                    if (d.getNode() != null) {
+                        String name = d.getName().toUpperCase();
+                        if (name.contains("EASY")) {
+                            d.getNode().setStyle("-fx-pie-color: #16a34a;");
+                        } else if (name.contains("HARD")) {
+                            d.getNode().setStyle("-fx-pie-color: #dc2626;");
+                        } else {
+                            d.getNode().setStyle("-fx-pie-color: #d97706;");
+                        }
+                    }
+                }
+            });
         }
     }
 

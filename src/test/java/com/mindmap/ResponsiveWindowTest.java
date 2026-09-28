@@ -62,10 +62,18 @@ public class ResponsiveWindowTest {
                 "/fxml/dashboard.fxml",
                 "/fxml/notes.fxml",
                 "/fxml/mindmap.fxml",
-                
                 "/fxml/revision.fxml",
+                "/fxml/quiz.fxml",
+                "/fxml/quiz_session.fxml",
+                "/fxml/quiz_result.fxml",
                 "/fxml/timeline.fxml",
-                "/fxml/settings.fxml"
+                "/fxml/research.fxml",
+                "/fxml/settings.fxml",
+                "/fxml/note_editor.fxml",
+                "/fxml/note_view.fxml",
+                "/fxml/review_dialog.fxml",
+                "/fxml/connection_dialog.fxml",
+                "/fxml/schedule_note_dialog.fxml"
         };
 
         for (String path : fxmlPaths) {
