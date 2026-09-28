@@ -66,14 +66,13 @@ public class DashboardController {
     @FXML private ScrollPane scrollDashboard;
     @FXML private VBox contentContainer;
 
-    // Primary Metric Cards
-    @FXML private FlowPane paneMetrics;
+    // Primary Metric Cards — HBox handles equal sizing via hgrow=ALWAYS
+    @FXML private HBox paneMetrics;
     @FXML private VBox cardTotalNotes;
     @FXML private VBox cardTotalConnections;
     @FXML private VBox cardReviewsDue;
     @FXML private VBox cardUpcomingReviews;
     @FXML private VBox cardTotalTags;
-
 
     // Phase 18 Features
     @FXML private VBox boxStudyNext;
@@ -86,13 +85,11 @@ public class DashboardController {
     // Primary Metric Labels
     @FXML private Label lblTotalNotes;
     @FXML private Label lblTotalConnections;
-@FXML
-    private javafx.scene.layout.VBox cardPrivateNotes;
     @FXML private Label lblDueToday;
     @FXML private Label lblUpcomingReviews;
     @FXML private Label lblTotalTags;
 
-    // Middle Section: Knowledge Distribution & Revision
+    // Middle Section: Study & Spaced Repetition | Knowledge Graph (side-by-side HBox)
     @FXML private HBox paneMiddleSection;
     @FXML private VBox cardKnowledgeDistribution;
     @FXML private VBox cardRevisionOverview;
@@ -116,8 +113,8 @@ public class DashboardController {
     @FXML private Label lblIsolatedNotes;
     @FXML private Label lblGraphRatio;
 
-    // Lower Section: Recent Activity & Recent Notes
-    @FXML private FlowPane paneLowerSection;
+    // Lower Section: Recent Activity & Recent Notes — HBox handles equal sizing
+    @FXML private HBox paneLowerSection;
     @FXML private VBox cardRecentActivity;
     @FXML private VBox cardRecentNotes;
     @FXML private VBox boxRecentActivity;
@@ -155,7 +152,7 @@ public class DashboardController {
         return contentContainer;
     }
 
-    public FlowPane getPaneMetrics() {
+    public HBox getPaneMetrics() {
         return paneMetrics;
     }
 
@@ -163,7 +160,7 @@ public class DashboardController {
         return paneMiddleSection;
     }
 
-    public FlowPane getPaneLowerSection() {
+    public HBox getPaneLowerSection() {
         return paneLowerSection;
     }
 
@@ -204,61 +201,16 @@ public class DashboardController {
     }
 
     /**
-     * Lightweight responsive layout calculation.
-     * Adjusts prefWidth of dashboard cards so they wrap naturally into rows
-     * and expand to fill available space without horizontal scrollbars or clipping.
-     * NO database queries, NO chart recreation, NO node reconstruction.
+     * Layout is now handled entirely by JavaFX HBox with HBox.hgrow="ALWAYS" on all cards.
+     * No manual prefWidth assignments are needed — they would conflict with HBox's own sizing.
+     * This method is intentionally a no-op and retained for API compatibility.
      *
-     * @param containerWidth Current width of content container
+     * @param containerWidth Current width of content container (unused)
      */
     public void applyResponsiveWidths(double containerWidth) {
-        if (containerWidth <= 100) return;
-
-        // Content padding is 24px left + 24px right = 48px
-        double usableWidth = Math.max(280, containerWidth - 48);
-
-        // 1. Primary Metrics Cards (5 cards, 12px gap)
-        if (paneMetrics != null) {
-            int cols;
-            if (usableWidth >= 860) {
-                cols = 5;
-            } else if (usableWidth >= 520) {
-                cols = 3;
-            } else {
-                cols = 2;
-            }
-            double metricCardWidth = Math.floor((usableWidth - (cols - 1) * 12.0) / cols);
-            setCardWidth(cardTotalNotes, metricCardWidth);
-            setCardWidth(cardTotalConnections, metricCardWidth);
-            setCardWidth(cardReviewsDue, metricCardWidth);
-            setCardWidth(cardUpcomingReviews, metricCardWidth);
-            setCardWidth(cardTotalTags, metricCardWidth);
-        }
-
-        // 2. Middle Section — HBox with HBox.hgrow=ALWAYS handles layout automatically.
-        // No manual width assignment needed; JavaFX divides space equally between the two children.
-
-        // 3. Lower Section (Recent Activity & Recent Notes, 14px gap)
-        if (paneLowerSection != null) {
-            if (usableWidth >= 800) {
-                // Side-by-side: 52% / 48% split
-                double wLeft = Math.floor((usableWidth - 14.0) * 0.52);
-                double wRight = Math.floor(usableWidth - 14.0 - wLeft);
-                setCardWidth(cardRecentActivity, wLeft);
-                setCardWidth(cardRecentNotes, wRight);
-            } else {
-                // Stacked: Both span full usable width
-                setCardWidth(cardRecentActivity, usableWidth);
-                setCardWidth(cardRecentNotes, usableWidth);
-            }
-        }
-    }
-
-    private void setCardWidth(Region card, double width) {
-        if (card != null && width > 0) {
-            card.setPrefWidth(width);
-            card.setMaxWidth(width);
-        }
+        // HBox with hgrow=ALWAYS handles all card sizing automatically.
+        // Manual setCardWidth calls are NOT made here because setting maxWidth
+        // on HBox children overrides the grow constraint and breaks the layout.
     }
 
 
